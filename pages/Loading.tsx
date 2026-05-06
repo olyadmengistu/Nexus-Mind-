@@ -1,0 +1,25 @@
+
+import React from 'react';
+
+const Loading: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center animate-pulse">
+        <div className="w-16 h-16 bg-[#1877F2] rounded-full flex items-center justify-center mb-6">
+            <span className="text-white text-4xl font-bold tracking-tighter">n</span>
+        </div>
+        <h2 className="text-[#1877F2] text-3xl font-bold">NexusMind</h2>
+      </div>
+      
+      <div className="fixed bottom-10 flex flex-col items-center text-gray-400">
+        <span className="text-xs font-semibold mb-2">from</span>
+        <div className="flex items-center gap-1.5 grayscale opacity-50">
+           <i className="fa-brands fa-meta text-2xl"></i>
+           <span className="text-xl font-bold">Meta</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Loading;
