@@ -25,10 +25,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-[1000px] flex flex-col lg:flex-row items-center lg:items-start lg:justify-between gap-8 mt-[-50px]">
+      <div className="w-full max-w-[1000px] flex flex-col lg:flex-row items-center lg:items-start lg:justify-between gap-8 mt-8">
         
         {/* Left Branding */}
-        <div className="flex-1 text-center lg:text-left pt-10">
+        <div className="flex-1 text-center lg:text-left pt-16">
           <h1 className="text-[#1877F2] text-6xl font-bold mb-4 tracking-tighter">NexusMind</h1>
           <p className="text-2xl font-medium leading-tight max-w-[500px]">
             Every problem has a solver. Connect with experts to share and tackle challenges together.
@@ -36,7 +36,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         </div>
 
         {/* Right Form */}
-        <div className="w-full max-w-[400px]">
+        <div className="w-full max-w-[400px] pt-16">
           <div className="bg-white p-4 shadow-xl rounded-xl">
             <form onSubmit={handleMockLogin} className="space-y-4">
               <input 
