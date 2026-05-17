@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +14,8 @@ const Signup: React.FC = () => {
   const [year, setYear] = useState('');
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handlePhotoClick = () => {
@@ -30,12 +34,36 @@ const Signup: React.FC = () => {
     }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log('Signup:', { firstName, lastName, email, password, month, day, year });
-    // Navigate back to login or to feed
-    navigate('/login');
+    
+    if (!firstName || !lastName || !email || !password) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // Create user with Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Update user profile with display name
+      const displayName = `${firstName} ${lastName}`;
+      await updateProfile(user, {
+        displayName: displayName,
+        photoURL: photoPreview || 'https://via.placeholder.com/40'
+      });
+
+      // Navigate to feed (platform) after successful signup
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
