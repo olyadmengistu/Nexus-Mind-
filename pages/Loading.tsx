@@ -5,8 +5,8 @@ const Loading: React.FC = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center">
       <div className="flex flex-col items-center animate-pulse">
-        <div className="w-16 h-16 bg-[#1877F2] rounded-lg flex items-center justify-center mb-6">
-            <i className="fa-solid fa-brain text-white text-3xl"></i>
+        <div className="w-20 h-20 bg-[#1877F2] rounded-lg flex items-center justify-center mb-6">
+            <i className="fa-solid fa-brain text-white text-4xl"></i>
         </div>
         <h2 className="text-[#1877F2] text-3xl font-bold">NexusMind</h2>
       </div>
