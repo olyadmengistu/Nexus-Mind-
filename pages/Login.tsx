@@ -58,9 +58,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               {error && <p className="text-red-500 text-sm text-center">{error}</p>}
               <button 
                 type="submit"
-                className="w-full bg-[#1877F2] hover:bg-blue-600 text-white font-bold py-3 rounded-lg text-xl transition-colors"
+                disabled={loading}
+                className="w-full bg-[#1877F2] hover:bg-blue-600 text-white font-bold py-3 rounded-lg text-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Log In
+                {loading ? 'Logging in...' : 'Log In'}
               </button>
               <div className="text-center">
                 <a href="#" className="text-blue-500 text-sm hover:underline">Forgotten password?</a>

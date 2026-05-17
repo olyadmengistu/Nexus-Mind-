@@ -10,7 +10,9 @@ import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Loading from './pages/Loading';
 import { User, Post } from './types';
-import { INITIAL_POSTS, INITIAL_USERS } from './constants';
+import { INITIAL_POSTS } from './constants';
+import { auth } from './firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -18,14 +20,8 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initial data load
-    const storedUser = localStorage.getItem('nexus_user');
+    // Load posts from localStorage
     const storedPosts = localStorage.getItem('nexus_posts');
-
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-
     if (storedPosts) {
       setPosts(JSON.parse(storedPosts));
     } else {
@@ -33,20 +29,37 @@ const App: React.FC = () => {
       localStorage.setItem('nexus_posts', JSON.stringify(INITIAL_POSTS));
     }
 
-    // Simulate splash screen
-    setTimeout(() => {
+    // Listen for Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const appUser: User = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          avatar: firebaseUser.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + firebaseUser.uid,
+          reputation: 0,
+          email: firebaseUser.email
+        };
+        setUser(appUser);
+      } else {
+        setUser(null);
+      }
       setIsLoading(false);
-    }, 1500);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleLogin = (newUser: User) => {
     setUser(newUser);
-    localStorage.setItem('nexus_user', JSON.stringify(newUser));
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('nexus_user');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const handleAddPost = (newPost: Post) => {
