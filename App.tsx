@@ -10,9 +10,7 @@ import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Loading from './pages/Loading';
 import { User, Post } from './types';
-import { INITIAL_POSTS } from './constants';
-import { auth } from './firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { INITIAL_POSTS, INITIAL_USERS } from './constants';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -20,10 +18,14 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('App useEffect - initializing');
-    
-    // Load posts from localStorage
+    // Initial data load
+    const storedUser = localStorage.getItem('nexus_user');
     const storedPosts = localStorage.getItem('nexus_posts');
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+
     if (storedPosts) {
       setPosts(JSON.parse(storedPosts));
     } else {
@@ -31,44 +33,20 @@ const App: React.FC = () => {
       localStorage.setItem('nexus_posts', JSON.stringify(INITIAL_POSTS));
     }
 
-    // Temporarily disable Firebase auth to test
-    setIsLoading(false);
-
-    // Listen for Firebase auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log('Firebase auth state changed:', firebaseUser);
-      if (firebaseUser) {
-        const appUser: User = {
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-          avatar: firebaseUser.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + firebaseUser.uid,
-          reputation: 0,
-          email: firebaseUser.email
-        };
-        setUser(appUser);
-      } else {
-        setUser(null);
-      }
-    }, (error) => {
-      console.error('Firebase auth error:', error);
-    });
-
-    return () => {
-      unsubscribe();
-    };
+    // Simulate splash screen
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
   }, []);
 
   const handleLogin = (newUser: User) => {
     setUser(newUser);
+    localStorage.setItem('nexus_user', JSON.stringify(newUser));
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      setUser(null);
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('nexus_user');
   };
 
   const handleAddPost = (newPost: Post) => {
@@ -87,9 +65,6 @@ const App: React.FC = () => {
 
   if (isLoading) return <Loading />;
 
-  // Temporarily render Login directly to test
-  return <Login onLogin={handleLogin} />;
-
   return (
     <Router>
       <div className="min-h-screen">
@@ -106,7 +81,7 @@ const App: React.FC = () => {
             />
             <Route 
               path="/" 
-              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Login onLogin={handleLogin} />} 
+              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/profile" 
@@ -119,10 +94,6 @@ const App: React.FC = () => {
             <Route 
               path="/notifications" 
               element={user ? <Notifications /> : <Navigate to="/login" />} 
-            />
-            <Route 
-              path="*" 
-              element={<Navigate to="/" />} 
             />
           </Routes>
         </main>

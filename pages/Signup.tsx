@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '../firebase';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -14,8 +12,6 @@ const Signup: React.FC = () => {
   const [year, setYear] = useState('');
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handlePhotoClick = () => {
@@ -34,34 +30,12 @@ const Signup: React.FC = () => {
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!firstName || !lastName || !email || !password) {
-      setError('Please fill in all required fields.');
-      return;
-    }
-    
-    setLoading(true);
-    setError('');
-    
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      
-      const displayName = `${firstName} ${lastName}`;
-      
-      await updateProfile(user, {
-        displayName: displayName,
-        photoURL: photoPreview || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.uid
-      });
-      
-      navigate('/login');
-    } catch (err: any) {
-      setError(err.message || 'Failed to create account. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // Handle signup logic here
+    console.log('Signup:', { firstName, lastName, email, password, month, day, year });
+    // Navigate back to login or to feed
+    navigate('/login');
   };
 
   return (
@@ -72,7 +46,6 @@ const Signup: React.FC = () => {
           <h1 className="text-[#1877F2] text-4xl font-bold mb-2 tracking-tighter">NexusMind</h1>
           <h2 className="text-2xl font-semibold text-gray-800 mb-1">Create a new account</h2>
           <p className="text-sm text-gray-600">It's free and always will be.</p>
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </div>
 
         {/* Profile Photo Section */}
@@ -189,10 +162,9 @@ const Signup: React.FC = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-[#42B72A] hover:bg-[#36a420] text-white font-bold py-3 rounded-lg text-[17px] transition-colors mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#42B72A] hover:bg-[#36a420] text-white font-bold py-3 rounded-lg text-[17px] transition-colors mt-4"
           >
-            {loading ? 'Creating account...' : 'Sign Up'}
+            Sign Up
           </button>
         </form>
 

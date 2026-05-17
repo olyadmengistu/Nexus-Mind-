@@ -5,7 +5,6 @@ export interface User {
   avatar: string;
   reputation: number;
   bio?: string;
-  email?: string;
 }
 
 export interface Solution {
