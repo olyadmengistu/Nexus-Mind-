@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
-import { INITIAL_USERS } from '../constants';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 interface LoginProps {
   onLogin: (user: User) => void;
@@ -13,16 +14,36 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleMockLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       setError('Please enter email and password.');
       return;
     }
-    // Randomly select one of our initial users to simulate login
-    const randomUser = INITIAL_USERS[Math.floor(Math.random() * INITIAL_USERS.length)];
-    onLogin(randomUser);
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
+
+      const user: User = {
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+        email: firebaseUser.email || '',
+        avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
+        reputation: 0,
+      };
+
+      onLogin(user);
+    } catch (err: any) {
+      setError(err.message || 'Failed to login. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,9 +79,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               {error && <p className="text-red-500 text-sm text-center">{error}</p>}
               <button 
                 type="submit"
-                className="w-full bg-[#1877F2] hover:bg-blue-600 text-white font-bold py-3 rounded-lg text-xl transition-colors"
+                disabled={loading}
+                className="w-full bg-[#1877F2] hover:bg-blue-600 text-white font-bold py-3 rounded-lg text-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Log In
+                {loading ? 'Logging in...' : 'Log In'}
               </button>
               <div className="text-center">
                 <a href="#" className="text-blue-500 text-sm hover:underline">Forgotten password?</a>

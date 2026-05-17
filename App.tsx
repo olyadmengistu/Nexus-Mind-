@@ -10,7 +10,9 @@ import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Loading from './pages/Loading';
 import { User, Post } from './types';
-import { INITIAL_POSTS, INITIAL_USERS } from './constants';
+import { INITIAL_POSTS } from './constants';
+import { auth } from './firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -19,12 +21,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Initial data load
-    const storedUser = localStorage.getItem('nexus_user');
     const storedPosts = localStorage.getItem('nexus_posts');
-
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
 
     if (storedPosts) {
       setPosts(JSON.parse(storedPosts));
@@ -33,15 +30,29 @@ const App: React.FC = () => {
       localStorage.setItem('nexus_posts', JSON.stringify(INITIAL_POSTS));
     }
 
-    // Simulate splash screen
-    setTimeout(() => {
+    // Listen for Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const appUser: User = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+          email: firebaseUser.email || '',
+          avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
+          reputation: 0,
+        };
+        setUser(appUser);
+      } else {
+        setUser(null);
+        localStorage.removeItem('nexus_user');
+      }
       setIsLoading(false);
-    }, 1500);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleLogin = (newUser: User) => {
     setUser(newUser);
-    localStorage.setItem('nexus_user', JSON.stringify(newUser));
   };
 
   const handleLogout = () => {
@@ -100,6 +111,9 @@ const App: React.FC = () => {
       </div>
     </Router>
   );
+};
+
+export default App;
 };
 
 export default App;

@@ -162,10 +162,13 @@ const Signup: React.FC = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-[#42B72A] hover:bg-[#36a420] text-white font-bold py-3 rounded-lg text-[17px] transition-colors mt-4"
+            disabled={loading}
+            className="w-full bg-[#42B72A] hover:bg-[#36a420] text-white font-bold py-3 rounded-lg text-[17px] transition-colors mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign Up
+            {loading ? 'Creating account...' : 'Sign Up'}
           </button>
+          
+          {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
         </form>
 
         {/* Back to Login */}
