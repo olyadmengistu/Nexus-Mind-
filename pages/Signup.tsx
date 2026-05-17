@@ -10,6 +10,25 @@ const Signup: React.FC = () => {
   const [month, setMonth] = useState('');
   const [day, setDay] = useState('');
   const [year, setYear] = useState('');
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>('');
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfilePhoto(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +50,29 @@ const Signup: React.FC = () => {
 
         {/* Profile Photo Section */}
         <div className="flex flex-col items-center mb-6">
-          <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors border-2 border-dashed border-gray-400">
-            <span className="text-4xl text-gray-500">+</span>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handlePhotoChange}
+            accept="image/*"
+            className="hidden"
+          />
+          <div
+            onClick={handlePhotoClick}
+            className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors border-2 border-dashed border-gray-400 overflow-hidden"
+          >
+            {photoPreview ? (
+              <img src={photoPreview} alt="Profile preview" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-4xl text-gray-500">+</span>
+            )}
           </div>
-          <p className="text-[#1877F2] text-sm font-medium mt-2 cursor-pointer hover:underline">Add Profile Photo</p>
+          <p
+            onClick={handlePhotoClick}
+            className="text-[#1877F2] text-sm font-medium mt-2 cursor-pointer hover:underline"
+          >
+            {photoPreview ? 'Change Profile Photo' : 'Add Profile Photo'}
+          </p>
         </div>
 
         {/* Form */}
