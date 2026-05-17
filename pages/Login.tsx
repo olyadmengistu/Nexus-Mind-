@@ -102,12 +102,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <span>Places</span>
           <span>Games</span>
           <span>Marketplace</span>
-          <span>Meta Pay</span>
-          <span>Meta Store</span>
-          <span>Meta Quest</span>
+          <span>Connect</span>
+          <span>Solve</span>
+          <span>Grow</span>
           <span>Instagram</span>
         </div>
-        <p className="mt-4">Meta © 2024</p>
+        <p className="mt-4">Connect.Solve.Grow © 2024</p>
       </footer>
     </div>
   );
