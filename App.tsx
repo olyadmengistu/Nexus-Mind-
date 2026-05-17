@@ -4,6 +4,7 @@ import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar';
 import Feed from './components/Feed';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
@@ -73,6 +74,10 @@ const App: React.FC = () => {
             <Route 
               path="/login" 
               element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} 
+            />
+            <Route 
+              path="/signup" 
+              element={user ? <Navigate to="/" /> : <Signup />} 
             />
             <Route 
               path="/" 

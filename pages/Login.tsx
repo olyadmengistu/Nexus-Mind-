@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
 import { INITIAL_USERS } from '../constants';
 
@@ -8,6 +9,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -67,6 +69,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <div className="text-center pt-2 pb-1">
                 <button 
                   type="button"
+                  onClick={() => navigate('/signup')}
                   className="bg-[#42B72A] hover:bg-[#36a420] text-white font-bold px-4 py-3 rounded-lg text-[17px] transition-colors"
                 >
                   Create New Account
