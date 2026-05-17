@@ -44,9 +44,20 @@ const App: React.FC = () => {
         setUser(null);
       }
       setIsLoading(false);
+    }, (error) => {
+      console.error('Firebase auth error:', error);
+      setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    // Timeout fallback in case Firebase auth takes too long
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleLogin = (newUser: User) => {
