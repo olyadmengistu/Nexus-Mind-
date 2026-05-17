@@ -31,6 +31,9 @@ const App: React.FC = () => {
       localStorage.setItem('nexus_posts', JSON.stringify(INITIAL_POSTS));
     }
 
+    // Temporarily disable Firebase auth to test
+    setIsLoading(false);
+
     // Listen for Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       console.log('Firebase auth state changed:', firebaseUser);
@@ -46,21 +49,12 @@ const App: React.FC = () => {
       } else {
         setUser(null);
       }
-      setIsLoading(false);
     }, (error) => {
       console.error('Firebase auth error:', error);
-      setIsLoading(false);
     });
-
-    // Timeout fallback in case Firebase auth takes too long
-    const timeoutId = setTimeout(() => {
-      console.log('Timeout reached, setting isLoading to false');
-      setIsLoading(false);
-    }, 3000);
 
     return () => {
       unsubscribe();
-      clearTimeout(timeoutId);
     };
   }, []);
 
