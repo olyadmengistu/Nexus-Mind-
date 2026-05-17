@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Post, User, Solution } from '../types';
 
 interface PostCardProps {
@@ -9,31 +10,16 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
-  const [showSolutions, setShowSolutions] = useState(false);
+  const navigate = useNavigate();
   const [hasVoted, setHasVoted] = useState(false);
-  const [newSolution, setNewSolution] = useState('');
 
   const handleVoteClick = () => {
     onVote(post.id, hasVoted ? -1 : 1);
     setHasVoted(!hasVoted);
   };
 
-  const handleAddSolution = () => {
-    if (!newSolution.trim()) return;
-    
-    const solution: Solution = {
-      id: Math.random().toString(36).substr(2, 9),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
-      text: newSolution,
-      timestamp: Date.now(),
-      upvotes: 0
-    };
-
-    post.solutions.push(solution);
-    // In a real app we'd trigger a parent update
-    setNewSolution('');
+  const handleSuggestSolution = () => {
+    navigate(`/solutions/${post.id}`);
   };
 
   const formatDate = (ts: number) => {
@@ -112,7 +98,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
           <i className={`fa-regular fa-thumbs-up ${hasVoted ? 'fa-solid' : ''}`}></i> Helpful
         </button>
         <button 
-          onClick={() => setShowSolutions(!showSolutions)}
+          onClick={handleSuggestSolution}
           className="flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-2 rounded-lg text-[#65676B] font-semibold text-sm transition-colors"
         >
           <i className="fa-regular fa-comment"></i> Suggest Solution
@@ -121,45 +107,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
           <i className="fa-solid fa-share"></i> Share
         </button>
       </div>
-
-      {/* Solutions Section */}
-      {showSolutions && (
-        <div className="px-3 py-3 bg-gray-50 space-y-3 rounded-b-lg">
-          {post.solutions.map(sol => (
-            <div key={sol.id} className="flex gap-2">
-              <img src={sol.userAvatar} className="w-8 h-8 rounded-full" alt={sol.userName} />
-              <div className="bg-gray-200 p-2 rounded-2xl max-w-[90%]">
-                <p className="font-bold text-xs">{sol.userName}</p>
-                <p className="text-[14px]">{sol.text}</p>
-                <div className="flex items-center gap-3 mt-1 text-[12px] font-bold text-gray-500">
-                   <span className="hover:underline cursor-pointer">Helpful</span>
-                   <span className="hover:underline cursor-pointer">Reply</span>
-                   <span>{formatDate(sol.timestamp)}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {/* New Solution Input */}
-          <div className="flex gap-2 items-center">
-            <img src={currentUser.avatar} className="w-8 h-8 rounded-full" alt="Me" />
-            <div className="flex-1 relative">
-              <input 
-                type="text" 
-                value={newSolution}
-                onChange={(e) => setNewSolution(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddSolution()}
-                placeholder="Suggest a solution..."
-                className="w-full bg-[#F0F2F5] px-3 py-2 rounded-2xl text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-2 text-gray-500 text-xs">
-                <i className="fa-regular fa-face-smile cursor-pointer"></i>
-                <i className="fa-solid fa-camera cursor-pointer"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

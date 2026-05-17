@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Loading from './pages/Loading';
+import Solutions from './pages/Solutions';
 import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
@@ -74,6 +75,14 @@ const App: React.FC = () => {
     localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
   };
 
+  const handleUpdatePost = (updatedPost: Post) => {
+    const updatedPosts = posts.map(p => 
+      p.id === updatedPost.id ? updatedPost : p
+    );
+    setPosts(updatedPosts);
+    localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+  };
+
   if (isLoading) return <Loading />;
 
   return (
@@ -92,7 +101,11 @@ const App: React.FC = () => {
             />
             <Route 
               path="/" 
-              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Navigate to="/login" />} 
+              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} onUpdatePost={handleUpdatePost} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/solutions/:postId" 
+              element={user ? <Solutions user={user} posts={posts} onUpdatePost={handleUpdatePost} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/profile" 
