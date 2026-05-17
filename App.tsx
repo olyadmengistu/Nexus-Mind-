@@ -87,6 +87,9 @@ const App: React.FC = () => {
 
   if (isLoading) return <Loading />;
 
+  // Temporarily render Login directly to test
+  return <Login onLogin={handleLogin} />;
+
   return (
     <Router>
       <div className="min-h-screen">
