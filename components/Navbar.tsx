@@ -23,8 +23,8 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     <header className="fixed top-0 left-0 right-0 h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-4 flex items-center justify-between">
       {/* Left */}
       <div className="flex items-center gap-2">
-        <Link to="/" className="flex items-center justify-center w-10 h-10 bg-[#1877F2] rounded-full">
-            <span className="text-white text-2xl font-bold tracking-tighter">n</span>
+        <Link to="/" className="flex items-center justify-center w-10 h-10 bg-[#1877F2] rounded-lg">
+            <i className="fa-solid fa-brain text-white text-xl"></i>
         </Link>
         <div className="relative group hidden sm:block">
           <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>

@@ -43,7 +43,7 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ user }) => {
       ))}
 
       <div className="mt-4 pt-4 border-t border-gray-300 px-2 text-xs text-gray-500 space-y-2">
-        <p>Privacy · Terms · Advertising · Cookies · Meta © 2024</p>
+        <p>Privacy · Terms · Advertising · Cookies · Connect.Solve.Grow © 2024</p>
       </div>
     </aside>
   );
