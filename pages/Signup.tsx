@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth, storage } from '../firebase';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +15,8 @@ const Signup: React.FC = () => {
   const [year, setYear] = useState('');
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handlePhotoClick = () => {
@@ -30,12 +35,38 @@ const Signup: React.FC = () => {
     }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log('Signup:', { firstName, lastName, email, password, month, day, year });
-    // Navigate back to login or to feed
-    navigate('/login');
+    setLoading(true);
+    setError('');
+
+    try {
+      // Create Firebase user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Upload profile photo if provided
+      let photoURL = 'https://via.placeholder.com/40';
+      if (profilePhoto) {
+        const storageRef = ref(storage, `profile-photos/${user.uid}`);
+        await uploadBytes(storageRef, profilePhoto);
+        photoURL = await getDownloadURL(storageRef);
+      }
+
+      // Update user profile
+      const displayName = `${firstName} ${lastName}`;
+      await updateProfile(user, {
+        displayName,
+        photoURL
+      });
+
+      // Navigate to feed
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
