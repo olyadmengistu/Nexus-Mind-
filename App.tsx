@@ -105,7 +105,7 @@ const App: React.FC = () => {
             />
             <Route 
               path="/" 
-              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Navigate to="/login" />} 
+              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Login onLogin={handleLogin} />} 
             />
             <Route 
               path="/profile" 
@@ -118,6 +118,10 @@ const App: React.FC = () => {
             <Route 
               path="/notifications" 
               element={user ? <Notifications /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="*" 
+              element={<Navigate to="/" />} 
             />
           </Routes>
         </main>
