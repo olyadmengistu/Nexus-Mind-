@@ -20,6 +20,8 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log('App useEffect - initializing');
+    
     // Load posts from localStorage
     const storedPosts = localStorage.getItem('nexus_posts');
     if (storedPosts) {
@@ -31,6 +33,7 @@ const App: React.FC = () => {
 
     // Listen for Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log('Firebase auth state changed:', firebaseUser);
       if (firebaseUser) {
         const appUser: User = {
           id: firebaseUser.uid,
@@ -51,8 +54,9 @@ const App: React.FC = () => {
 
     // Timeout fallback in case Firebase auth takes too long
     const timeoutId = setTimeout(() => {
+      console.log('Timeout reached, setting isLoading to false');
       setIsLoading(false);
-    }, 5000);
+    }, 3000);
 
     return () => {
       unsubscribe();
