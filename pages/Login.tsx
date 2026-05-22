@@ -61,7 +61,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         {/* Right Form */}
         <div className="w-full max-w-[400px] pt-16">
           <div className="bg-white p-4 shadow-xl rounded-xl">
-            <form onSubmit={handleMockLogin} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-4">
               <input 
                 type="text" 
                 placeholder="Email address or phone number" 

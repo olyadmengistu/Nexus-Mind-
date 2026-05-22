@@ -10,7 +10,7 @@ import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Loading from './pages/Loading';
 import Solutions from './pages/Solutions';
-import { User, Post } from './types';
+import { User, Post, Solution, SolutionReply } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -75,10 +75,60 @@ const App: React.FC = () => {
     localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
   };
 
-  const handleUpdatePost = (updatedPost: Post) => {
-    const updatedPosts = posts.map(p => 
-      p.id === updatedPost.id ? updatedPost : p
-    );
+  const handleAddSolution = (postId: string, solution: Solution) => {
+    const updatedPosts = posts.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          solutions: [...p.solutions, solution]
+        };
+      }
+      return p;
+    });
+    setPosts(updatedPosts);
+    localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+  };
+
+  const handleAddReply = (postId: string, solutionId: string, reply: SolutionReply) => {
+    const updatedPosts = posts.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          solutions: p.solutions.map(s => {
+            if (s.id === solutionId) {
+              return {
+                ...s,
+                replies: [...s.replies, reply]
+              };
+            }
+            return s;
+          })
+        };
+      }
+      return p;
+    });
+    setPosts(updatedPosts);
+    localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+  };
+
+  const handleVoteSolution = (postId: string, solutionId: string, delta: number) => {
+    const updatedPosts = posts.map(p => {
+      if (p.id === postId) {
+        return {
+          ...p,
+          solutions: p.solutions.map(s => {
+            if (s.id === solutionId) {
+              return {
+                ...s,
+                upvotes: s.upvotes + delta
+              };
+            }
+            return s;
+          })
+        };
+      }
+      return p;
+    });
     setPosts(updatedPosts);
     localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
   };
@@ -101,11 +151,7 @@ const App: React.FC = () => {
             />
             <Route 
               path="/" 
-              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} onUpdatePost={handleUpdatePost} /> : <Navigate to="/login" />} 
-            />
-            <Route 
-              path="/solutions/:postId" 
-              element={user ? <Solutions user={user} posts={posts} onUpdatePost={handleUpdatePost} /> : <Navigate to="/login" />} 
+              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/profile" 
@@ -119,14 +165,15 @@ const App: React.FC = () => {
               path="/notifications" 
               element={user ? <Notifications /> : <Navigate to="/login" />} 
             />
+            <Route 
+              path="/solutions/:postId" 
+              element={user ? <Solutions user={user} posts={posts} onAddSolution={handleAddSolution} onAddReply={handleAddReply} onVoteSolution={handleVoteSolution} /> : <Navigate to="/login" />} 
+            />
           </Routes>
         </main>
       </div>
     </Router>
   );
-};
-
-export default App;
 };
 
 export default App;

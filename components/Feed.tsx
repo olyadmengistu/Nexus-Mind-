@@ -12,10 +12,9 @@ interface FeedProps {
   posts: Post[];
   onAddPost: (post: Post) => void;
   onVote: (postId: string, delta: number) => void;
-  onUpdatePost: (post: Post) => void;
 }
 
-const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote, onUpdatePost }) => {
+const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote }) => {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
   return (

@@ -48,7 +48,8 @@ export const INITIAL_POSTS: Post[] = [
         userAvatar: 'https://picsum.photos/seed/john/100/100',
         text: 'Have you tried web workers for heavy data processing outside the main thread?',
         timestamp: Date.now() - 1800000,
-        upvotes: 12
+        upvotes: 12,
+        replies: []
       }
     ]
   },
@@ -85,7 +86,8 @@ export const INITIAL_POSTS: Post[] = [
         userAvatar: 'https://picsum.photos/seed/alex/100/100',
         text: 'Earth tones are trending and feel more "premium" and natural than standard greens.',
         timestamp: Date.now() - 43200000,
-        upvotes: 25
+        upvotes: 25,
+        replies: []
       }
     ]
   }

@@ -15,7 +15,6 @@ export interface SolutionReply {
   userAvatar: string;
   text: string;
   timestamp: number;
-  upvotes: number;
 }
 
 export interface Solution {
