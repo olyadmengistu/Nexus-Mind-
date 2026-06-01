@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, reload } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase';
 
@@ -59,6 +59,9 @@ const Signup: React.FC = () => {
         displayName,
         photoURL
       });
+
+      // Force reload to ensure profile updates are picked up by the auth state listener
+      await reload(user);
 
       // Navigate to feed
       navigate('/');
