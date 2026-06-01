@@ -8,15 +8,6 @@ export interface User {
   bio?: string;
 }
 
-export interface SolutionReply {
-  id: string;
-  userId: string;
-  userName: string;
-  userAvatar: string;
-  text: string;
-  timestamp: number;
-}
-
 export interface Solution {
   id: string;
   userId: string;
@@ -25,7 +16,6 @@ export interface Solution {
   text: string;
   timestamp: number;
   upvotes: number;
-  replies: SolutionReply[];
 }
 
 export interface Post {

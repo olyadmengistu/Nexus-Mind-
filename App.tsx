@@ -9,8 +9,7 @@ import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Loading from './pages/Loading';
-import Solutions from './pages/Solutions';
-import { User, Post, Solution, SolutionReply } from './types';
+import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -75,64 +74,6 @@ const App: React.FC = () => {
     localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
   };
 
-  const handleAddSolution = (postId: string, solution: Solution) => {
-    const updatedPosts = posts.map(p => {
-      if (p.id === postId) {
-        return {
-          ...p,
-          solutions: [...p.solutions, solution]
-        };
-      }
-      return p;
-    });
-    setPosts(updatedPosts);
-    localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
-  };
-
-  const handleAddReply = (postId: string, solutionId: string, reply: SolutionReply) => {
-    const updatedPosts = posts.map(p => {
-      if (p.id === postId) {
-        return {
-          ...p,
-          solutions: p.solutions.map(s => {
-            if (s.id === solutionId) {
-              return {
-                ...s,
-                replies: [...s.replies, reply]
-              };
-            }
-            return s;
-          })
-        };
-      }
-      return p;
-    });
-    setPosts(updatedPosts);
-    localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
-  };
-
-  const handleVoteSolution = (postId: string, solutionId: string, delta: number) => {
-    const updatedPosts = posts.map(p => {
-      if (p.id === postId) {
-        return {
-          ...p,
-          solutions: p.solutions.map(s => {
-            if (s.id === solutionId) {
-              return {
-                ...s,
-                upvotes: s.upvotes + delta
-              };
-            }
-            return s;
-          })
-        };
-      }
-      return p;
-    });
-    setPosts(updatedPosts);
-    localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
-  };
-
   if (isLoading) return <Loading />;
 
   return (
@@ -165,15 +106,14 @@ const App: React.FC = () => {
               path="/notifications" 
               element={user ? <Notifications /> : <Navigate to="/login" />} 
             />
-            <Route 
-              path="/solutions/:postId" 
-              element={user ? <Solutions user={user} posts={posts} onAddSolution={handleAddSolution} onAddReply={handleAddReply} onVoteSolution={handleVoteSolution} /> : <Navigate to="/login" />} 
-            />
           </Routes>
         </main>
       </div>
     </Router>
   );
+};
+
+export default App;
 };
 
 export default App;
