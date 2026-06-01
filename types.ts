@@ -31,6 +31,9 @@ export interface Post {
   votes: number;
   solutions: Solution[];
   isSolved: boolean;
+  taggedUsers?: string[];
+  emoji?: string;
+  location?: string;
 }
 
 export interface Story {
