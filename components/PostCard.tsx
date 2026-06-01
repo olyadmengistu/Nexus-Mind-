@@ -75,6 +75,33 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
       <div className="px-3 pb-2 space-y-2">
         {post.title && <h3 className="font-bold text-[17px]">{post.title}</h3>}
         <p className="text-[15px] whitespace-pre-wrap">{post.content}</p>
+        
+        {/* Emoji Display */}
+        {post.emoji && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="text-xl">{post.emoji}</span>
+            <span>feeling</span>
+          </div>
+        )}
+
+        {/* Location Display */}
+        {post.location && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <i className="fa-solid fa-location-dot text-[#F3425E]"></i>
+            <span>{post.location}</span>
+          </div>
+        )}
+
+        {/* Tagged Users Display */}
+        {post.taggedUsers && post.taggedUsers.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {post.taggedUsers.map((tag, index) => (
+              <span key={index} className="text-sm text-blue-600 hover:underline cursor-pointer">
+                @{tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Image */}
