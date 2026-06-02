@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, updateProfile, reload, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, reload, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase';
 
@@ -18,6 +18,27 @@ const Signup: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Handle redirect result from Google sign-in
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log('Redirect sign-in successful, user:', result.user.uid);
+          // The auth state listener in App.tsx will handle the navigation
+          // We just need to ensure the loading state is cleared
+          setLoading(false);
+        }
+      } catch (err: any) {
+        console.error('Redirect result error:', err);
+        setError(err.message || 'Failed to complete sign-in');
+        setLoading(false);
+      }
+    };
+
+    handleRedirectResult();
+  }, []);
 
   const handlePhotoClick = () => {
     fileInputRef.current?.click();
@@ -78,8 +99,42 @@ const Signup: React.FC = () => {
 
     try {
       const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
+      
+      // Add custom parameters to ensure consistent behavior
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        login_hint: email || undefined
+      });
+
+      // Add required scopes for profile information
+      provider.addScope('profile');
+      provider.addScope('email');
+
+      console.log('Initiating Google sign-in...');
+      
+      let userCredential;
+      try {
+        // Try popup first (better UX)
+        userCredential = await signInWithPopup(auth, provider);
+      } catch (popupError: any) {
+        console.warn('Popup failed, trying redirect:', popupError.code);
+        
+        // If popup is blocked or fails, use redirect as fallback
+        if (popupError.code === 'auth/popup-blocked' || 
+            popupError.code === 'auth/popup-closed-by-user' ||
+            popupError.code === 'auth/cancelled-popup-request') {
+          console.log('Using redirect fallback...');
+          await signInWithRedirect(auth, provider);
+          // The redirect will handle the rest, so we return here
+          return;
+        }
+        // If it's a different error, throw it to be caught by the outer catch
+        throw popupError;
+      }
+      
       const user = userCredential.user;
+
+      console.log('Google sign-in successful, user:', user.uid);
 
       // Upload profile photo if provided (user can still add custom photo after Google sign-in)
       let photoURL = user.photoURL || 'https://via.placeholder.com/40';
@@ -99,10 +154,26 @@ const Signup: React.FC = () => {
       // Force reload to ensure profile updates are picked up by the auth state listener
       await reload(user);
 
+      console.log('Profile updated, navigating to feed...');
       // Navigate to feed
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Failed to sign in with Google');
+      console.error('Google sign-in error:', err);
+      
+      // Handle specific error cases
+      if (err.code === 'auth/popup-blocked') {
+        setError('Popup was blocked by your browser. Please allow popups for this site and try again.');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        setError('Sign-in was cancelled. Please try again.');
+      } else if (err.code === 'auth/cancelled-popup-request') {
+        setError('Multiple popups were opened. Please close other popups and try again.');
+      } else if (err.code === 'auth/account-exists-with-different-credential') {
+        setError('An account already exists with the same email address but different sign-in method.');
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError('This domain is not authorized for Google sign-in. Please contact support.');
+      } else {
+        setError(err.message || 'Failed to sign in with Google. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
