@@ -13,10 +13,10 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
 
   const navItems = [
     { icon: 'fa-house', path: '/', label: 'Home' },
-    { icon: 'fa-video', path: '/solutions', label: 'Watch' },
+    { icon: 'fa-lightbulb', path: '/solutions', label: 'Solutions' },
     { icon: 'fa-store', path: '/marketplace', label: 'Marketplace' },
     { icon: 'fa-users-viewfinder', path: '/groups', label: 'Groups' },
-    { icon: 'fa-gamepad', path: '/gaming', label: 'Gaming' }
+    { icon: 'fa-handshake', path: '/collaborate', label: 'Collaborate' }
   ];
 
   return (

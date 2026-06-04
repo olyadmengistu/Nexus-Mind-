@@ -33,12 +33,24 @@ const RightSidebar: React.FC = () => {
         </div>
       </section>
 
-      {/* Birthdays */}
+      {/* Trending Solutions */}
       <section className="mb-6 pt-4 border-t border-gray-300">
-        <h3 className="text-gray-500 font-semibold text-[17px] mb-2">Birthdays</h3>
-        <div className="flex items-center gap-3 p-2 cursor-pointer hover:bg-gray-200 rounded-lg">
-          <i className="fa-solid fa-gift text-2xl text-blue-500"></i>
-          <p className="text-sm"><b>Sarah Chen</b> and <b>2 others</b> have birthdays today.</p>
+        <h3 className="text-gray-500 font-semibold text-[17px] mb-2">Trending Solutions</h3>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-2 cursor-pointer hover:bg-gray-200 rounded-lg">
+            <i className="fa-solid fa-lightbulb text-2xl text-yellow-500"></i>
+            <div>
+              <p className="text-sm font-semibold">Climate Change Initiative</p>
+              <p className="text-xs text-gray-500">1.2k solvers engaged</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-2 cursor-pointer hover:bg-gray-200 rounded-lg">
+            <i className="fa-solid fa-rocket text-2xl text-purple-500"></i>
+            <div>
+              <p className="text-sm font-semibold">Tech Startup Accelerator</p>
+              <p className="text-xs text-gray-500">856 solvers engaged</p>
+            </div>
+          </div>
         </div>
       </section>
 

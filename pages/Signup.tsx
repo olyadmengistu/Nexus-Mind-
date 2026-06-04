@@ -64,6 +64,9 @@ const Signup: React.FC = () => {
       // Force reload to ensure profile updates are picked up by the auth state listener
       await reload(user);
 
+      // Wait a moment to ensure Firebase has processed the profile updates
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // Navigate to feed
       navigate('/');
     } catch (err: any) {

@@ -31,8 +31,11 @@ const App: React.FC = () => {
     }
 
     // Listen for Firebase auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // Force reload to ensure we have the latest profile data
+        await reload(firebaseUser);
+        
         const appUser: User = {
           id: firebaseUser.uid,
           name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
