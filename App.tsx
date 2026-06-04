@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Loading from './pages/Loading';
+import Solutions from './pages/Solutions';
 import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
@@ -151,6 +152,10 @@ const App: React.FC = () => {
             <Route 
               path="/notifications" 
               element={user ? <Notifications /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/solutions/:postId" 
+              element={user ? <Solutions user={user} posts={posts} /> : <Navigate to="/login" />} 
             />
           </Routes>
         </main>

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Post, User, Solution } from '../types';
 
 interface PostCardProps {
@@ -9,6 +10,7 @@ interface PostCardProps {
 }
 
 const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
+  const navigate = useNavigate();
   const [showSolutions, setShowSolutions] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [newSolution, setNewSolution] = useState('');
@@ -139,7 +141,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
           <i className={`fa-regular fa-thumbs-up ${hasVoted ? 'fa-solid' : ''}`}></i> Helpful
         </button>
         <button 
-          onClick={() => setShowSolutions(!showSolutions)}
+          onClick={() => navigate(`/solutions/${post.id}`)}
           className="flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-2 rounded-lg text-[#65676B] font-semibold text-sm transition-colors"
         >
           <i className="fa-regular fa-comment"></i> Suggest Solution
