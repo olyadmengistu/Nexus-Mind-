@@ -15,6 +15,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Handle redirect result from Google sign-in
   useEffect(() => {
@@ -73,7 +74,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
+    setGoogleLoading(true);
     setError('');
 
     try {
@@ -91,36 +92,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       console.log('Initiating Google sign-in...');
       
-      let userCredential;
-      try {
-        // Try popup first (better UX)
-        userCredential = await signInWithPopup(auth, provider);
-        const firebaseUser = userCredential.user;
+      const userCredential = await signInWithPopup(auth, provider);
+      const firebaseUser = userCredential.user;
 
-        const user: User = {
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-          email: firebaseUser.email || '',
-          avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
-          reputation: 0,
-        };
+      const user: User = {
+        id: firebaseUser.uid,
+        name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+        email: firebaseUser.email || '',
+        avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
+        reputation: 0,
+      };
 
-        onLogin(user);
-      } catch (popupError: any) {
-        console.warn('Popup failed, trying redirect:', popupError.code);
-        
-        // If popup is blocked or fails, use redirect as fallback
-        if (popupError.code === 'auth/popup-blocked' || 
-            popupError.code === 'auth/popup-closed-by-user' ||
-            popupError.code === 'auth/cancelled-popup-request') {
-          console.log('Using redirect fallback...');
-          await signInWithRedirect(auth, provider);
-          // The redirect will handle the rest, so we return here
-          return;
-        }
-        // If it's a different error, throw it to be caught by the outer catch
-        throw popupError;
-      }
+      onLogin(user);
     } catch (err: any) {
       console.error('Google sign-in error:', err);
       
@@ -134,12 +117,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       } else if (err.code === 'auth/account-exists-with-different-credential') {
         setError('An account already exists with the same email address but different sign-in method.');
       } else if (err.code === 'auth/unauthorized-domain') {
-        setError('This domain is not authorized for Google sign-in. Please contact support.');
+        setError('This domain is not authorized for Google sign-in. Please add your domain to Firebase Console authorized domains.');
       } else {
         setError(err.message || 'Failed to sign in with Google. Please try again.');
       }
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
 
@@ -186,7 +169,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
-                disabled={loading}
+                disabled={googleLoading}
                 className="w-full flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-3 rounded-lg text-[17px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -195,7 +178,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                {loading ? 'Signing in with Google...' : 'Sign in with Google'}
+                {googleLoading ? 'Signing in with Google...' : 'Sign in with Google'}
               </button>
               
               <div className="text-center">
