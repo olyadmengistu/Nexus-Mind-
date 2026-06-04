@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile, reload } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../firebase';
+import { User } from '../types';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [month, setMonth] = useState('');
@@ -66,6 +68,21 @@ const Signup: React.FC = () => {
 
       // Wait a moment to ensure Firebase has processed the profile updates
       await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Save user to localStorage for searchability
+      const newUser: User = {
+        id: user.uid,
+        name: displayName,
+        username: username || displayName.toLowerCase().replace(/\s+/g, ''),
+        email: user.email || '',
+        avatar: photoURL,
+        reputation: 0,
+      };
+
+      // Get existing users from localStorage
+      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      existingUsers.push(newUser);
+      localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
 
       // Navigate to feed
       navigate('/');
@@ -134,6 +151,15 @@ const Signup: React.FC = () => {
               className="flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px]"
             />
           </div>
+
+          {/* Username Field */}
+          <input
+            type="text"
+            placeholder="Username (optional)"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px]"
+          />
 
           {/* Email Field */}
           <input

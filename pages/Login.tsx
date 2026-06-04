@@ -28,10 +28,20 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           const user: User = {
             id: firebaseUser.uid,
             name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+            username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
             email: firebaseUser.email || '',
             avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
             reputation: 0,
           };
+          
+          // Save user to localStorage for searchability
+          const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+          const userExists = existingUsers.some((u: User) => u.id === user.id);
+          if (!userExists) {
+            existingUsers.push(user);
+            localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
+          }
+          
           onLogin(user);
         }
       } catch (err: any) {
@@ -60,10 +70,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const user: User = {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+        username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
         email: firebaseUser.email || '',
         avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
         reputation: 0,
       };
+
+      // Save user to localStorage for searchability
+      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      const userExists = existingUsers.some((u: User) => u.id === user.id);
+      if (!userExists) {
+        existingUsers.push(user);
+        localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
+      }
 
       onLogin(user);
     } catch (err: any) {
@@ -98,10 +117,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const user: User = {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+        username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
         email: firebaseUser.email || '',
         avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
         reputation: 0,
       };
+
+      // Save user to localStorage for searchability
+      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      const userExists = existingUsers.some((u: User) => u.id === user.id);
+      if (!userExists) {
+        existingUsers.push(user);
+        localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
+      }
 
       onLogin(user);
     } catch (err: any) {

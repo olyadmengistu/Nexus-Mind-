@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User } from '../types';
 
@@ -10,6 +10,25 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      const query = searchQuery.toLowerCase();
+      const results = users.filter((u: User) =>
+        u.name.toLowerCase().includes(query) ||
+        u.username.toLowerCase().includes(query)
+      );
+      setSearchResults(results);
+      setShowResults(true);
+    } else {
+      setSearchResults([]);
+      setShowResults(false);
+    }
+  }, [searchQuery]);
 
   const navItems = [
     { icon: 'fa-house', path: '/', label: 'Home' },
@@ -31,8 +50,37 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
           <input 
             type="text" 
             placeholder="Search NexusMind..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onBlur={() => setTimeout(() => setShowResults(false), 200)}
+            onFocus={() => searchQuery && setShowResults(true)}
             className="bg-[#F0F2F5] pl-10 pr-4 py-2 rounded-full w-[240px] focus:outline-none focus:ring-2 focus:ring-[#1877F2] text-sm"
           />
+          {showResults && searchResults.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-80 overflow-y-auto z-50">
+              {searchResults.map((resultUser) => (
+                <Link
+                  key={resultUser.id}
+                  to={`/profile/${resultUser.id}`}
+                  className="flex items-center gap-3 p-3 hover:bg-gray-100 transition-colors"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setShowResults(false);
+                  }}
+                >
+                  <img 
+                    src={resultUser.avatar} 
+                    alt={resultUser.name} 
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="font-semibold text-sm">{resultUser.name}</p>
+                    <p className="text-gray-500 text-xs">@{resultUser.username}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

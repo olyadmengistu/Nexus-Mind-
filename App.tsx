@@ -65,6 +65,7 @@ const App: React.FC = () => {
             const appUser: User = {
               id: firebaseUser.uid,
               name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+              username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
               email: firebaseUser.email || '',
               avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
               reputation: 0,
@@ -143,6 +144,10 @@ const App: React.FC = () => {
             />
             <Route 
               path="/profile" 
+              element={user ? <Profile user={user} posts={posts} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/profile/:userId" 
               element={user ? <Profile user={user} posts={posts} /> : <Navigate to="/login" />} 
             />
             <Route 

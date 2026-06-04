@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { User, Post } from '../types';
 import PostCard from '../components/PostCard';
 
@@ -9,7 +10,30 @@ interface ProfileProps {
 }
 
 const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
-  const myPosts = posts.filter(p => p.userId === user.id);
+  const { userId } = useParams<{ userId: string }>();
+  const [profileUser, setProfileUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    if (userId) {
+      // Look up user from localStorage
+      const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      const foundUser = users.find((u: User) => u.id === userId);
+      if (foundUser) {
+        setProfileUser(foundUser);
+      } else {
+        // If not found in localStorage, use current user (for own profile)
+        setProfileUser(user);
+      }
+    } else {
+      setProfileUser(user);
+    }
+  }, [userId, user]);
+
+  if (!profileUser) {
+    return <div className="min-h-screen bg-[#F0F2F5] flex items-center justify-center">Loading...</div>;
+  }
+
+  const myPosts = posts.filter(p => p.userId === profileUser.id);
 
   return (
     <div className="bg-[#F0F2F5] min-h-screen">
@@ -27,15 +51,16 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           <div className="px-10 pb-4 relative">
              <div className="flex flex-col md:flex-row items-center md:items-end gap-4 -mt-10 md:-mt-20">
                 <div className="relative group">
-                  <img src={user.avatar} className="w-[168px] h-[168px] rounded-full border-4 border-white shadow" alt="Avatar" />
+                  <img src={profileUser.avatar} className="w-[168px] h-[168px] rounded-full border-4 border-white shadow" alt="Avatar" />
                   <button className="absolute bottom-4 right-2 bg-gray-200 hover:bg-gray-300 w-9 h-9 rounded-full border-4 border-white flex items-center justify-center">
                     <i className="fa-solid fa-camera"></i>
                   </button>
                 </div>
                 <div className="flex-1 mb-4 text-center md:text-left">
-                  <h1 className="text-4xl font-bold">{user.name}</h1>
-                  <p className="text-gray-500 font-semibold">{user.reputation} Reputation Points</p>
-                  <p className="text-gray-600 mt-2">{user.bio}</p>
+                  <h1 className="text-4xl font-bold">{profileUser.name}</h1>
+                  <p className="text-gray-500 font-semibold">@{profileUser.username}</p>
+                  <p className="text-gray-500 font-semibold">{profileUser.reputation} Reputation Points</p>
+                  <p className="text-gray-600 mt-2">{profileUser.bio}</p>
                 </div>
                 <div className="flex gap-2 mb-4">
                   <button className="bg-[#1877F2] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2">
@@ -69,7 +94,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           <div className="bg-white p-4 rounded-lg shadow-sm">
              <h2 className="text-xl font-bold mb-4">Intro</h2>
              <div className="space-y-4 text-sm text-gray-700">
-                <p className="text-center italic">{user.bio}</p>
+                <p className="text-center italic">{profileUser.bio}</p>
                 <div className="flex items-center gap-3">
                    <i className="fa-solid fa-briefcase text-gray-500 text-lg"></i>
                    <span>Top Solver at <b>Technology Sector</b></span>
@@ -113,7 +138,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           
           {myPosts.length > 0 ? (
             myPosts.map(post => (
-              <PostCard key={post.id} post={post} currentUser={user} onVote={() => {}} />
+              <PostCard key={post.id} post={post} currentUser={profileUser} onVote={() => {}} />
             ))
           ) : (
             <div className="bg-white p-10 text-center rounded-lg shadow-sm text-gray-500 italic">
