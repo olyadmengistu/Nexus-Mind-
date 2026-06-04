@@ -12,7 +12,7 @@ import Loading from './pages/Loading';
 import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut, reload } from 'firebase/auth';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -20,38 +20,81 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initial data load
-    const storedPosts = localStorage.getItem('nexus_posts');
+    let isMounted = true;
+    let authTimeout: NodeJS.Timeout;
 
-    if (storedPosts) {
-      setPosts(JSON.parse(storedPosts));
-    } else {
+    // Timeout to force loading screen to dismiss after 10 seconds
+    authTimeout = setTimeout(() => {
+      if (isMounted && isLoading) {
+        console.warn('Firebase auth initialization timeout - forcing load complete');
+        setIsLoading(false);
+      }
+    }, 10000);
+
+    // Initial data load
+    try {
+      const storedPosts = localStorage.getItem('nexus_posts');
+
+      if (storedPosts) {
+        setPosts(JSON.parse(storedPosts));
+      } else {
+        setPosts(INITIAL_POSTS);
+        localStorage.setItem('nexus_posts', JSON.stringify(INITIAL_POSTS));
+      }
+    } catch (error) {
+      console.error('Error loading posts from localStorage:', error);
       setPosts(INITIAL_POSTS);
-      localStorage.setItem('nexus_posts', JSON.stringify(INITIAL_POSTS));
     }
 
     // Listen for Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // Force reload to ensure we have the latest profile data
-        await reload(firebaseUser);
-        
-        const appUser: User = {
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-          email: firebaseUser.email || '',
-          avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
-          reputation: 0,
-        };
-        setUser(appUser);
-      } else {
-        setUser(null);
-        localStorage.removeItem('nexus_user');
+      try {
+        if (isMounted) {
+          clearTimeout(authTimeout);
+          
+          if (firebaseUser) {
+            // Force reload to ensure we have the latest profile data
+            try {
+              await reload(firebaseUser);
+            } catch (reloadError) {
+              console.warn('Failed to reload user profile:', reloadError);
+              // Continue anyway with the data we have
+            }
+            
+            const appUser: User = {
+              id: firebaseUser.uid,
+              name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+              email: firebaseUser.email || '',
+              avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
+              reputation: 0,
+            };
+            setUser(appUser);
+          } else {
+            setUser(null);
+            localStorage.removeItem('nexus_user');
+          }
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error in auth state change handler:', error);
+        if (isMounted) {
+          setUser(null);
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false);
+    }, (error) => {
+      console.error('Firebase auth state observer error:', error);
+      if (isMounted) {
+        setUser(null);
+        setIsLoading(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      isMounted = false;
+      clearTimeout(authTimeout);
+      unsubscribe();
+    };
   }, []);
 
   const handleLogin = (newUser: User) => {
