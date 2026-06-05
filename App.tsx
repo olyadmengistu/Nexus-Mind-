@@ -5,7 +5,6 @@ import Navbar from './components/Navbar';
 import Feed from './components/Feed';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import Onboarding from './pages/Onboarding';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
@@ -132,20 +131,16 @@ const App: React.FC = () => {
         <main className={user ? "pt-[56px]" : ""}>
           <Routes>
             <Route 
-              path="/" 
-              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Navigate to="/onboarding" />} 
-            />
-            <Route 
-              path="/onboarding" 
-              element={user ? <Navigate to="/" /> : <Onboarding />} 
-            />
-            <Route 
               path="/login" 
               element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} 
             />
             <Route 
               path="/signup" 
               element={user ? <Navigate to="/" /> : <Signup />} 
+            />
+            <Route 
+              path="/" 
+              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/profile" 
