@@ -44,6 +44,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           }
           localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
           
+          // Also save current user directly for immediate access
+          localStorage.setItem('nexus_current_user', JSON.stringify(user));
+          
           onLogin(user);
         }
       } catch (err: any) {
@@ -87,6 +90,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         existingUsers.push(user);
       }
       localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
+
+      // Also save current user directly for immediate access
+      localStorage.setItem('nexus_current_user', JSON.stringify(user));
 
       onLogin(user);
     } catch (err: any) {
@@ -136,6 +142,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         existingUsers.push(user);
       }
       localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
+
+      // Also save current user directly for immediate access
+      localStorage.setItem('nexus_current_user', JSON.stringify(user));
 
       onLogin(user);
     } catch (err: any) {
