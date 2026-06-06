@@ -33,7 +33,7 @@ const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote }) => {
               onClick={() => setIsComposerOpen(true)}
               className="flex-1 bg-[#F0F2F5] hover:bg-gray-200 text-left px-4 py-2 rounded-full text-gray-500 text-[17px] transition-colors"
             >
-              What problem are you facing, {user.name.split(' ')[0]}?
+              What problem are you facing, {user.name}?
             </button>
           </div>
           <div className="border-t border-gray-100 pt-3 flex items-center justify-around">

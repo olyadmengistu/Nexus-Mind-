@@ -58,7 +58,6 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
                 </div>
                 <div className="flex-1 mb-4 text-center md:text-left">
                   <h1 className="text-4xl font-bold">{profileUser.name}</h1>
-                  <p className="text-gray-500 font-semibold">@{profileUser.username}</p>
                   <p className="text-gray-500 font-semibold">{profileUser.reputation} Reputation Points</p>
                   <p className="text-gray-600 mt-2">{profileUser.bio}</p>
                 </div>

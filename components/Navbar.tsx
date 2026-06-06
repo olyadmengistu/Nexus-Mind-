@@ -75,7 +75,6 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                   />
                   <div>
                     <p className="font-semibold text-sm">{resultUser.name}</p>
-                    <p className="text-gray-500 text-xs">@{resultUser.username}</p>
                   </div>
                 </Link>
               ))}
@@ -103,7 +102,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
       <div className="flex items-center gap-2">
         <div className="hidden lg:flex items-center hover:bg-gray-100 p-1.5 rounded-full cursor-pointer">
             <img src={user.avatar} className="w-7 h-7 rounded-full object-cover mr-2" alt="Avatar" />
-            <span className="font-semibold text-sm">{user.name.split(' ')[0]}</span>
+            <span className="font-semibold text-sm">{user.name}</span>
         </div>
         <button className="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
           <i className="fa-solid fa-bars"></i>
