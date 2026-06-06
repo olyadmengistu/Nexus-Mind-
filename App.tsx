@@ -61,14 +61,18 @@ const App: React.FC = () => {
               console.warn('Failed to reload user profile:', reloadError);
               // Continue anyway with the data we have
             }
+
+            // Check localStorage for user data (includes avatar from signup)
+            const storedUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+            const storedUser = storedUsers.find((u: User) => u.id === firebaseUser.uid);
             
             const appUser: User = {
               id: firebaseUser.uid,
-              name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
-              username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
+              name: firebaseUser.displayName || storedUser?.name || firebaseUser.email?.split('@')[0] || 'User',
+              username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || storedUser?.username || firebaseUser.email?.split('@')[0] || 'user',
               email: firebaseUser.email || '',
-              avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
-              reputation: 0,
+              avatar: storedUser?.avatar || firebaseUser.photoURL || 'https://via.placeholder.com/40',
+              reputation: storedUser?.reputation || 0,
             };
             setUser(appUser);
           } else {
