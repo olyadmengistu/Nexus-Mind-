@@ -47,6 +47,19 @@ const App: React.FC = () => {
       setPosts(INITIAL_POSTS);
     }
 
+    // Check for current user in localStorage first (for immediate signup display)
+    const currentUserData = localStorage.getItem('nexus_current_user');
+    if (currentUserData && isMounted) {
+      try {
+        const currentUser = JSON.parse(currentUserData);
+        console.log('Found current user in localStorage:', currentUser);
+        setUser(currentUser);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error parsing current user from localStorage:', error);
+      }
+    }
+
     // Listen for Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
@@ -66,17 +79,24 @@ const App: React.FC = () => {
             const storedUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
             const storedUser = storedUsers.find((u: User) => u.id === firebaseUser.uid);
             
+            // Also check for current user directly saved during signup
+            const currentUserData = localStorage.getItem('nexus_current_user');
+            const currentUser = currentUserData ? JSON.parse(currentUserData) : null;
+            
             const appUser: User = {
               id: firebaseUser.uid,
-              name: firebaseUser.displayName || storedUser?.name || firebaseUser.email?.split('@')[0] || 'User',
-              username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || storedUser?.username || firebaseUser.email?.split('@')[0] || 'user',
+              name: currentUser?.name || firebaseUser.displayName || storedUser?.name || firebaseUser.email?.split('@')[0] || 'User',
+              username: currentUser?.username || firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || storedUser?.username || firebaseUser.email?.split('@')[0] || 'user',
               email: firebaseUser.email || '',
-              avatar: storedUser?.avatar || firebaseUser.photoURL || 'https://via.placeholder.com/40',
-              reputation: storedUser?.reputation || 0,
+              avatar: currentUser?.avatar || storedUser?.avatar || firebaseUser.photoURL || 'https://via.placeholder.com/40',
+              reputation: currentUser?.reputation || storedUser?.reputation || 0,
             };
+            
+            console.log('App user created:', appUser);
             setUser(appUser);
           } else {
             setUser(null);
+            localStorage.removeItem('nexus_current_user');
             localStorage.removeItem('nexus_user');
           }
           setIsLoading(false);
@@ -105,6 +125,8 @@ const App: React.FC = () => {
 
   const handleLogin = (newUser: User) => {
     setUser(newUser);
+    // Also save to localStorage for persistence
+    localStorage.setItem('nexus_current_user', JSON.stringify(newUser));
   };
 
   const handleLogout = () => {

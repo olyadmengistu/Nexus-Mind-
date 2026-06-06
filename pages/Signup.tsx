@@ -84,8 +84,13 @@ const Signup: React.FC = () => {
       existingUsers.push(newUser);
       localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
 
-      // Navigate to feed
-      navigate('/');
+      // Also save current user directly for immediate access
+      localStorage.setItem('nexus_current_user', JSON.stringify(newUser));
+
+      console.log('Signup complete, user data saved:', newUser);
+
+      // Navigate to feed with user data in state
+      navigate('/', { state: { user: newUser } });
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
     } finally {

@@ -34,13 +34,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             reputation: 0,
           };
           
-          // Save user to localStorage for searchability
+          // Save/update user to localStorage for searchability
           const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-          const userExists = existingUsers.some((u: User) => u.id === user.id);
-          if (!userExists) {
+          const userIndex = existingUsers.findIndex((u: User) => u.id === user.id);
+          if (userIndex >= 0) {
+            existingUsers[userIndex] = user;
+          } else {
             existingUsers.push(user);
-            localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
           }
+          localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
           
           onLogin(user);
         }
@@ -76,13 +78,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         reputation: 0,
       };
 
-      // Save user to localStorage for searchability
+      // Save/update user to localStorage for searchability
       const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-      const userExists = existingUsers.some((u: User) => u.id === user.id);
-      if (!userExists) {
+      const userIndex = existingUsers.findIndex((u: User) => u.id === user.id);
+      if (userIndex >= 0) {
+        existingUsers[userIndex] = user;
+      } else {
         existingUsers.push(user);
-        localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
       }
+      localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
 
       onLogin(user);
     } catch (err: any) {
@@ -123,13 +127,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         reputation: 0,
       };
 
-      // Save user to localStorage for searchability
+      // Save/update user to localStorage for searchability
       const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-      const userExists = existingUsers.some((u: User) => u.id === user.id);
-      if (!userExists) {
+      const userIndex = existingUsers.findIndex((u: User) => u.id === user.id);
+      if (userIndex >= 0) {
+        existingUsers[userIndex] = user;
+      } else {
         existingUsers.push(user);
-        localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
       }
+      localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
 
       onLogin(user);
     } catch (err: any) {
