@@ -23,7 +23,7 @@ const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote }) => {
 
       <div className="w-full max-w-[680px] px-4 py-4 space-y-4 lg:ml-[280px] lg:mr-[300px]">
         {/* Stories */}
-        <StoryCarousel />
+        <StoryCarousel user={user} />
 
         {/* Composer Trigger */}
         <div className="bg-white rounded-lg shadow-sm p-3 space-y-3">

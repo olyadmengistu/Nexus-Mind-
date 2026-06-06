@@ -10,6 +10,10 @@ import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Loading from './pages/Loading';
 import Solutions from './pages/Solutions';
+import Videos from './pages/Videos';
+import Marketplace from './pages/Marketplace';
+import Groups from './pages/Groups';
+import Collaborate from './pages/Collaborate';
 import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
@@ -187,6 +191,22 @@ const App: React.FC = () => {
             <Route 
               path="/solutions/:postId" 
               element={user ? <Solutions user={user} posts={posts} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/videos" 
+              element={user ? <Videos user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/marketplace" 
+              element={user ? <Marketplace user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/groups" 
+              element={user ? <Groups user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/collaborate" 
+              element={user ? <Collaborate user={user} /> : <Navigate to="/login" />} 
             />
           </Routes>
         </main>

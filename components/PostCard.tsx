@@ -14,10 +14,32 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
   const [showSolutions, setShowSolutions] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [newSolution, setNewSolution] = useState('');
+  const [shareSuccess, setShareSuccess] = useState(false);
 
   const handleVoteClick = () => {
     onVote(post.id, hasVoted ? -1 : 1);
     setHasVoted(!hasVoted);
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/post/${post.id}`;
+    const shareData = {
+      title: post.title || 'Post from NexusMind',
+      text: post.content?.substring(0, 100) || 'Check out this post',
+      url: shareUrl
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareSuccess(true);
+        setTimeout(() => setShareSuccess(false), 2000);
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+    }
   };
 
   const handleAddSolution = () => {
@@ -134,20 +156,23 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
 
       {/* Actions */}
       <div className="px-3 py-1 flex items-center justify-around">
-        <button 
+        <button
           onClick={handleVoteClick}
-          className={`flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-2 rounded-lg font-semibold text-sm transition-colors ${hasVoted ? 'text-blue-500' : 'text-[#65676B]'}`}
+          className={`flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-3 rounded-lg font-semibold text-base transition-all hover:scale-105 active:scale-95 ${hasVoted ? 'text-blue-500' : 'text-[#65676B]'}`}
         >
           <i className={`fa-regular fa-thumbs-up ${hasVoted ? 'fa-solid' : ''}`}></i> Helpful
         </button>
-        <button 
+        <button
           onClick={() => navigate(`/solutions/${post.id}`)}
-          className="flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-2 rounded-lg text-[#65676B] font-semibold text-sm transition-colors"
+          className="flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-3 rounded-lg text-[#65676B] font-semibold text-base transition-colors"
         >
           <i className="fa-regular fa-comment"></i> Suggest Solution
         </button>
-        <button className="flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-2 rounded-lg text-[#65676B] font-semibold text-sm transition-colors">
-          <i className="fa-solid fa-share"></i> Share
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-3 rounded-lg text-[#65676B] font-semibold text-base transition-colors"
+        >
+          <i className={`fa-solid ${shareSuccess ? 'fa-check' : 'fa-share'}`}></i> {shareSuccess ? 'Copied!' : 'Share'}
         </button>
       </div>
 
