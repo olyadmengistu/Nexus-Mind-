@@ -18,6 +18,12 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     push: true,
     mentions: true,
     messages: true,
+    replies: true,
+    likes: true,
+    follows: true,
+    solutions: true,
+    votes: true,
+    system: true,
   });
 
   const [privacy, setPrivacy] = useState({
@@ -39,8 +45,16 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     alert('Profile updated successfully!');
   };
 
+  // Load notification settings from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('nexus_notification_settings');
+    if (stored) {
+      setNotifications(JSON.parse(stored));
+    }
+  }, []);
+
   const handleSaveNotifications = () => {
-    localStorage.setItem('nexus_notifications', JSON.stringify(notifications));
+    localStorage.setItem('nexus_notification_settings', JSON.stringify(notifications));
     alert('Notification settings saved!');
   };
 
@@ -131,6 +145,9 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                 <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${notifications.push ? 'translate-x-7' : 'translate-x-1'}`} />
               </button>
             </div>
+            <div className="border-t border-gray-200 pt-4 mt-4">
+              <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Notification Types</p>
+            </div>
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Mentions</p>
@@ -145,6 +162,66 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
             </div>
             <div className="flex items-center justify-between">
               <div>
+                <p className="font-medium">Replies</p>
+                <p className="text-sm text-gray-500">Get notified when someone replies to your posts</p>
+              </div>
+              <button
+                onClick={() => setNotifications({ ...notifications, replies: !notifications.replies })}
+                className={`w-12 h-6 rounded-full transition-colors ${notifications.replies ? 'bg-blue-500' : 'bg-gray-300'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${notifications.replies ? 'translate-x-7' : 'translate-x-1'}`} />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Likes</p>
+                <p className="text-sm text-gray-500">Get notified when someone likes your content</p>
+              </div>
+              <button
+                onClick={() => setNotifications({ ...notifications, likes: !notifications.likes })}
+                className={`w-12 h-6 rounded-full transition-colors ${notifications.likes ? 'bg-blue-500' : 'bg-gray-300'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${notifications.likes ? 'translate-x-7' : 'translate-x-1'}`} />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Follows</p>
+                <p className="text-sm text-gray-500">Get notified when someone follows you</p>
+              </div>
+              <button
+                onClick={() => setNotifications({ ...notifications, follows: !notifications.follows })}
+                className={`w-12 h-6 rounded-full transition-colors ${notifications.follows ? 'bg-blue-500' : 'bg-gray-300'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${notifications.follows ? 'translate-x-7' : 'translate-x-1'}`} />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Solutions</p>
+                <p className="text-sm text-gray-500">Get notified when someone suggests a solution</p>
+              </div>
+              <button
+                onClick={() => setNotifications({ ...notifications, solutions: !notifications.solutions })}
+                className={`w-12 h-6 rounded-full transition-colors ${notifications.solutions ? 'bg-blue-500' : 'bg-gray-300'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${notifications.solutions ? 'translate-x-7' : 'translate-x-1'}`} />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Votes</p>
+                <p className="text-sm text-gray-500">Get notified when your content receives votes</p>
+              </div>
+              <button
+                onClick={() => setNotifications({ ...notifications, votes: !notifications.votes })}
+                className={`w-12 h-6 rounded-full transition-colors ${notifications.votes ? 'bg-blue-500' : 'bg-gray-300'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${notifications.votes ? 'translate-x-7' : 'translate-x-1'}`} />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
                 <p className="font-medium">Messages</p>
                 <p className="text-sm text-gray-500">Get notified for new messages</p>
               </div>
@@ -153,6 +230,18 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
                 className={`w-12 h-6 rounded-full transition-colors ${notifications.messages ? 'bg-blue-500' : 'bg-gray-300'}`}
               >
                 <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${notifications.messages ? 'translate-x-7' : 'translate-x-1'}`} />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">System Notifications</p>
+                <p className="text-sm text-gray-500">Get notified about system updates and announcements</p>
+              </div>
+              <button
+                onClick={() => setNotifications({ ...notifications, system: !notifications.system })}
+                className={`w-12 h-6 rounded-full transition-colors ${notifications.system ? 'bg-blue-500' : 'bg-gray-300'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full transform transition-transform ${notifications.system ? 'translate-x-7' : 'translate-x-1'}`} />
               </button>
             </div>
             <button

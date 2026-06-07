@@ -58,10 +58,15 @@ export interface Story {
 
 export interface Notification {
   id: string;
+  userId: string;
+  type: 'mention' | 'reply' | 'like' | 'follow' | 'solution' | 'vote' | 'system';
   text: string;
   time: string;
+  createdAt: number;
   read: boolean;
   avatar: string;
+  actionUrl?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface Message {

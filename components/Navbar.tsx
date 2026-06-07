@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { User } from '../types';
+import { User, Notification } from '../types';
 
 interface NavbarProps {
   user: User;
@@ -15,6 +15,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -47,6 +48,16 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownOpen]);
+
+  // Load unread notification count
+  useEffect(() => {
+    const stored = localStorage.getItem('nexus_notifications');
+    if (stored) {
+      const notifications: Notification[] = JSON.parse(stored);
+      const unread = notifications.filter(n => !n.read).length;
+      setUnreadCount(unread);
+    }
+  }, [location]); // Reload when location changes to update count after viewing notifications
 
 
   const navItems = [
@@ -128,8 +139,13 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
         <Link to="/messages" className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
           <i className="fa-brands fa-facebook-messenger text-xl"></i>
         </Link>
-        <Link to="/notifications" className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
+        <Link to="/notifications" className="relative w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
           <i className="fa-solid fa-bell text-xl"></i>
+          {unreadCount > 0 && (
+            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </Link>
         <Link to="/feedback" className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
           <i className="fa-solid fa-comment-dots text-xl"></i>

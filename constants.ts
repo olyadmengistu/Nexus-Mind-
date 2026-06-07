@@ -99,7 +99,40 @@ export const STORIES: Story[] = [
 ];
 
 export const NOTIFICATIONS: Notification[] = [
-  { id: 'n1', text: 'Sarah Chen suggested a solution to your problem.', time: '2h ago', read: false, avatar: 'https://picsum.photos/seed/sarah/50/50' },
-  { id: 'n2', text: 'Your problem reached 50 helpful votes!', time: '5h ago', read: true, avatar: 'https://picsum.photos/seed/star/50/50' },
-  { id: 'n3', text: 'Alex River started following your solutions.', time: '1d ago', read: false, avatar: 'https://picsum.photos/seed/alex/50/50' }
+  { 
+    id: 'n1', 
+    userId: 'u1',
+    type: 'solution',
+    text: 'Sarah Chen suggested a solution to your problem.', 
+    time: '2h ago',
+    createdAt: Date.now() - 7200000,
+    read: false, 
+    avatar: 'https://picsum.photos/seed/sarah/50/50',
+    actionUrl: '/post/p1',
+    metadata: { postId: 'p1', solutionId: 's1' }
+  },
+  { 
+    id: 'n2', 
+    userId: 'system',
+    type: 'vote',
+    text: 'Your problem reached 50 helpful votes!', 
+    time: '5h ago',
+    createdAt: Date.now() - 18000000,
+    read: true, 
+    avatar: 'https://picsum.photos/seed/star/50/50',
+    actionUrl: '/post/p1',
+    metadata: { postId: 'p1', voteCount: 50 }
+  },
+  { 
+    id: 'n3', 
+    userId: 'u3',
+    type: 'follow',
+    text: 'Alex River started following your solutions.', 
+    time: '1d ago',
+    createdAt: Date.now() - 86400000,
+    read: false, 
+    avatar: 'https://picsum.photos/seed/alex/50/50',
+    actionUrl: '/profile/u3',
+    metadata: { followerId: 'u3' }
+  }
 ];
