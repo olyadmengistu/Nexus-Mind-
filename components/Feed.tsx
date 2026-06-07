@@ -26,25 +26,25 @@ const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote }) => {
         <StoryCarousel user={user} />
 
         {/* Composer Trigger */}
-        <div className="bg-white rounded-lg shadow-sm p-3 space-y-3">
-          <div className="flex items-center gap-2">
-            <img src={user.avatar} className="w-10 h-10 rounded-full" alt="User" />
-            <button 
+        <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
+          <div className="flex items-center gap-3">
+            <img src={user.avatar} className="w-12 h-12 rounded-full" alt="User" />
+            <button
               onClick={() => setIsComposerOpen(true)}
-              className="flex-1 bg-[#F0F2F5] hover:bg-gray-200 text-left px-4 py-2 rounded-full text-gray-500 text-[17px] transition-colors"
+              className="flex-1 bg-[#F0F2F5] hover:bg-gray-200 text-left px-5 py-3 rounded-full text-gray-500 text-lg transition-colors"
             >
               What problem are you facing, {user.name}?
             </button>
           </div>
-          <div className="border-t border-gray-100 pt-3 flex items-center justify-around">
-            <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-2 rounded-lg text-[#65676B] font-semibold text-sm">
-              <i className="fa-solid fa-video text-[#F3425E]"></i> Live Video
+          <div className="border-t border-gray-100 pt-4 flex items-center justify-around">
+            <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-3 rounded-xl text-[#65676B] font-bold text-base">
+              <i className="fa-solid fa-video text-[#F3425E] text-xl"></i> Live Video
             </button>
-            <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-2 rounded-lg text-[#65676B] font-semibold text-sm">
-              <i className="fa-solid fa-images text-[#45BD62]"></i> Photo/video
+            <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-3 rounded-xl text-[#65676B] font-bold text-base">
+              <i className="fa-solid fa-images text-[#45BD62] text-xl"></i> Photo/video
             </button>
-            <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-2 hover:bg-gray-100 flex-1 justify-center py-2 rounded-lg text-[#65676B] font-semibold text-sm">
-              <i className="fa-regular fa-face-smile text-[#F7B928]"></i> Feeling/activity
+            <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-3 rounded-xl text-[#65676B] font-bold text-base">
+              <i className="fa-regular fa-face-smile text-[#F7B928] text-xl"></i> Feeling/activity
             </button>
           </div>
         </div>

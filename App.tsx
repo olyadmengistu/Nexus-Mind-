@@ -14,6 +14,11 @@ import Videos from './pages/Videos';
 import Marketplace from './pages/Marketplace';
 import Groups from './pages/Groups';
 import Collaborate from './pages/Collaborate';
+import Settings from './pages/Settings';
+import SavedPosts from './pages/SavedPosts';
+import ActivityLog from './pages/ActivityLog';
+import Help from './pages/Help';
+import Feedback from './pages/Feedback';
 import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
@@ -82,18 +87,24 @@ const App: React.FC = () => {
             // Check localStorage for user data (includes avatar from signup)
             const storedUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
             const storedUser = storedUsers.find((u: User) => u.id === firebaseUser.uid);
-            
+
             // Also check for current user directly saved during signup
             const currentUserData = localStorage.getItem('nexus_current_user');
             const currentUser = currentUserData ? JSON.parse(currentUserData) : null;
-            
+
+            // Prioritize storedUser from nexus_users (has correct signup data) over currentUser
+            // If storedUser exists and has better data (not just email prefix as name), update nexus_current_user
+            if (storedUser && storedUser.name !== firebaseUser.email?.split('@')[0]) {
+              localStorage.setItem('nexus_current_user', JSON.stringify(storedUser));
+            }
+
             const appUser: User = {
               id: firebaseUser.uid,
-              name: currentUser?.name || firebaseUser.displayName || storedUser?.name || firebaseUser.email?.split('@')[0] || 'User',
-              username: currentUser?.username || firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || storedUser?.username || firebaseUser.email?.split('@')[0] || 'user',
+              name: storedUser?.name || currentUser?.name || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+              username: storedUser?.username || currentUser?.username || firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
               email: firebaseUser.email || '',
-              avatar: currentUser?.avatar || storedUser?.avatar || firebaseUser.photoURL || 'https://via.placeholder.com/40',
-              reputation: currentUser?.reputation || storedUser?.reputation || 0,
+              avatar: storedUser?.avatar || currentUser?.avatar || firebaseUser.photoURL || 'https://via.placeholder.com/40',
+              reputation: storedUser?.reputation || currentUser?.reputation || 0,
             };
             
             console.log('App user created:', appUser);
@@ -207,6 +218,26 @@ const App: React.FC = () => {
             <Route 
               path="/collaborate" 
               element={user ? <Collaborate user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/settings" 
+              element={user ? <Settings user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/saved-posts" 
+              element={user ? <SavedPosts user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/activity-log" 
+              element={user ? <ActivityLog user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/help" 
+              element={user ? <Help /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/feedback" 
+              element={user ? <Feedback user={user} /> : <Navigate to="/login" />} 
             />
           </Routes>
         </main>

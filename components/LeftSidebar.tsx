@@ -28,17 +28,17 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ user }) => {
 
   return (
     <aside className="fixed left-0 top-[56px] bottom-0 w-[280px] overflow-y-auto hidden lg:block p-2">
-      <Link to="/profile" className="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors mb-2">
-        <img src={user.avatar} className="w-9 h-9 rounded-full object-cover" alt="User" />
-        <span className="font-semibold text-sm">{user.name}</span>
+      <Link to="/profile" className="flex items-center gap-4 p-3 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors mb-2">
+        <img src={user.avatar} className="w-11 h-11 rounded-full object-cover" alt="User" />
+        <span className="font-semibold text-base">{user.name}</span>
       </Link>
 
       {items.map((item, idx) => (
-        <div key={idx} className="flex items-center gap-3 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
-          <div className={`w-9 h-9 flex items-center justify-center text-xl ${item.color}`}>
+        <div key={idx} className="flex items-center gap-4 p-3 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors">
+          <div className={`w-11 h-11 flex items-center justify-center text-2xl ${item.color}`}>
             <i className={`fa-solid ${item.icon}`}></i>
           </div>
-          <span className="text-[15px] font-medium">{item.label}</span>
+          <span className="text-base font-semibold">{item.label}</span>
         </div>
       ))}
 

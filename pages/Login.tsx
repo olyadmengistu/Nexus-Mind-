@@ -25,7 +25,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         if (result) {
           console.log('Redirect sign-in successful, user:', result.user.uid);
           const firebaseUser = result.user;
-          const user: User = {
+
+          // First check if user already exists in localStorage (from signup)
+          const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+          const storedUser = existingUsers.find((u: User) => u.id === firebaseUser.uid);
+
+          // Use stored user data if available, otherwise create from Firebase data
+          const user: User = storedUser || {
             id: firebaseUser.uid,
             name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
             username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
@@ -33,20 +39,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             avatar: firebaseUser.photoURL || 'https://via.placeholder.com/40',
             reputation: 0,
           };
-          
+
           // Save/update user to localStorage for searchability
-          const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-          const userIndex = existingUsers.findIndex((u: User) => u.id === user.id);
-          if (userIndex >= 0) {
-            existingUsers[userIndex] = user;
-          } else {
+          if (!storedUser) {
             existingUsers.push(user);
+            localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
           }
-          localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
-          
+
           // Also save current user directly for immediate access
           localStorage.setItem('nexus_current_user', JSON.stringify(user));
-          
+
           onLogin(user);
         }
       } catch (err: any) {
@@ -72,7 +74,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
-      const user: User = {
+      // First check if user already exists in localStorage (from signup)
+      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      const storedUser = existingUsers.find((u: User) => u.id === firebaseUser.uid);
+
+      // Use stored user data if available, otherwise create from Firebase data
+      const user: User = storedUser || {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
         username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
@@ -82,14 +89,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       };
 
       // Save/update user to localStorage for searchability
-      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-      const userIndex = existingUsers.findIndex((u: User) => u.id === user.id);
-      if (userIndex >= 0) {
-        existingUsers[userIndex] = user;
-      } else {
+      if (!storedUser) {
         existingUsers.push(user);
+        localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
       }
-      localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
 
       // Also save current user directly for immediate access
       localStorage.setItem('nexus_current_user', JSON.stringify(user));
@@ -124,7 +127,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const userCredential = await signInWithPopup(auth, provider);
       const firebaseUser = userCredential.user;
 
-      const user: User = {
+      // First check if user already exists in localStorage (from signup)
+      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      const storedUser = existingUsers.find((u: User) => u.id === firebaseUser.uid);
+
+      // Use stored user data if available, otherwise create from Firebase data
+      const user: User = storedUser || {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
         username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
@@ -134,14 +142,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       };
 
       // Save/update user to localStorage for searchability
-      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-      const userIndex = existingUsers.findIndex((u: User) => u.id === user.id);
-      if (userIndex >= 0) {
-        existingUsers[userIndex] = user;
-      } else {
+      if (!storedUser) {
         existingUsers.push(user);
+        localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
       }
-      localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
 
       // Also save current user directly for immediate access
       localStorage.setItem('nexus_current_user', JSON.stringify(user));

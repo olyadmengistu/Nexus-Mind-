@@ -15,10 +15,6 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('nexus_dark_mode');
-    return saved ? JSON.parse(saved) : false;
-  });
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -36,20 +32,13 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     }
   }, [searchQuery]);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('nexus_dark_mode', JSON.stringify(darkMode));
-  }, [darkMode]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownOpen) {
         const target = event.target as HTMLElement;
-        if (!target.closest('.dropdown-container')) {
+        const dropdown = document.querySelector('.dropdown-container');
+        if (dropdown && !dropdown.contains(target)) {
           setDropdownOpen(false);
         }
       }
@@ -59,9 +48,6 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownOpen]);
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
 
   const navItems = [
     { icon: 'fa-house', path: '/', label: 'Home' },
@@ -74,40 +60,40 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   return (
     <header className="fixed top-0 left-0 right-0 h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-4 flex items-center justify-between">
       {/* Left */}
-      <div className="flex items-center gap-2">
-        <Link to="/" className="flex items-center justify-center w-10 h-10 bg-[#1877F2] rounded-lg">
-            <i className="fa-solid fa-brain text-white text-xl"></i>
+      <div className="flex items-center gap-3">
+        <Link to="/" className="flex items-center justify-center w-12 h-12 bg-[#1877F2] rounded-xl">
+            <i className="fa-solid fa-brain text-white text-2xl"></i>
         </Link>
         <div className="relative group hidden sm:block">
-          <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
-          <input 
-            type="text" 
-            placeholder="Search NexusMind..." 
+          <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg"></i>
+          <input
+            type="text"
+            placeholder="Search NexusMind..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onBlur={() => setTimeout(() => setShowResults(false), 200)}
             onFocus={() => searchQuery && setShowResults(true)}
-            className="bg-[#F0F2F5] pl-10 pr-4 py-2 rounded-full w-[240px] focus:outline-none focus:ring-2 focus:ring-[#1877F2] text-sm"
+            className="bg-[#F0F2F5] pl-12 pr-5 py-3 rounded-full w-[280px] focus:outline-none focus:ring-2 focus:ring-[#1877F2] text-base"
           />
           {showResults && searchResults.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-80 overflow-y-auto z-50">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 max-h-80 overflow-y-auto z-50">
               {searchResults.map((resultUser) => (
                 <Link
                   key={resultUser.id}
                   to={`/profile/${resultUser.id}`}
-                  className="flex items-center gap-3 p-3 hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-4 p-4 hover:bg-gray-100 transition-colors"
                   onClick={() => {
                     setSearchQuery('');
                     setShowResults(false);
                   }}
                 >
-                  <img 
-                    src={resultUser.avatar} 
-                    alt={resultUser.name} 
-                    className="w-10 h-10 rounded-full object-cover"
+                  <img
+                    src={resultUser.avatar}
+                    alt={resultUser.name}
+                    className="w-12 h-12 rounded-full object-cover"
                   />
                   <div>
-                    <p className="font-semibold text-sm">{resultUser.name}</p>
+                    <p className="font-bold text-base">{resultUser.name}</p>
                   </div>
                 </Link>
               ))}
@@ -122,94 +108,226 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
           <Link 
             key={item.path}
             to={item.path}
-            className={`flex items-center justify-center w-[110px] h-full border-b-4 transition-all ${
+            className={`flex items-center justify-center w-[140px] h-full border-b-4 transition-all ${
               location.pathname === item.path ? 'border-[#1877F2] text-[#1877F2]' : 'border-transparent text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <i className={`fa-solid ${item.icon} text-xl`}></i>
+            <i className={`fa-solid ${item.icon} text-2xl`}></i>
           </Link>
         ))}
       </div>
 
       {/* Right */}
       <div className="flex items-center gap-2">
-        <div className="hidden lg:flex items-center hover:bg-gray-100 p-1.5 rounded-full cursor-pointer">
-            <img src={user.avatar} className="w-7 h-7 rounded-full object-cover mr-2" alt="Avatar" />
-            <span className="font-semibold text-sm">{user.name}</span>
-        </div>
         <button 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center"
+          className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center"
         >
-          <i className="fa-solid fa-bars"></i>
+          <i className="fa-solid fa-bars text-xl"></i>
         </button>
-        <Link to="/messages" className="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
-          <i className="fa-brands fa-facebook-messenger"></i>
+        <Link to="/messages" className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
+          <i className="fa-brands fa-facebook-messenger text-xl"></i>
         </Link>
-        <Link to="/notifications" className="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
-          <i className="fa-solid fa-bell"></i>
+        <Link to="/notifications" className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
+          <i className="fa-solid fa-bell text-xl"></i>
         </Link>
-        <div className="relative">
+        <Link to="/feedback" className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
+          <i className="fa-solid fa-comment-dots text-xl"></i>
+        </Link>
+        <div className="relative dropdown-container">
           <button 
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center"
+            className="relative w-12 h-12 rounded-full flex items-center justify-center"
           >
-            <i className="fa-solid fa-caret-down"></i>
+            <img src={user.avatar} className="w-full h-full rounded-full object-cover" alt="Avatar" />
+            <div className="absolute bottom-0 right-0 bg-gray-600 rounded-full w-5 h-5 flex items-center justify-center">
+              <i className="fa-solid fa-caret-down text-white text-sm"></i>
+            </div>
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-              <div className="p-3 border-b border-gray-200">
-                <div className="flex items-center gap-3">
-                  <img src={user.avatar} className="w-10 h-10 rounded-full object-cover" alt="Avatar" />
+            <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
+                <div className="flex items-center gap-4">
+                  <img src={user.avatar} className="w-16 h-16 rounded-full object-cover border-3 border-blue-500" alt="Avatar" />
                   <div>
-                    <p className="font-semibold text-sm">{user.name}</p>
-                    <p className="text-xs text-gray-500">@{user.username}</p>
+                    <p className="font-bold text-lg">{user.name}</p>
+                    <p className="text-base text-gray-600">@{user.username}</p>
+                    <div className="flex items-center gap-1 mt-2">
+                      <span className="text-sm bg-blue-500 text-white px-3 py-1 rounded-full">{user.reputation} Rep</span>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="py-1">
-                <Link 
-                  to="/profile"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition-colors"
-                >
-                  <i className="fa-solid fa-user text-gray-600 w-5"></i>
-                  <span className="text-sm">Your Profile</span>
-                </Link>
-                <button 
-                  onClick={() => {
-                    toggleDarkMode();
-                    setDropdownOpen(false);
-                  }}
-                  className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition-colors w-full text-left"
-                >
-                  <i className={`fa-solid ${darkMode ? 'fa-sun' : 'fa-moon'} text-gray-600 w-5`}></i>
-                  <span className="text-sm">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
-                </button>
-                <button 
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition-colors w-full text-left"
-                >
-                  <i className="fa-solid fa-gear text-gray-600 w-5"></i>
-                  <span className="text-sm">Settings</span>
-                </button>
-                <button 
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition-colors w-full text-left"
-                >
-                  <i className="fa-solid fa-circle-question text-gray-600 w-5"></i>
-                  <span className="text-sm">Help & Support</span>
-                </button>
-                <div className="border-t border-gray-200 mt-1 pt-1">
+              <div className="py-3 max-h-[500px] overflow-y-auto">
+                <div className="px-4 py-3">
+                  <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Account</p>
+                  <Link 
+                    to="/profile"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-user text-blue-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Your Profile</span>
+                  </Link>
+                  <Link 
+                    to="/saved-posts"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-bookmark text-blue-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Saved Posts</span>
+                  </Link>
+                  <Link 
+                    to="/activity-log"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-clock-rotate-left text-blue-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Activity Log</span>
+                  </Link>
+                </div>
+                
+                <div className="px-4 py-3 border-t border-gray-100">
+                  <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Settings</p>
+                  <Link 
+                    to="/settings"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-gear text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Settings</span>
+                  </Link>
+                  <Link 
+                    to="/settings"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-shield-halved text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Privacy Settings</span>
+                  </Link>
+                  <Link 
+                    to="/settings"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-bell text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Notification Settings</span>
+                  </Link>
+                  <Link 
+                    to="/settings"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-language text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Language</span>
+                  </Link>
+                  <Link 
+                    to="/settings"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-universal-access text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Accessibility</span>
+                  </Link>
+                </div>
+
+                <div className="px-4 py-3 border-t border-gray-100">
+                  <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Support</p>
+                  <Link 
+                    to="/help"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-circle-question text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Help & Support</span>
+                  </Link>
+                  <Link 
+                    to="/help"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-triangle-exclamation text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Report a Problem</span>
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      alert('Terms of Service: By using NexusMind, you agree to our terms. Full terms available at nexusmind.com/terms');
+                    }}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors w-full text-left"
+                  >
+                    <i className="fa-solid fa-file-lines text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Terms of Service</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      alert('Privacy Policy: We respect your privacy. Full policy available at nexusmind.com/privacy');
+                    }}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors w-full text-left"
+                  >
+                    <i className="fa-solid fa-lock text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Privacy Policy</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      alert('About NexusMind: Version 1.0.0 - A social platform for collaboration and innovation.');
+                    }}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors w-full text-left"
+                  >
+                    <i className="fa-solid fa-info-circle text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">About</span>
+                  </button>
+                </div>
+
+                <div className="px-4 py-3 border-t border-gray-100">
+                  <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Account Actions</p>
+                  <button 
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+                      if (users.length > 1) {
+                        alert('Switch account feature: Select from your saved accounts');
+                      } else {
+                        alert('No other accounts available. Sign up with a new account to switch.');
+                      }
+                    }}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors w-full text-left"
+                  >
+                    <i className="fa-solid fa-users text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Switch Account</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+                        setDropdownOpen(false);
+                        // Remove user from localStorage
+                        const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+                        const updatedUsers = users.filter((u: any) => u.id !== user.id);
+                        localStorage.setItem('nexus_users', JSON.stringify(updatedUsers));
+                        localStorage.removeItem('nexus_current_user');
+                        onLogout();
+                        alert('Account deleted successfully.');
+                      }
+                    }}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-red-50 rounded-xl transition-colors w-full text-left text-red-600"
+                  >
+                    <i className="fa-solid fa-trash w-6 text-lg"></i>
+                    <span className="text-base font-medium">Delete Account</span>
+                  </button>
+                </div>
+
+                <div className="border-t border-gray-200 mt-2 pt-3 px-4">
                   <button 
                     onClick={() => {
                       onLogout();
                       setDropdownOpen(false);
                     }}
-                    className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition-colors w-full text-left text-red-600"
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-red-50 rounded-xl transition-colors w-full text-left text-red-600 font-medium"
                   >
-                    <i className="fa-solid fa-right-from-bracket w-5"></i>
-                    <span className="text-sm">Log Out</span>
+                    <i className="fa-solid fa-right-from-bracket w-6 text-lg"></i>
+                    <span className="text-base">Log Out</span>
                   </button>
                 </div>
               </div>
@@ -249,93 +367,182 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
                 </div>
               </div>
             </div>
-            <nav className="p-4">
+            <nav className="p-4 overflow-y-auto max-h-[calc(100vh-200px)]">
               <div className="space-y-1">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      location.pathname === item.path 
-                        ? 'bg-[#1877F2] text-white' 
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    <i className={`fa-solid ${item.icon} w-6 text-center`}></i>
-                    <span className="font-medium">{item.label}</span>
-                  </Link>
-                ))}
-                <Link
-                  to="/profile"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    location.pathname.startsWith('/profile') 
-                      ? 'bg-[#1877F2] text-white' 
-                      : 'hover:bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  <i className="fa-solid fa-user w-6 text-center"></i>
-                  <span className="font-medium">Profile</span>
-                </Link>
-                <Link
-                  to="/messages"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    location.pathname === '/messages' 
-                      ? 'bg-[#1877F2] text-white' 
-                      : 'hover:bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  <i className="fa-brands fa-facebook-messenger w-6 text-center"></i>
-                  <span className="font-medium">Messages</span>
-                </Link>
-                <Link
-                  to="/notifications"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    location.pathname === '/notifications' 
-                      ? 'bg-[#1877F2] text-white' 
-                      : 'hover:bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  <i className="fa-solid fa-bell w-6 text-center"></i>
-                  <span className="font-medium">Notifications</span>
-                </Link>
-              </div>
-              <div className="border-t border-gray-200 mt-4 pt-4">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-2">Revenue & Monetization</p>
+                
                 <button
-                  onClick={() => {
-                    toggleDarkMode();
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 w-full hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
                 >
-                  <i className={`fa-solid ${darkMode ? 'fa-sun' : 'fa-moon'} w-6 text-center`}></i>
-                  <span className="font-medium">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                  <i className="fa-solid fa-rectangle-ad w-8 text-center text-purple-600 text-xl"></i>
+                  <span className="font-bold text-lg">Ads</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 w-full hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
                 >
-                  <i className="fa-solid fa-gear w-6 text-center"></i>
-                  <span className="font-medium">Settings</span>
+                  <i className="fa-solid fa-hand-holding-dollar w-8 text-center text-green-600 text-xl"></i>
+                  <span className="font-bold text-lg">Sponsors</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 w-full hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
                 >
-                  <i className="fa-solid fa-circle-question w-6 text-center"></i>
-                  <span className="font-medium">Help & Support</span>
+                  <i className="fa-solid fa-sack-dollar w-8 text-center text-yellow-600 text-xl"></i>
+                  <span className="font-bold text-lg">Investors</span>
                 </button>
                 <button
-                  onClick={() => {
-                    onLogout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-3 px-4 py-3 w-full hover:bg-gray-100 rounded-lg transition-colors text-red-600"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
                 >
-                  <i className="fa-solid fa-right-from-bracket w-6 text-center"></i>
-                  <span className="font-medium">Log Out</span>
+                  <i className="fa-solid fa-coins w-8 text-center text-orange-600 text-xl"></i>
+                  <span className="font-bold text-lg">Funding</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-crown w-8 text-center text-amber-600 text-xl"></i>
+                  <span className="font-bold text-lg">Premium</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-circle-check w-8 text-center text-blue-600 text-xl"></i>
+                  <span className="font-bold text-lg">Verification</span>
+                </button>
+                
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4">Business & Growth</p>
+                
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-building w-8 text-center text-indigo-600 text-xl"></i>
+                  <span className="font-bold text-lg">Business Pages</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-briefcase w-8 text-center text-slate-600 text-xl"></i>
+                  <span className="font-bold text-lg">Jobs</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-shop w-8 text-center text-pink-600 text-xl"></i>
+                  <span className="font-bold text-lg">Marketplace</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-video w-8 text-center text-red-600 text-xl"></i>
+                  <span className="font-bold text-lg">Creator Hub</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-handshake-simple w-8 text-center text-teal-600 text-xl"></i>
+                  <span className="font-bold text-lg">Brand Deals</span>
+                </button>
+                
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4">Financial & Analytics</p>
+                
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-wallet w-8 text-center text-emerald-600 text-xl"></i>
+                  <span className="font-bold text-lg">Wallet</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-chart-line w-8 text-center text-cyan-600 text-xl"></i>
+                  <span className="font-bold text-lg">Analytics</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-robot w-8 text-center text-violet-600 text-xl"></i>
+                  <span className="font-bold text-lg">AI Tools</span>
+                </button>
+                
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4">Community & Engagement</p>
+                
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-users w-8 text-center text-blue-500 text-xl"></i>
+                  <span className="font-bold text-lg">Communities</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-calendar-days w-8 text-center text-rose-600 text-xl"></i>
+                  <span className="font-bold text-lg">Events</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-graduation-cap w-8 text-center text-fuchsia-600 text-xl"></i>
+                  <span className="font-bold text-lg">Courses</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-rocket w-8 text-center text-lime-600 text-xl"></i>
+                  <span className="font-bold text-lg">Boost</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-link w-8 text-center text-sky-600 text-xl"></i>
+                  <span className="font-bold text-lg">Affiliate</span>
+                </button>
+                
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4">Platform & Development</p>
+                
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-code w-8 text-center text-gray-700 text-xl"></i>
+                  <span className="font-bold text-lg">Developers</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-mobile-screen w-8 text-center text-stone-600 text-xl"></i>
+                  <span className="font-bold text-lg">App Store</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-building-columns w-8 text-center text-neutral-600 text-xl"></i>
+                  <span className="font-bold text-lg">Enterprise</span>
+                </button>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                >
+                  <i className="fa-solid fa-flask w-8 text-center text-zinc-600 text-xl"></i>
+                  <span className="font-bold text-lg">Research</span>
                 </button>
               </div>
             </nav>
