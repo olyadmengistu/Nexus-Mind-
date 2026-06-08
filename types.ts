@@ -232,3 +232,16 @@ export interface DailyReflection {
   timestamp: number;
   likes: number;
 }
+
+// Contact Types
+export interface Contact {
+  id: string;
+  name: string;
+  username?: string;
+  avatar: string;
+  status: 'online' | 'offline' | 'away' | 'busy';
+  lastSeen?: number;
+  bio?: string;
+  email?: string;
+  phone?: string;
+}
