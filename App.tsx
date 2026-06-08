@@ -20,6 +20,7 @@ import SavedPosts from './pages/SavedPosts';
 import ActivityLog from './pages/ActivityLog';
 import Help from './pages/Help';
 import Feedback from './pages/Feedback';
+import Mission from './pages/Mission';
 import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
@@ -244,6 +245,10 @@ const App: React.FC = () => {
             <Route 
               path="/feedback" 
               element={user ? <Feedback user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/mission" 
+              element={<Mission />} 
             />
           </Routes>
         </main>
