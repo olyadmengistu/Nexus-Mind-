@@ -12,6 +12,45 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showMeetingModal, setShowMeetingModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  
+  // Video upload form state
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    description: '',
+    category: 'Education',
+    tags: '',
+    videoFile: null as File | null,
+    thumbnailFile: null as File | null
+  });
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
+  
+  // Meeting scheduling form state
+  const [meetingForm, setMeetingForm] = useState({
+    title: '',
+    description: '',
+    scheduledTime: '',
+    duration: 60,
+    maxParticipants: 50
+  });
+  const [isScheduling, setIsScheduling] = useState(false);
+  
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [sortBy, setSortBy] = useState<'recent' | 'views' | 'likes'>('recent');
+  
+  // Comments state
+  const [comments, setComments] = useState<Record<string, Array<{
+    id: string;
+    userId: string;
+    userName: string;
+    userAvatar: string;
+    text: string;
+    timestamp: number;
+  }>>>({});
+  const [newComment, setNewComment] = useState('');
+  const [showComments, setShowComments] = useState(false);
 
   useEffect(() => {
     // Load sample videos
@@ -99,21 +138,330 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
 
     setVideos(sampleVideos);
     setMeetings(sampleMeetings);
+    
+    // Load videos from localStorage if available
+    try {
+      const storedVideos = localStorage.getItem('nexus_videos');
+      const storedMeetings = localStorage.getItem('nexus_meetings');
+      if (storedVideos) setVideos(JSON.parse(storedVideos));
+      if (storedMeetings) setMeetings(JSON.parse(storedMeetings));
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+    }
   }, []);
+  
+  // Persist videos and meetings to localStorage
+  useEffect(() => {
+    localStorage.setItem('nexus_videos', JSON.stringify(videos));
+  }, [videos]);
+  
+  useEffect(() => {
+    localStorage.setItem('nexus_meetings', JSON.stringify(meetings));
+  }, [meetings]);
 
   const handleLikeVideo = (videoId: string) => {
     setVideos(videos.map(v => 
       v.id === videoId ? { ...v, likes: v.likes + 1 } : v
     ));
+    // Prepare for backend: send like event to API
+    const video = videos.find(v => v.id === videoId);
+    if (video) {
+      console.log('Backend: Like video payload', {
+        videoId,
+        userId: user.id,
+        timestamp: Date.now()
+      });
+    }
+  };
+  
+  const handleUnlikeVideo = (videoId: string) => {
+    setVideos(videos.map(v => 
+      v.id === videoId ? { ...v, likes: Math.max(0, v.likes - 1) } : v
+    ));
+    // Prepare for backend: send unlike event to API
+    console.log('Backend: Unlike video payload', {
+      videoId,
+      userId: user.id,
+      timestamp: Date.now()
+    });
+  };
+  
+  const handleViewVideo = (videoId: string) => {
+    setVideos(videos.map(v => 
+      v.id === videoId ? { ...v, views: v.views + 1 } : v
+    ));
+    // Prepare for backend: send view event to API
+    console.log('Backend: View video payload', {
+      videoId,
+      userId: user.id,
+      timestamp: Date.now()
+    });
   };
 
   const handleJoinMeeting = (meetingId: string) => {
+    const meeting = meetings.find(m => m.id === meetingId);
+    if (meeting && meeting.participants.length >= meeting.maxParticipants) {
+      alert('Meeting is full');
+      return;
+    }
+    if (meeting && meeting.participants.some(p => p.id === user.id)) {
+      alert('You have already joined this meeting');
+      return;
+    }
     setMeetings(meetings.map(m => 
       m.id === meetingId 
         ? { ...m, participants: [...m.participants, user] }
         : m
     ));
+    // Prepare for backend: send join meeting event to API
+    console.log('Backend: Join meeting payload', {
+      meetingId,
+      userId: user.id,
+      timestamp: Date.now()
+    });
   };
+  
+  const handleLeaveMeeting = (meetingId: string) => {
+    setMeetings(meetings.map(m => 
+      m.id === meetingId 
+        ? { ...m, participants: m.participants.filter(p => p.id !== user.id) }
+        : m
+    ));
+    // Prepare for backend: send leave meeting event to API
+    console.log('Backend: Leave meeting payload', {
+      meetingId,
+      userId: user.id,
+      timestamp: Date.now()
+    });
+  };
+  
+  const handleCancelMeeting = (meetingId: string) => {
+    if (confirm('Are you sure you want to cancel this meeting?')) {
+      setMeetings(meetings.map(m => 
+        m.id === meetingId ? { ...m, status: 'ended' as const } : m
+      ));
+      // Prepare for backend: send cancel meeting event to API
+      console.log('Backend: Cancel meeting payload', {
+        meetingId,
+        userId: user.id,
+        timestamp: Date.now()
+      });
+    }
+  };
+  
+  const handleDeleteVideo = (videoId: string) => {
+    if (confirm('Are you sure you want to delete this video?')) {
+      setVideos(videos.filter(v => v.id !== videoId));
+      if (selectedVideo?.id === videoId) {
+        setSelectedVideo(null);
+      }
+      // Prepare for backend: send delete video event to API
+      console.log('Backend: Delete video payload', {
+        videoId,
+        userId: user.id,
+        timestamp: Date.now()
+      });
+    }
+  };
+
+  // Video upload handler
+  const handleVideoUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!uploadForm.title || !uploadForm.videoFile) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    setIsUploading(true);
+    setUploadProgress(0);
+    
+    try {
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 200);
+      
+      // Prepare video data for backend
+      const videoData = {
+        id: Date.now().toString(),
+        userId: user.id,
+        userName: user.name,
+        userAvatar: user.avatar,
+        title: uploadForm.title,
+        description: uploadForm.description,
+        thumbnail: uploadForm.thumbnailFile ? URL.createObjectURL(uploadForm.thumbnailFile) : 'https://via.placeholder.com/320x180',
+        videoUrl: uploadForm.videoFile ? URL.createObjectURL(uploadForm.videoFile) : '',
+        views: 0,
+        likes: 0,
+        duration: '0:00', // Will be calculated from actual video file
+        timestamp: Date.now(),
+        category: uploadForm.category,
+        tags: uploadForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+      };
+      
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
+      // Add video to state
+      setVideos([videoData, ...videos]);
+      
+      // Prepare for backend: send video data to API
+      console.log('Backend: Upload video payload', {
+        ...videoData,
+        videoFile: uploadForm.videoFile,
+        thumbnailFile: uploadForm.thumbnailFile,
+        uploadedBy: user.id
+      });
+      
+      // Reset form
+      setUploadForm({
+        title: '',
+        description: '',
+        category: 'Education',
+        tags: '',
+        videoFile: null,
+        thumbnailFile: null
+      });
+      setUploadProgress(0);
+      setShowUploadModal(false);
+      
+      alert('Video uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      alert('Error uploading video. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  
+  // Meeting scheduling handler
+  const handleScheduleMeeting = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!meetingForm.title || !meetingForm.scheduledTime) {
+      alert('Please fill in all required fields');
+      return;
+    }
+    
+    setIsScheduling(true);
+    
+    try {
+      // Prepare meeting data for backend
+      const meetingData: Meeting = {
+        id: Date.now().toString(),
+        hostId: user.id,
+        hostName: user.name,
+        hostAvatar: user.avatar,
+        title: meetingForm.title,
+        description: meetingForm.description,
+        scheduledTime: new Date(meetingForm.scheduledTime).getTime(),
+        duration: meetingForm.duration,
+        participants: [],
+        maxParticipants: meetingForm.maxParticipants,
+        status: 'scheduled',
+        meetingUrl: '' // Will be generated by backend
+      };
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Add meeting to state
+      setMeetings([meetingData, ...meetings]);
+      
+      // Prepare for backend: send meeting data to API
+      console.log('Backend: Schedule meeting payload', {
+        ...meetingData,
+        hostedBy: user.id
+      });
+      
+      // Reset form
+      setMeetingForm({
+        title: '',
+        description: '',
+        scheduledTime: '',
+        duration: 60,
+        maxParticipants: 50
+      });
+      setShowMeetingModal(false);
+      
+      alert('Meeting scheduled successfully!');
+    } catch (error) {
+      console.error('Error scheduling meeting:', error);
+      alert('Error scheduling meeting. Please try again.');
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+  
+  // Comments handlers
+  const handleAddComment = (videoId: string) => {
+    if (!newComment.trim()) return;
+    
+    const comment = {
+      id: Date.now().toString(),
+      userId: user.id,
+      userName: user.name,
+      userAvatar: user.avatar,
+      text: newComment,
+      timestamp: Date.now()
+    };
+    
+    setComments(prev => ({
+      ...prev,
+      [videoId]: [...(prev[videoId] || []), comment]
+    }));
+    
+    // Prepare for backend: send comment to API
+    console.log('Backend: Add comment payload', {
+      videoId,
+      ...comment
+    });
+    
+    setNewComment('');
+  };
+  
+  const handleDeleteComment = (videoId: string, commentId: string) => {
+    setComments(prev => ({
+      ...prev,
+      [videoId]: prev[videoId]?.filter(c => c.id !== commentId) || []
+    }));
+    
+    // Prepare for backend: send delete comment to API
+    console.log('Backend: Delete comment payload', {
+      videoId,
+      commentId,
+      userId: user.id
+    });
+  };
+  
+  // Filter and sort videos
+  const filteredVideos = videos
+    .filter(video => {
+      const matchesSearch = video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           video.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           video.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCategory = selectedCategory === 'All' || video.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'recent') return b.timestamp - a.timestamp;
+      if (sortBy === 'views') return b.views - a.views;
+      if (sortBy === 'likes') return b.likes - a.likes;
+      return 0;
+    });
+  
+  // Get unique categories
+  const categories = ['All', ...Array.from(new Set(videos.map(v => v.category)))];
 
   return (
     <div className="max-w-7xl mx-auto p-4">
@@ -135,6 +483,46 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
           </button>
         </div>
       </div>
+      
+      {/* Search and Filter Bar */}
+      {activeTab === 'videos' && (
+        <div className="bg-white rounded-lg shadow p-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search videos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-2 pl-10 border rounded-lg"
+                />
+                <i className="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-4 py-2 border rounded-lg"
+              >
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'recent' | 'views' | 'likes')}
+                className="px-4 py-2 border rounded-lg"
+              >
+                <option value="recent">Most Recent</option>
+                <option value="views">Most Viewed</option>
+                <option value="likes">Most Liked</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-4 mb-6 border-b border-gray-200">
@@ -171,8 +559,20 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
               >
                 <i className="fa-solid fa-arrow-left mr-2"></i>Back to Videos
               </button>
-              <div className="aspect-video bg-gray-900 rounded-lg mb-4 flex items-center justify-center">
-                <i className="fa-solid fa-play text-white text-6xl"></i>
+              <div className="aspect-video bg-gray-900 rounded-lg mb-4 flex items-center justify-center relative">
+                {selectedVideo.videoUrl ? (
+                  <video
+                    src={selectedVideo.videoUrl}
+                    controls
+                    className="w-full h-full rounded-lg"
+                    onPlay={() => handleViewVideo(selectedVideo.id)}
+                  />
+                ) : (
+                  <div className="text-center">
+                    <i className="fa-solid fa-play text-white text-6xl mb-4"></i>
+                    <p className="text-white">Video not available</p>
+                  </div>
+                )}
               </div>
               <h2 className="text-2xl font-bold mb-2">{selectedVideo.title}</h2>
               <div className="flex items-center gap-4 mb-4 text-gray-600">
@@ -195,16 +595,94 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
                   </span>
                 ))}
               </div>
-              <button
-                onClick={() => handleLikeVideo(selectedVideo.id)}
-                className="mt-4 px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
-              >
-                <i className="fa-solid fa-heart mr-2"></i>Like
-              </button>
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => handleLikeVideo(selectedVideo.id)}
+                  className="px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
+                >
+                  <i className="fa-solid fa-heart mr-2"></i>Like
+                </button>
+                <button
+                  onClick={() => handleUnlikeVideo(selectedVideo.id)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  <i className="fa-solid fa-heart-broken mr-2"></i>Unlike
+                </button>
+                {selectedVideo.userId === user.id && (
+                  <button
+                    onClick={() => handleDeleteVideo(selectedVideo.id)}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    <i className="fa-solid fa-trash mr-2"></i>Delete
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowComments(!showComments)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  <i className="fa-solid fa-comment mr-2"></i>Comments ({comments[selectedVideo.id]?.length || 0})
+                </button>
+              </div>
+              
+              {/* Comments Section */}
+              {showComments && (
+                <div className="mt-6 border-t pt-6">
+                  <h3 className="text-lg font-semibold mb-4">Comments</h3>
+                  
+                  {/* Add Comment Form */}
+                  <div className="flex gap-3 mb-4">
+                    <img src={user.avatar} className="w-10 h-10 rounded-full" alt="" />
+                    <div className="flex-1">
+                      <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        className="w-full px-3 py-2 border rounded-lg resize-none"
+                        rows={2}
+                      />
+                      <button
+                        onClick={() => handleAddComment(selectedVideo.id)}
+                        className="mt-2 px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
+                      >
+                        Post Comment
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Comments List */}
+                  <div className="space-y-4">
+                    {(comments[selectedVideo.id] || []).map(comment => (
+                      <div key={comment.id} className="flex gap-3">
+                        <img src={comment.userAvatar} className="w-10 h-10 rounded-full" alt="" />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold">{comment.userName}</span>
+                            <span className="text-sm text-gray-500">
+                              {new Date(comment.timestamp).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 mt-1">{comment.text}</p>
+                          {(comment.userId === user.id || selectedVideo.userId === user.id) && (
+                            <button
+                              onClick={() => handleDeleteComment(selectedVideo.id, comment.id)}
+                              className="mt-2 text-sm text-red-600 hover:text-red-800"
+                            >
+                              Delete
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {(!comments[selectedVideo.id] || comments[selectedVideo.id].length === 0) && (
+                      <p className="text-gray-500 text-center py-4">No comments yet. Be the first to comment!</p>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {videos.map(video => (
+              {filteredVideos.length > 0 ? filteredVideos.map(video => (
                 <div
                   key={video.id}
                   className="bg-white rounded-lg shadow overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
@@ -228,7 +706,12 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="col-span-full text-center py-12 text-gray-500">
+                  <i className="fa-solid fa-video text-4xl mb-4"></i>
+                  <p>No videos found. Try adjusting your search or filters.</p>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -261,12 +744,31 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
                 <span><i className="fa-solid fa-clock mr-1"></i>{meeting.duration} min</span>
                 <span><i className="fa-solid fa-users mr-1"></i>{meeting.participants.length}/{meeting.maxParticipants}</span>
               </div>
-              <button
-                onClick={() => handleJoinMeeting(meeting.id)}
-                className="w-full px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
-              >
-                <i className="fa-solid fa-video mr-2"></i>Join Meeting
-              </button>
+              <div className="flex gap-2">
+                {!meeting.participants.some(p => p.id === user.id) ? (
+                  <button
+                    onClick={() => handleJoinMeeting(meeting.id)}
+                    className="flex-1 px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
+                  >
+                    <i className="fa-solid fa-video mr-2"></i>Join Meeting
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleLeaveMeeting(meeting.id)}
+                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    <i className="fa-solid fa-door-open mr-2"></i>Leave Meeting
+                  </button>
+                )}
+                {meeting.hostId === user.id && meeting.status === 'scheduled' && (
+                  <button
+                    onClick={() => handleCancelMeeting(meeting.id)}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    <i className="fa-solid fa-times"></i>
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -285,34 +787,86 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
                 <i className="fa-solid fa-xmark text-xl"></i>
               </button>
             </div>
-            <form className="space-y-4">
+            <form onSubmit={handleVideoUpload} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Title</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-lg" placeholder="Video title" />
+                <label className="block text-sm font-medium mb-1">Title *</label>
+                <input
+                  type="text"
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm({...uploadForm, title: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="Video title"
+                  required
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea className="w-full px-3 py-2 border rounded-lg" rows={3} placeholder="Video description" />
+                <textarea
+                  value={uploadForm.description}
+                  onChange={(e) => setUploadForm({...uploadForm, description: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  rows={3}
+                  placeholder="Video description"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Category</label>
-                <select className="w-full px-3 py-2 border rounded-lg">
+                <select
+                  value={uploadForm.category}
+                  onChange={(e) => setUploadForm({...uploadForm, category: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                >
                   <option>Education</option>
                   <option>Business</option>
                   <option>Technology</option>
                   <option>Lifestyle</option>
+                  <option>Entertainment</option>
+                  <option>Science</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Video File</label>
-                <input type="file" accept="video/*" className="w-full px-3 py-2 border rounded-lg" />
+                <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  value={uploadForm.tags}
+                  onChange={(e) => setUploadForm({...uploadForm, tags: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="problem-solving, tutorial, education"
+                />
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Video File *</label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => setUploadForm({...uploadForm, videoFile: e.target.files?.[0] || null})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Thumbnail (optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setUploadForm({...uploadForm, thumbnailFile: e.target.files?.[0] || null})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
+              {isUploading && (
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-[#1877F2] h-2 rounded-full transition-all"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              )}
               <button
-                type="button"
-                onClick={() => setShowUploadModal(false)}
-                className="w-full px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
+                type="submit"
+                disabled={isUploading}
+                className="w-full px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Upload
+                {isUploading ? `Uploading... ${uploadProgress}%` : 'Upload'}
               </button>
             </form>
           </div>
@@ -332,33 +886,69 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
                 <i className="fa-solid fa-xmark text-xl"></i>
               </button>
             </div>
-            <form className="space-y-4">
+            <form onSubmit={handleScheduleMeeting} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Meeting Title</label>
-                <input type="text" className="w-full px-3 py-2 border rounded-lg" placeholder="Meeting title" />
+                <label className="block text-sm font-medium mb-1">Meeting Title *</label>
+                <input
+                  type="text"
+                  value={meetingForm.title}
+                  onChange={(e) => setMeetingForm({...meetingForm, title: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="Meeting title"
+                  required
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea className="w-full px-3 py-2 border rounded-lg" rows={3} placeholder="Meeting description" />
+                <textarea
+                  value={meetingForm.description}
+                  onChange={(e) => setMeetingForm({...meetingForm, description: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  rows={3}
+                  placeholder="Meeting description"
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Date & Time</label>
-                <input type="datetime-local" className="w-full px-3 py-2 border rounded-lg" />
+                <label className="block text-sm font-medium mb-1">Date & Time *</label>
+                <input
+                  type="datetime-local"
+                  value={meetingForm.scheduledTime}
+                  onChange={(e) => setMeetingForm({...meetingForm, scheduledTime: e.target.value})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  required
+                  min={new Date().toISOString().slice(0, 16)}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Duration (minutes)</label>
-                <input type="number" className="w-full px-3 py-2 border rounded-lg" placeholder="60" />
+                <input
+                  type="number"
+                  value={meetingForm.duration}
+                  onChange={(e) => setMeetingForm({...meetingForm, duration: parseInt(e.target.value) || 60})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="60"
+                  min="15"
+                  max="480"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Max Participants</label>
-                <input type="number" className="w-full px-3 py-2 border rounded-lg" placeholder="50" />
+                <input
+                  type="number"
+                  value={meetingForm.maxParticipants}
+                  onChange={(e) => setMeetingForm({...meetingForm, maxParticipants: parseInt(e.target.value) || 50})}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="50"
+                  min="2"
+                  max="500"
+                />
               </div>
               <button
-                type="button"
-                onClick={() => setShowMeetingModal(false)}
-                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                type="submit"
+                disabled={isScheduling}
+                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Schedule Meeting
+                {isScheduling ? 'Scheduling...' : 'Schedule Meeting'}
               </button>
             </form>
           </div>
