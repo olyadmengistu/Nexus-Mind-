@@ -33,6 +33,11 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
     }
   }, [searchQuery]);
 
+  // Log avatar URL for debugging
+  useEffect(() => {
+    console.log('Navbar - Current user avatar URL:', user.avatar);
+  }, [user.avatar]);
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

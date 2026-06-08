@@ -108,6 +108,7 @@ const App: React.FC = () => {
             };
             
             console.log('App user created:', appUser);
+            console.log('Avatar sources - storedUser:', storedUser?.avatar, 'currentUser:', currentUser?.avatar, 'firebaseUser:', firebaseUser.photoURL, 'final:', appUser.avatar);
             setUser(appUser);
           } else {
             setUser(null);

@@ -19,12 +19,15 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
       const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
       const foundUser = users.find((u: User) => u.id === userId);
       if (foundUser) {
+        console.log('Profile - Found user from localStorage with avatar:', foundUser.avatar);
         setProfileUser(foundUser);
       } else {
         // If not found in localStorage, use current user (for own profile)
+        console.log('Profile - Using current user with avatar:', user.avatar);
         setProfileUser(user);
       }
     } else {
+      console.log('Profile - No userId provided, using current user with avatar:', user.avatar);
       setProfileUser(user);
     }
   }, [userId, user]);

@@ -51,9 +51,19 @@ const Signup: React.FC = () => {
       // Upload profile photo if provided
       let photoURL = 'https://picsum.photos/seed/default/100/100';
       if (profilePhoto) {
-        const storageRef = ref(storage, `profile-photos/${user.uid}`);
-        await uploadBytes(storageRef, profilePhoto);
-        photoURL = await getDownloadURL(storageRef);
+        try {
+          console.log('Uploading profile photo for user:', user.uid);
+          const storageRef = ref(storage, `profile-photos/${user.uid}`);
+          await uploadBytes(storageRef, profilePhoto);
+          photoURL = await getDownloadURL(storageRef);
+          console.log('Profile photo uploaded successfully, URL:', photoURL);
+        } catch (uploadError) {
+          console.error('Error uploading profile photo:', uploadError);
+          // Continue with default avatar if upload fails
+          photoURL = 'https://picsum.photos/seed/default/100/100';
+        }
+      } else {
+        console.log('No profile photo provided, using default avatar');
       }
 
       // Update user profile
@@ -79,6 +89,8 @@ const Signup: React.FC = () => {
         reputation: 0,
       };
 
+      console.log('Saving user to localStorage with avatar:', photoURL);
+      
       // Get existing users from localStorage
       const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
       existingUsers.push(newUser);
@@ -88,6 +100,7 @@ const Signup: React.FC = () => {
       localStorage.setItem('nexus_current_user', JSON.stringify(newUser));
 
       console.log('Signup complete, user data saved:', newUser);
+      console.log('Avatar URL in saved user:', newUser.avatar);
 
       // Navigate to feed with user data in state
       navigate('/', { state: { user: newUser } });
