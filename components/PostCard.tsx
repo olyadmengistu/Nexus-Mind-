@@ -86,8 +86,28 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
               <h4 className="font-bold text-base leading-tight cursor-pointer hover:underline">{post.userName}</h4>
               <span className="text-gray-500 text-sm">•</span>
               <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold uppercase">{post.category}</span>
+              {post.privacy && (
+                <>
+                  <span className="text-gray-500 text-sm">•</span>
+                  <span className="text-gray-500 text-xs">
+                    {post.privacy === 'private' && <i className="fa-solid fa-lock"></i>}
+                    {post.privacy === 'friends' && <i className="fa-solid fa-user-group"></i>}
+                    {post.privacy === 'public' && <i className="fa-solid fa-globe"></i>}
+                  </span>
+                </>
+              )}
             </div>
-            <p className="text-gray-500 text-sm">{formatDate(post.timestamp)} · <i className="fa-solid fa-earth-americas"></i></p>
+            <p className="text-gray-500 text-sm">
+              {post.scheduledTime && post.scheduledTime > Date.now() ? (
+                <>
+                  <i className="fa-solid fa-clock"></i> Scheduled for {formatDate(post.scheduledTime)}
+                </>
+              ) : (
+                <>
+                  {formatDate(post.timestamp)} · <i className="fa-solid fa-earth-americas"></i>
+                </>
+              )}
+            </p>
           </div>
         </div>
         <button className="text-gray-500 hover:bg-gray-100 w-10 h-10 rounded-full transition-colors">
@@ -113,6 +133,16 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
           <div className="flex items-center gap-3 text-base text-gray-600">
             <i className="fa-solid fa-location-dot text-[#F3425E] text-xl"></i>
             <span className="font-medium">{post.location}</span>
+            {post.locationCoordinates && (
+              <a
+                href={`https://www.google.com/maps?q=${post.locationCoordinates.latitude},${post.locationCoordinates.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline text-sm"
+              >
+                <i className="fa-solid fa-external-link"></i> View on map
+              </a>
+            )}
           </div>
         )}
 
@@ -132,6 +162,53 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
       {post.imageUrl && (
         <div className="w-full h-auto border-y border-gray-100">
           <img src={post.imageUrl} className="w-full object-cover max-h-[500px]" alt="Post Content" />
+        </div>
+      )}
+
+      {/* Video */}
+      {post.videoUrl && (
+        <div className="w-full h-auto border-y border-gray-100">
+          <video src={post.videoUrl} controls className="w-full max-h-[500px]" />
+        </div>
+      )}
+
+      {/* GIF */}
+      {post.gifUrl && (
+        <div className="w-full h-auto border-y border-gray-100">
+          <img src={post.gifUrl} className="w-full object-cover max-h-[500px]" alt="GIF Content" />
+        </div>
+      )}
+
+      {/* Poll */}
+      {post.poll && (
+        <div className="px-4 py-3 border-y border-gray-100">
+          <h4 className="font-semibold mb-3">{post.poll.question}</h4>
+          <div className="space-y-2">
+            {post.poll.options.map((option) => {
+              const totalVotes = post.poll!.options.reduce((sum, opt) => sum + opt.votes, 0);
+              const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
+              return (
+                <button
+                  key={option.id}
+                  className="w-full text-left p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors relative overflow-hidden"
+                >
+                  <div 
+                    className="absolute inset-0 bg-blue-100 transition-all"
+                    style={{ width: `${percentage}%` }}
+                  ></div>
+                  <div className="relative flex justify-between items-center">
+                    <span className="font-medium">{option.text}</span>
+                    <span className="text-sm text-gray-600">{percentage}% ({option.votes} votes)</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+          {post.poll.expiresAt && (
+            <p className="text-xs text-gray-500 mt-2">
+              Poll expires {formatDate(post.poll.expiresAt)}
+            </p>
+          )}
         </div>
       )}
 

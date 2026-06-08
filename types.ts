@@ -30,6 +30,18 @@ export interface Solution {
   replies: SolutionReply[];
 }
 
+export interface PollOption {
+  id: string;
+  text: string;
+  votes: number;
+}
+
+export interface Poll {
+  question: string;
+  options: PollOption[];
+  expiresAt?: number;
+}
+
 export interface Post {
   id: string;
   userId: string;
@@ -39,6 +51,8 @@ export interface Post {
   title: string;
   content: string;
   imageUrl?: string;
+  videoUrl?: string;
+  gifUrl?: string;
   timestamp: number;
   votes: number;
   solutions: Solution[];
@@ -46,6 +60,13 @@ export interface Post {
   taggedUsers?: string[];
   emoji?: string;
   location?: string;
+  locationCoordinates?: {
+    latitude: number;
+    longitude: number;
+  };
+  poll?: Poll;
+  scheduledTime?: number;
+  privacy?: 'public' | 'friends' | 'private';
 }
 
 export interface Story {
