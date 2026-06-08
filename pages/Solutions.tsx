@@ -171,10 +171,10 @@ const Solutions: React.FC<SolutionsProps> = ({ user, posts }) => {
                     <div className="flex items-center gap-4 mt-3">
                       <button 
                         onClick={() => handleHelpful(solution.id)}
-                        className="flex items-center gap-1 text-gray-500 hover:text-green-600 transition-colors"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full text-gray-500 hover:text-green-600 hover:bg-green-50 transition-all duration-300 hover:scale-110 active:scale-95"
                       >
                         <i className="fa-regular fa-thumbs-up text-sm"></i>
-                        <span className="text-sm">Helpful {solution.helpful}</span>
+                        <span className="text-sm font-medium">Helpful {solution.helpful}</span>
                       </button>
                       <button 
                         onClick={() => setReplyingTo(solution.id)}
