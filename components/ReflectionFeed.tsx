@@ -51,21 +51,25 @@ const ReflectionFeed: React.FC<ReflectionFeedProps> = ({ reflections, currentUse
             </span>
           </div>
 
-          {/* Content */}
+          {/* Content and Image */}
           <div className="p-4">
-            <p className="text-gray-800 whitespace-pre-wrap">{reflection.content}</p>
+            {reflection.imageUrl ? (
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <p className="text-gray-800 whitespace-pre-wrap">{reflection.content}</p>
+                </div>
+                <div className="flex-shrink-0">
+                  <img 
+                    src={reflection.imageUrl} 
+                    alt="Reflection image" 
+                    className="w-48 h-48 object-cover rounded-lg"
+                  />
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-800 whitespace-pre-wrap">{reflection.content}</p>
+            )}
           </div>
-
-          {/* Image */}
-          {reflection.imageUrl && (
-            <div className="w-full">
-              <img 
-                src={reflection.imageUrl} 
-                alt="Reflection image" 
-                className="w-full max-h-[500px] object-cover"
-              />
-            </div>
-          )}
 
           {/* Actions */}
           <div className="flex items-center gap-4 p-4 border-t border-gray-100">

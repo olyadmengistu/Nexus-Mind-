@@ -104,20 +104,24 @@ const ReflectionDetail: React.FC<ReflectionDetailProps> = ({ reflection, current
           </div>
         )}
 
-        {/* Image */}
-        {reflection.imageUrl && (
-          <div className="w-full">
-            <img 
-              src={reflection.imageUrl} 
-              alt="Reflection" 
-              className="w-full max-h-[500px] object-cover"
-            />
-          </div>
-        )}
-
-        {/* Content */}
+        {/* Content and Image */}
         <div className="p-4">
-          <p className="text-gray-800 whitespace-pre-wrap">{reflection.content}</p>
+          {reflection.imageUrl ? (
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <p className="text-gray-800 whitespace-pre-wrap">{reflection.content}</p>
+              </div>
+              <div className="flex-shrink-0">
+                <img 
+                  src={reflection.imageUrl} 
+                  alt="Reflection" 
+                  className="w-64 h-64 object-cover rounded-lg"
+                />
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-800 whitespace-pre-wrap">{reflection.content}</p>
+          )}
         </div>
 
         {/* Actions */}
