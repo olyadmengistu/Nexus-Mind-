@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Notification } from '../types';
+import { searchUsers, debounce } from '../lib/searchApi';
 
 interface NavbarProps {
   user: User;
@@ -13,25 +14,37 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce(async (query: string) => {
+      if (query.trim()) {
+        setIsSearching(true);
+        try {
+          const response = await searchUsers({ query, limit: 10 });
+          setSearchResults(response.data);
+          setShowResults(true);
+        } catch (error) {
+          console.error('Search error:', error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+        setShowResults(false);
+      }
+    }, 300),
+    []
+  );
+
   useEffect(() => {
-    if (searchQuery.trim()) {
-      const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-      const query = searchQuery.toLowerCase();
-      const results = users.filter((u: User) =>
-        u.name.toLowerCase().includes(query) ||
-        u.username.toLowerCase().includes(query)
-      );
-      setSearchResults(results);
-      setShowResults(true);
-    } else {
-      setSearchResults([]);
-      setShowResults(false);
-    }
-  }, [searchQuery]);
+    debouncedSearch(searchQuery);
+  }, [searchQuery, debouncedSearch]);
 
   // Log avatar URL for debugging
   useEffect(() => {
@@ -91,28 +104,39 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
             onFocus={() => searchQuery && setShowResults(true)}
             className="bg-[#F0F2F5] pl-12 pr-5 py-3 rounded-full w-[280px] focus:outline-none focus:ring-2 focus:ring-[#1877F2] text-base"
           />
-          {showResults && searchResults.length > 0 && (
+          {showResults && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 max-h-80 overflow-y-auto z-50">
-              {searchResults.map((resultUser) => (
-                <Link
-                  key={resultUser.id}
-                  to={`/profile/${resultUser.id}`}
-                  className="flex items-center gap-4 p-4 hover:bg-gray-100 transition-colors"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setShowResults(false);
-                  }}
-                >
-                  <img
-                    src={resultUser.avatar}
-                    alt={resultUser.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="font-bold text-base">{resultUser.name}</p>
-                  </div>
-                </Link>
-              ))}
+              {isSearching ? (
+                <div className="p-4 text-center text-gray-500">
+                  <i className="fa-solid fa-spinner fa-spin mr-2"></i>Searching...
+                </div>
+              ) : searchResults.length > 0 ? (
+                searchResults.map((resultUser) => (
+                  <Link
+                    key={resultUser.id}
+                    to={`/profile/${resultUser.id}`}
+                    className="flex items-center gap-4 p-4 hover:bg-gray-100 transition-colors"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setShowResults(false);
+                    }}
+                  >
+                    <img
+                      src={resultUser.avatar}
+                      alt={resultUser.name}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-bold text-base">{resultUser.name}</p>
+                      <p className="text-sm text-gray-500">@{resultUser.username}</p>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="p-4 text-center text-gray-500">
+                  No users found
+                </div>
+              )}
             </div>
           )}
         </div>

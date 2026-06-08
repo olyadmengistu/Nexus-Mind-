@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User, Collaboration, CollaborationApplicant } from '../types';
+import { searchCollaborations, debounce } from '../lib/searchApi';
 
 interface CollaborateProps {
   user: User;
@@ -11,6 +12,8 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [filteredCollaborations, setFilteredCollaborations] = useState<Collaboration[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedCollaboration, setSelectedCollaboration] = useState<Collaboration | null>(null);
   const [applicationMessage, setApplicationMessage] = useState('');
@@ -104,13 +107,41 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
     setCollaborations(sampleCollaborations);
   }, []);
 
-  const filteredCollaborations = collaborations.filter(collab => {
-    const matchesCategory = selectedCategory === 'All' || collab.category === selectedCategory;
-    const matchesType = selectedType === 'All' || collab.type === selectedType;
-    const matchesSearch = collab.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         collab.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesType && matchesSearch;
-  });
+  // Debounced search function for collaborations
+  const debouncedCollaborationSearch = useCallback(
+    debounce(async (query: string, category: string, type: string) => {
+      if (query.trim() || category !== 'All' || type !== 'All') {
+        setIsSearching(true);
+        try {
+          const response = await searchCollaborations({ 
+            query, 
+            category: category === 'All' ? undefined : category, 
+            type: type === 'All' ? undefined : type,
+            limit: 50
+          });
+          setFilteredCollaborations(response.data);
+        } catch (error) {
+          console.error('Collaboration search error:', error);
+          setFilteredCollaborations([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setFilteredCollaborations(collaborations);
+      }
+    }, 300),
+    [collaborations]
+  );
+
+  // Trigger search when search parameters change
+  useEffect(() => {
+    debouncedCollaborationSearch(searchQuery, selectedCategory, selectedType);
+  }, [searchQuery, selectedCategory, selectedType, debouncedCollaborationSearch]);
+
+  // Initialize filteredCollaborations with all collaborations on mount
+  useEffect(() => {
+    setFilteredCollaborations(collaborations);
+  }, [collaborations]);
 
   const handleApply = (collabId: string) => {
     if (!applicationMessage.trim()) return;
@@ -325,6 +356,9 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1877F2]"
               />
+              {isSearching && (
+                <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              )}
             </div>
             <div className="flex gap-2 flex-wrap">
               {categories.map(category => (
@@ -363,7 +397,12 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
 
           {/* Collaborations Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredCollaborations.map(collab => (
+            {isSearching ? (
+              <div className="col-span-full text-center py-12 text-gray-500">
+                <i className="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
+                <p>Searching opportunities...</p>
+              </div>
+            ) : filteredCollaborations.length > 0 ? filteredCollaborations.map(collab => (
               <div
                 key={collab.id}
                 className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer"
@@ -407,6 +446,12 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
                 )}
               </div>
             ))}
+            ) : (
+              <div className="col-span-full text-center py-12 text-gray-500">
+                <i className="fa-solid fa-search text-4xl mb-4"></i>
+                <p>No opportunities found. Try adjusting your search or filters.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

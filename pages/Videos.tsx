@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User, Video, Meeting } from '../types';
+import { searchVideos, debounce } from '../lib/searchApi';
 
 interface VideosProps {
   user: User;
@@ -39,6 +40,8 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState<'recent' | 'views' | 'likes'>('recent');
+  const [isSearching, setIsSearching] = useState(false);
+  const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
   
   // Comments state
   const [comments, setComments] = useState<Record<string, Array<{
@@ -444,24 +447,44 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
     });
   };
   
-  // Filter and sort videos
-  const filteredVideos = videos
-    .filter(video => {
-      const matchesSearch = video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           video.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           video.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesCategory = selectedCategory === 'All' || video.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'recent') return b.timestamp - a.timestamp;
-      if (sortBy === 'views') return b.views - a.views;
-      if (sortBy === 'likes') return b.likes - a.likes;
-      return 0;
-    });
-  
   // Get unique categories
   const categories = ['All', ...Array.from(new Set(videos.map(v => v.category)))];
+
+  // Debounced search function for videos
+  const debouncedVideoSearch = useCallback(
+    debounce(async (query: string, category: string, sort: 'recent' | 'views' | 'likes') => {
+      if (query.trim() || category !== 'All' || sort !== 'recent') {
+        setIsSearching(true);
+        try {
+          const response = await searchVideos({ 
+            query, 
+            category: category === 'All' ? undefined : category, 
+            sortBy: sort,
+            limit: 50
+          });
+          setFilteredVideos(response.data);
+        } catch (error) {
+          console.error('Video search error:', error);
+          setFilteredVideos([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setFilteredVideos(videos);
+      }
+    }, 300),
+    [videos]
+  );
+
+  // Trigger search when search parameters change
+  useEffect(() => {
+    debouncedVideoSearch(searchQuery, selectedCategory, sortBy);
+  }, [searchQuery, selectedCategory, sortBy, debouncedVideoSearch]);
+
+  // Initialize filteredVideos with all videos on mount
+  useEffect(() => {
+    setFilteredVideos(videos);
+  }, [videos]);
 
   return (
     <div className="max-w-7xl mx-auto p-4">
@@ -498,6 +521,9 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
                   className="w-full px-4 py-2 pl-10 border rounded-lg"
                 />
                 <i className="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                {isSearching && (
+                  <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                )}
               </div>
             </div>
             <div className="flex gap-2">

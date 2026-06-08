@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User, Group, GroupPost, GroupComment } from '../types';
+import { searchGroups, debounce } from '../lib/searchApi';
 
 interface GroupsProps {
   user: User;
@@ -11,6 +12,8 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [filteredGroups, setFilteredGroups] = useState<Group[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newPostContent, setNewPostContent] = useState('');
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
@@ -131,12 +134,40 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
     setGroups(sampleGroups);
   }, []);
 
-  const filteredGroups = groups.filter(group => {
-    const matchesCategory = selectedCategory === 'All' || group.category === selectedCategory;
-    const matchesSearch = group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         group.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Debounced search function for groups
+  const debouncedGroupSearch = useCallback(
+    debounce(async (query: string, category: string) => {
+      if (query.trim() || category !== 'All') {
+        setIsSearching(true);
+        try {
+          const response = await searchGroups({ 
+            query, 
+            category: category === 'All' ? undefined : category,
+            limit: 50
+          });
+          setFilteredGroups(response.data);
+        } catch (error) {
+          console.error('Group search error:', error);
+          setFilteredGroups([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setFilteredGroups(groups);
+      }
+    }, 300),
+    [groups]
+  );
+
+  // Trigger search when search parameters change
+  useEffect(() => {
+    debouncedGroupSearch(searchQuery, selectedCategory);
+  }, [searchQuery, selectedCategory, debouncedGroupSearch]);
+
+  // Initialize filteredGroups with all groups on mount
+  useEffect(() => {
+    setFilteredGroups(groups);
+  }, [groups]);
 
   const handleJoinGroup = (groupId: string) => {
     setGroups(groups.map(g => 
@@ -404,6 +435,9 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1877F2]"
               />
+              {isSearching && (
+                <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              )}
             </div>
             <div className="flex gap-2 flex-wrap">
               {categories.map(category => (
@@ -424,7 +458,12 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
 
           {/* Groups Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredGroups.map(group => (
+            {isSearching ? (
+              <div className="col-span-full text-center py-12 text-gray-500">
+                <i className="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
+                <p>Searching groups...</p>
+              </div>
+            ) : filteredGroups.length > 0 ? filteredGroups.map(group => (
               <div
                 key={group.id}
                 className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
@@ -456,6 +495,12 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
                 </div>
               </div>
             ))}
+            ) : (
+              <div className="col-span-full text-center py-12 text-gray-500">
+                <i className="fa-solid fa-search text-4xl mb-4"></i>
+                <p>No groups found. Try adjusting your search or filters.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User, Product, CartItem, Order } from '../types';
+import { searchProducts, debounce } from '../lib/searchApi';
 
 interface MarketplaceProps {
   user: User;
@@ -12,6 +13,8 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [showProductModal, setShowProductModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -142,12 +145,40 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
     setOrders(sampleOrders);
   }, [user.id]);
 
-  const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-    const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Debounced search function for products
+  const debouncedProductSearch = useCallback(
+    debounce(async (query: string, category: string) => {
+      if (query.trim() || category !== 'All') {
+        setIsSearching(true);
+        try {
+          const response = await searchProducts({ 
+            query, 
+            category: category === 'All' ? undefined : category,
+            limit: 50
+          });
+          setFilteredProducts(response.data);
+        } catch (error) {
+          console.error('Product search error:', error);
+          setFilteredProducts([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setFilteredProducts(products);
+      }
+    }, 300),
+    [products]
+  );
+
+  // Trigger search when search parameters change
+  useEffect(() => {
+    debouncedProductSearch(searchQuery, selectedCategory);
+  }, [searchQuery, selectedCategory, debouncedProductSearch]);
+
+  // Initialize filteredProducts with all products on mount
+  useEffect(() => {
+    setFilteredProducts(products);
+  }, [products]);
 
   const addToCart = (product: Product) => {
     const existingItem = cart.find(item => item.product.id === product.id);
@@ -267,6 +298,9 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1877F2]"
               />
+              {isSearching && (
+                <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+              )}
             </div>
             <div className="flex gap-2 flex-wrap">
               {categories.map(category => (
@@ -287,7 +321,12 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
 
           {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredProducts.map(product => (
+            {isSearching ? (
+              <div className="col-span-full text-center py-12 text-gray-500">
+                <i className="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
+                <p>Searching products...</p>
+              </div>
+            ) : filteredProducts.length > 0 ? filteredProducts.map(product => (
               <div key={product.id} className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-square bg-gray-200">
                   <img src={product.images[0]} className="w-full h-full object-cover" alt={product.title} />
@@ -320,6 +359,12 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
                 </div>
               </div>
             ))}
+            ) : (
+              <div className="col-span-full text-center py-12 text-gray-500">
+                <i className="fa-solid fa-search text-4xl mb-4"></i>
+                <p>No products found. Try adjusting your search or filters.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

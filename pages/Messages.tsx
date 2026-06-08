@@ -1,6 +1,7 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { User, Message, Conversation } from '../types';
+import { searchConversations, debounce } from '../lib/searchApi';
 
 interface MessagesProps {
   user: User;
@@ -10,6 +11,8 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [filteredConversations, setFilteredConversations] = useState<Conversation[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [showChatInfo, setShowChatInfo] = useState(false);
@@ -106,11 +109,36 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
     return conversation.participants.find(p => p.id !== user.id) || conversation.participants[0];
   };
 
-  const filteredConversations = conversations.filter(conv => {
-    const otherUser = getOtherParticipant(conv);
-    return otherUser.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           otherUser.username.toLowerCase().includes(searchQuery.toLowerCase());
-  });
+  // Debounced search function for conversations
+  const debouncedConversationSearch = useCallback(
+    debounce(async (query: string) => {
+      if (query.trim()) {
+        setIsSearching(true);
+        try {
+          const response = await searchConversations({ query, limit: 50 });
+          setFilteredConversations(response.data);
+        } catch (error) {
+          console.error('Conversation search error:', error);
+          setFilteredConversations([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setFilteredConversations(conversations);
+      }
+    }, 300),
+    [conversations]
+  );
+
+  // Trigger search when search query changes
+  useEffect(() => {
+    debouncedConversationSearch(searchQuery);
+  }, [searchQuery, debouncedConversationSearch]);
+
+  // Initialize filteredConversations with all conversations on mount
+  useEffect(() => {
+    setFilteredConversations(conversations);
+  }, [conversations]);
 
   const selectedConversation = conversations.find(c => c.id === selectedChat);
   const otherUser = selectedConversation ? getOtherParticipant(selectedConversation) : null;
@@ -206,6 +234,9 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
                onChange={(e) => setSearchQuery(e.target.value)}
                className="w-full bg-gray-100 pl-10 pr-4 py-2 rounded-full outline-none"
              />
+             {isSearching && (
+               <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+             )}
            </div>
         </div>
         <div className="flex-1 overflow-y-auto">
