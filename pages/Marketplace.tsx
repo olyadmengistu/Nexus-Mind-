@@ -358,8 +358,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
                   </button>
                 </div>
               </div>
-            ))}
-            ) : (
+            )) : (
               <div className="col-span-full text-center py-12 text-gray-500">
                 <i className="fa-solid fa-search text-4xl mb-4"></i>
                 <p>No products found. Try adjusting your search or filters.</p>

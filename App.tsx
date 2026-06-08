@@ -11,6 +11,7 @@ import Notifications from './pages/Notifications';
 import Loading from './pages/Loading';
 import Solutions from './pages/Solutions';
 import Videos from './pages/Videos';
+import LiveStreams from './pages/LiveStreams';
 import Marketplace from './pages/Marketplace';
 import Groups from './pages/Groups';
 import Collaborate from './pages/Collaborate';
@@ -207,6 +208,10 @@ const App: React.FC = () => {
             <Route 
               path="/videos" 
               element={user ? <Videos user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/livestreams" 
+              element={user ? <LiveStreams user={user} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/marketplace" 

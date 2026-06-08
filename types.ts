@@ -117,6 +117,52 @@ export interface Meeting {
   meetingUrl: string;
 }
 
+export interface LiveStream {
+  id: string;
+  streamerId: string;
+  streamerName: string;
+  streamerAvatar: string;
+  title: string;
+  description: string;
+  thumbnail: string;
+  streamUrl: string;
+  streamKey: string;
+  category: string;
+  tags: string[];
+  viewers: number;
+  likes: number;
+  status: 'offline' | 'live' | 'scheduled';
+  scheduledTime?: number;
+  startedAt?: number;
+  endedAt?: number;
+  duration?: number;
+  isRecording: boolean;
+  allowChat: boolean;
+  isPrivate: boolean;
+  maxViewers?: number;
+  timestamp: number;
+}
+
+export interface LiveChatMessage {
+  id: string;
+  streamId: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  text: string;
+  timestamp: number;
+  isModerator: boolean;
+  isStreamer: boolean;
+}
+
+export interface StreamViewer {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  joinedAt: number;
+}
+
 // Marketplace Types
 export interface Product {
   id: string;
