@@ -49,7 +49,7 @@ const Signup: React.FC = () => {
       const user = userCredential.user;
 
       // Upload profile photo if provided
-      let photoURL = 'https://via.placeholder.com/40';
+      let photoURL = 'https://picsum.photos/seed/default/100/100';
       if (profilePhoto) {
         const storageRef = ref(storage, `profile-photos/${user.uid}`);
         await uploadBytes(storageRef, profilePhoto);

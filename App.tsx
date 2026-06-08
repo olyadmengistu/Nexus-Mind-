@@ -103,7 +103,7 @@ const App: React.FC = () => {
               name: storedUser?.name || currentUser?.name || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
               username: storedUser?.username || currentUser?.username || firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
               email: firebaseUser.email || '',
-              avatar: storedUser?.avatar || currentUser?.avatar || firebaseUser.photoURL || 'https://via.placeholder.com/40',
+              avatar: storedUser?.avatar || currentUser?.avatar || firebaseUser.photoURL || 'https://picsum.photos/seed/default/100/100',
               reputation: storedUser?.reputation || currentUser?.reputation || 0,
             };
             
