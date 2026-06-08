@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import LeftSidebar from './LeftSidebar';
 import RightSidebar from './RightSidebar';
 import StoryCarousel from './StoryCarousel';
@@ -37,9 +38,9 @@ const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote }) => {
             </button>
           </div>
           <div className="border-t border-gray-100 pt-4 flex items-center justify-around">
-            <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-3 rounded-xl text-[#65676B] font-bold text-base">
+            <Link to="/livestreams" className="flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-3 rounded-xl text-[#65676B] font-bold text-base">
               <i className="fa-solid fa-video text-[#F3425E] text-xl"></i> Live Video
-            </button>
+            </Link>
             <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-3 rounded-xl text-[#65676B] font-bold text-base">
               <i className="fa-solid fa-images text-[#45BD62] text-xl"></i> Photo/video
             </button>

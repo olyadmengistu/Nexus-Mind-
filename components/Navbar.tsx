@@ -81,7 +81,6 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   const navItems = [
     { icon: 'fa-house', path: '/', label: 'Home' },
     { icon: 'fa-video', path: '/videos', label: 'Videos' },
-    { icon: 'fa-broadcast-tower', path: '/livestreams', label: 'Live' },
     { icon: 'fa-store', path: '/marketplace', label: 'Marketplace' },
     { icon: 'fa-users-viewfinder', path: '/groups', label: 'Groups' },
     { icon: 'fa-handshake', path: '/collaborate', label: 'Collaborate' }
