@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile, reload } from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { auth, storage } from '../firebase';
+import { auth } from '../firebase';
 import { User } from '../types';
 
 const Signup: React.FC = () => {
@@ -32,7 +31,8 @@ const Signup: React.FC = () => {
       setProfilePhoto(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
+        const base64String = reader.result as string;
+        setPhotoPreview(base64String);
       };
       reader.readAsDataURL(file);
     }
@@ -48,30 +48,27 @@ const Signup: React.FC = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Upload profile photo if provided
+      // Use base64 for profile photo if provided
       let photoURL = 'https://picsum.photos/seed/default/100/100';
-      if (profilePhoto) {
-        try {
-          console.log('Uploading profile photo for user:', user.uid);
-          const storageRef = ref(storage, `profile-photos/${user.uid}`);
-          await uploadBytes(storageRef, profilePhoto);
-          photoURL = await getDownloadURL(storageRef);
-          console.log('Profile photo uploaded successfully, URL:', photoURL);
-        } catch (uploadError) {
-          console.error('Error uploading profile photo:', uploadError);
-          // Continue with default avatar if upload fails
-          photoURL = 'https://picsum.photos/seed/default/100/100';
-        }
+      if (photoPreview) {
+        photoURL = photoPreview;
+        console.log('Using base64 profile photo');
       } else {
         console.log('No profile photo provided, using default avatar');
       }
 
       // Update user profile
       const displayName = `${firstName} ${lastName}`;
-      await updateProfile(user, {
-        displayName,
-        photoURL
-      });
+      try {
+        await updateProfile(user, {
+          displayName,
+          photoURL
+        });
+        console.log('Firebase profile updated with photoURL');
+      } catch (profileError) {
+        console.error('Error updating Firebase profile (base64 might be too large):', profileError);
+        // Continue anyway since we'll use localStorage
+      }
 
       // Force reload to ensure profile updates are picked up by the auth state listener
       await reload(user);
@@ -89,7 +86,7 @@ const Signup: React.FC = () => {
         reputation: 0,
       };
 
-      console.log('Saving user to localStorage with avatar:', photoURL);
+      console.log('Saving user to localStorage with avatar (base64):', photoURL.substring(0, 50) + '...');
       
       // Get existing users from localStorage
       const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
@@ -99,8 +96,8 @@ const Signup: React.FC = () => {
       // Also save current user directly for immediate access
       localStorage.setItem('nexus_current_user', JSON.stringify(newUser));
 
-      console.log('Signup complete, user data saved:', newUser);
-      console.log('Avatar URL in saved user:', newUser.avatar);
+      console.log('Signup complete, user data saved');
+      console.log('Avatar length:', newUser.avatar.length, 'characters');
 
       // Navigate to feed with user data in state
       navigate('/', { state: { user: newUser } });
