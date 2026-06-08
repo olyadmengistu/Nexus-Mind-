@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Contact } from '../types';
+import { Contact, SponsoredContent } from '../types';
 
 const RightSidebar: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([
@@ -14,6 +14,44 @@ const RightSidebar: React.FC = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [sponsoredItems, setSponsoredItems] = useState<SponsoredContent[]>([
+    {
+      id: '1',
+      title: 'Solved: Global Warming?',
+      description: 'Join the global initiative to combat climate change through innovative solutions',
+      imageUrl: 'https://picsum.photos/seed/ad1/150/150',
+      sponsorName: 'nexusmind.org',
+      sponsorUrl: 'https://nexusmind.org',
+      category: 'Environment',
+      ctaText: 'Learn More',
+      ctaUrl: 'https://nexusmind.org/climate',
+      startDate: Date.now(),
+      endDate: Date.now() + 30 * 24 * 60 * 60 * 1000,
+      clicks: 1250,
+      impressions: 15000,
+      isSaved: false,
+      tags: ['climate', 'environment', 'innovation']
+    },
+    {
+      id: '2',
+      title: 'New Startup Grant 2024',
+      description: 'Apply for $50,000 in funding for your innovative startup idea',
+      imageUrl: 'https://picsum.photos/seed/ad2/150/150',
+      sponsorName: 'grants.com',
+      sponsorUrl: 'https://grants.com',
+      category: 'Business',
+      ctaText: 'Apply Now',
+      ctaUrl: 'https://grants.com/apply',
+      startDate: Date.now(),
+      endDate: Date.now() + 60 * 24 * 60 * 60 * 1000,
+      clicks: 890,
+      impressions: 12000,
+      isSaved: false,
+      tags: ['startup', 'funding', 'business']
+    }
+  ]);
+  const [selectedSponsored, setSelectedSponsored] = useState<SponsoredContent | null>(null);
+  const [showSponsoredModal, setShowSponsoredModal] = useState(false);
 
   // Filter contacts based on search query
   const filteredContacts = contacts.filter(contact =>
@@ -64,26 +102,137 @@ const RightSidebar: React.FC = () => {
     setShowMenu(false);
   };
 
+  // Handle sponsored item click - track click and open details
+  const handleSponsoredClick = (item: SponsoredContent) => {
+    console.log('Sponsored item clicked:', item.title);
+    // TODO: Backend integration - track click analytics
+    // Increment click count in backend
+    setSponsoredItems(prev => prev.map(sponsored => 
+      sponsored.id === item.id 
+        ? { ...sponsored, clicks: sponsored.clicks + 1 }
+        : sponsored
+    ));
+    setSelectedSponsored(item);
+    setShowSponsoredModal(true);
+  };
+
+  // Handle sponsored CTA click
+  const handleSponsoredCTA = (item: SponsoredContent) => {
+    console.log('Sponsored CTA clicked:', item.title, item.ctaUrl);
+    // TODO: Backend integration - track CTA click and redirect
+    if (item.ctaUrl) {
+      window.open(item.ctaUrl, '_blank');
+    }
+  };
+
+  // Handle save sponsored item
+  const handleSaveSponsored = (item: SponsoredContent) => {
+    console.log('Saving sponsored item:', item.title);
+    // TODO: Backend integration - save to user's saved items
+    setSponsoredItems(prev => prev.map(sponsored => 
+      sponsored.id === item.id 
+        ? { ...sponsored, isSaved: !sponsored.isSaved }
+        : sponsored
+    ));
+    alert(`${item.isSaved ? 'Removed from' : 'Added to'} saved items - Backend integration ready`);
+  };
+
+  // Handle share sponsored item
+  const handleShareSponsored = (item: SponsoredContent) => {
+    console.log('Sharing sponsored item:', item.title);
+    // TODO: Backend integration - share functionality
+    if (navigator.share) {
+      navigator.share({
+        title: item.title,
+        text: item.description,
+        url: item.sponsorUrl
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(`${item.title} - ${item.sponsorUrl}`);
+      alert('Link copied to clipboard - Backend integration ready');
+    }
+  };
+
+  // Handle report sponsored item
+  const handleReportSponsored = (item: SponsoredContent) => {
+    console.log('Reporting sponsored item:', item.title);
+    // TODO: Backend integration - report inappropriate content
+    const reason = prompt('Please provide a reason for reporting this sponsored content:');
+    if (reason) {
+      alert(`Report submitted for "${item.title}" - Backend integration ready`);
+    }
+  };
+
+  // Handle view sponsor profile
+  const handleViewSponsor = (item: SponsoredContent) => {
+    console.log('Viewing sponsor:', item.sponsorName);
+    // TODO: Backend integration - navigate to sponsor profile
+    window.open(item.sponsorUrl, '_blank');
+  };
+
   return (
     <aside className="fixed right-0 top-[56px] bottom-0 w-[300px] overflow-y-auto hidden xl:block p-4">
       {/* Sponsored */}
       <section className="mb-6">
         <h3 className="text-gray-500 font-bold text-lg mb-3">Sponsored</h3>
         <div className="space-y-4">
-          <div className="flex items-center gap-4 cursor-pointer hover:bg-gray-200 p-3 rounded-xl transition-colors">
-            <img src="https://picsum.photos/seed/ad1/150/150" className="w-[120px] h-[120px] object-cover rounded-lg" alt="Ad" />
-            <div>
-              <p className="font-bold text-base">Solved: Global Warming?</p>
-              <p className="text-sm text-gray-500">nexusmind.org</p>
+          {sponsoredItems.map((item) => (
+            <div 
+              key={item.id} 
+              className="relative group"
+            >
+              <div 
+                className="flex items-center gap-4 cursor-pointer hover:bg-gray-200 p-3 rounded-xl transition-colors"
+                onClick={() => handleSponsoredClick(item)}
+              >
+                <img src={item.imageUrl} className="w-[120px] h-[120px] object-cover rounded-lg" alt={item.title} />
+                <div className="flex-1">
+                  <p className="font-bold text-base">{item.title}</p>
+                  <p className="text-sm text-gray-500">{item.sponsorName}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{item.category}</span>
+                    {item.isSaved && (
+                      <i className="fa-solid fa-bookmark text-blue-500 text-xs"></i>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {/* Action buttons on hover */}
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white rounded-lg shadow-md p-1">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSaveSponsored(item);
+                  }}
+                  className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
+                  title={item.isSaved ? 'Remove from saved' : 'Save'}
+                >
+                  <i className={`fa-solid fa-bookmark ${item.isSaved ? 'text-blue-500' : 'text-gray-500'} text-sm`}></i>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleShareSponsored(item);
+                  }}
+                  className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
+                  title="Share"
+                >
+                  <i className="fa-solid fa-share text-gray-500 text-sm"></i>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleReportSponsored(item);
+                  }}
+                  className="p-1.5 hover:bg-gray-100 rounded-md transition-colors"
+                  title="Report"
+                >
+                  <i className="fa-solid fa-flag text-gray-500 text-sm"></i>
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-4 cursor-pointer hover:bg-gray-200 p-3 rounded-xl transition-colors">
-            <img src="https://picsum.photos/seed/ad2/150/150" className="w-[120px] h-[120px] object-cover rounded-lg" alt="Ad" />
-            <div>
-              <p className="font-bold text-base">New Startup Grant 2024</p>
-              <p className="text-sm text-gray-500">grants.com</p>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -206,6 +355,86 @@ const RightSidebar: React.FC = () => {
           )}
         </div>
       </section>
+
+      {/* Sponsored Detail Modal */}
+      {showSponsoredModal && selectedSponsored && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="relative">
+              <img 
+                src={selectedSponsored.imageUrl} 
+                alt={selectedSponsored.title} 
+                className="w-full h-48 object-cover rounded-t-2xl"
+              />
+              <button
+                onClick={() => setShowSponsoredModal(false)}
+                className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition-colors"
+              >
+                <i className="fa-solid fa-xmark text-gray-700"></i>
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold mb-1">{selectedSponsored.title}</h2>
+                  <p 
+                    className="text-blue-600 hover:underline cursor-pointer text-sm"
+                    onClick={() => handleViewSponsor(selectedSponsored)}
+                  >
+                    {selectedSponsored.sponsorName}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleSaveSponsored(selectedSponsored)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  title={selectedSponsored.isSaved ? 'Remove from saved' : 'Save'}
+                >
+                  <i className={`fa-solid fa-bookmark ${selectedSponsored.isSaved ? 'text-blue-500' : 'text-gray-500'} text-xl`}></i>
+                </button>
+              </div>
+              
+              <p className="text-gray-700 mb-4">{selectedSponsored.description}</p>
+              
+              <div className="flex flex-wrap gap-2 mb-4">
+                <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">{selectedSponsored.category}</span>
+                {selectedSponsored.tags?.map((tag, idx) => (
+                  <span key={idx} className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full">#{tag}</span>
+                ))}
+              </div>
+              
+              <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
+                <span><i className="fa-solid fa-eye mr-1"></i>{selectedSponsored.impressions.toLocaleString()} views</span>
+                <span><i className="fa-solid fa-mouse-pointer mr-1"></i>{selectedSponsored.clicks.toLocaleString()} clicks</span>
+              </div>
+              
+              <div className="flex gap-3">
+                {selectedSponsored.ctaText && selectedSponsored.ctaUrl && (
+                  <button
+                    onClick={() => handleSponsoredCTA(selectedSponsored)}
+                    className="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition-colors"
+                  >
+                    {selectedSponsored.ctaText}
+                  </button>
+                )}
+                <button
+                  onClick={() => handleShareSponsored(selectedSponsored)}
+                  className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                  title="Share"
+                >
+                  <i className="fa-solid fa-share text-gray-700"></i>
+                </button>
+                <button
+                  onClick={() => handleReportSponsored(selectedSponsored)}
+                  className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors"
+                  title="Report"
+                >
+                  <i className="fa-solid fa-flag text-gray-700"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 };

@@ -245,3 +245,22 @@ export interface Contact {
   email?: string;
   phone?: string;
 }
+
+// Sponsored Content Types
+export interface SponsoredContent {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  sponsorName: string;
+  sponsorUrl: string;
+  category: string;
+  ctaText?: string;
+  ctaUrl?: string;
+  startDate: number;
+  endDate: number;
+  clicks: number;
+  impressions: number;
+  isSaved: boolean;
+  tags?: string[];
+}
