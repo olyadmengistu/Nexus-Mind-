@@ -7,6 +7,23 @@ export interface User {
   avatar: string;
   reputation: number;
   bio?: string;
+  savedItems?: SavedItem[];
+  education?: string;
+  location?: string;
+  work?: string;
+  expertise?: string[];
+}
+
+export interface SavedItem {
+  id: string;
+  userId: string;
+  itemType: 'post' | 'solution' | 'video' | 'product' | 'group' | 'collaboration' | 'stream';
+  itemId: string;
+  title: string;
+  description?: string;
+  thumbnail?: string;
+  url?: string;
+  timestamp: number;
 }
 
 export interface SolutionReply {
