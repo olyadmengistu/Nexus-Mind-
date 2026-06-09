@@ -12,6 +12,7 @@ export interface User {
   location?: string;
   work?: string;
   expertise?: string[];
+  coverPhoto?: string;
 }
 
 export interface SavedItem {

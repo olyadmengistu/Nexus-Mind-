@@ -25,6 +25,12 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
     work: '',
     expertise: ''
   });
+  const [editProfile, setEditProfile] = useState({
+    name: '',
+    username: '',
+    bio: ''
+  });
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState('');
   const [filters, setFilters] = useState({
     category: '',
     sortBy: 'newest',
@@ -45,6 +51,12 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           work: foundUser.work || '',
           expertise: foundUser.expertise?.join(', ') || ''
         });
+        setEditProfile({
+          name: foundUser.name,
+          username: foundUser.username,
+          bio: foundUser.bio || ''
+        });
+        setCoverPhotoUrl(foundUser.coverPhoto || '');
       } else {
         // If not found in localStorage, use current user (for own profile)
         console.log('Profile - Using current user with avatar:', user.avatar);
@@ -55,6 +67,12 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           work: user.work || '',
           expertise: user.expertise?.join(', ') || ''
         });
+        setEditProfile({
+          name: user.name,
+          username: user.username,
+          bio: user.bio || ''
+        });
+        setCoverPhotoUrl(user.coverPhoto || '');
       }
     } else {
       console.log('Profile - No userId provided, using current user with avatar:', user.avatar);
@@ -65,6 +83,12 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
         work: user.work || '',
         expertise: user.expertise?.join(', ') || ''
       });
+      setEditProfile({
+        name: user.name,
+        username: user.username,
+        bio: user.bio || ''
+      });
+      setCoverPhotoUrl(user.coverPhoto || '');
     }
 
     // Load saved items from localStorage
@@ -129,6 +153,68 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
     setShowEditCover(true);
   };
 
+  const handleSaveProfile = () => {
+    if (!profileUser) return;
+
+    const updatedUser = {
+      ...profileUser,
+      name: editProfile.name,
+      username: editProfile.username,
+      bio: editProfile.bio
+    };
+
+    setProfileUser(updatedUser);
+
+    // Update in localStorage
+    const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+    const userIndex = users.findIndex((u: User) => u.id === updatedUser.id);
+    if (userIndex !== -1) {
+      users[userIndex] = updatedUser;
+      localStorage.setItem('nexus_users', JSON.stringify(users));
+    }
+
+    // Update current user in localStorage if it's the same user
+    const currentUserData = localStorage.getItem('nexus_current_user');
+    if (currentUserData) {
+      const currentUser = JSON.parse(currentUserData);
+      if (currentUser.id === updatedUser.id) {
+        localStorage.setItem('nexus_current_user', JSON.stringify(updatedUser));
+      }
+    }
+
+    setShowEditProfile(false);
+  };
+
+  const handleSaveCoverPhoto = () => {
+    if (!profileUser) return;
+
+    const updatedUser = {
+      ...profileUser,
+      coverPhoto: coverPhotoUrl
+    };
+
+    setProfileUser(updatedUser);
+
+    // Update in localStorage
+    const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+    const userIndex = users.findIndex((u: User) => u.id === updatedUser.id);
+    if (userIndex !== -1) {
+      users[userIndex] = updatedUser;
+      localStorage.setItem('nexus_users', JSON.stringify(users));
+    }
+
+    // Update current user in localStorage if it's the same user
+    const currentUserData = localStorage.getItem('nexus_current_user');
+    if (currentUserData) {
+      const currentUser = JSON.parse(currentUserData);
+      if (currentUser.id === updatedUser.id) {
+        localStorage.setItem('nexus_current_user', JSON.stringify(updatedUser));
+      }
+    }
+
+    setShowEditCover(false);
+  };
+
   const handleApplyFilters = () => {
     // Apply filters to posts - backend ready
     console.log('Applying filters:', filters);
@@ -153,7 +239,16 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
       <div className="bg-white border-b border-gray-300">
         <div className="max-w-[1100px] mx-auto">
           {/* Cover */}
-          <div className="h-[350px] bg-gradient-to-b from-gray-300 to-gray-500 rounded-b-xl relative group">
+          <div
+            className="h-[350px] rounded-b-xl relative group"
+            style={{
+              backgroundImage: profileUser.coverPhoto
+                ? `url(${profileUser.coverPhoto})`
+                : 'linear-gradient(to bottom, #d1d5db, #6b7280)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
              <button onClick={handleEditCover} className="absolute bottom-4 right-4 bg-white px-3 py-2 rounded-lg font-bold text-sm shadow flex items-center gap-2">
                 <i className="fa-solid fa-camera"></i> Edit cover photo
              </button>
@@ -473,7 +568,8 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
                 <label className="block text-sm font-semibold mb-1">Name</label>
                 <input
                   type="text"
-                  defaultValue={profileUser?.name}
+                  value={editProfile.name}
+                  onChange={(e) => setEditProfile({...editProfile, name: e.target.value})}
                   className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
@@ -481,21 +577,23 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
                 <label className="block text-sm font-semibold mb-1">Username</label>
                 <input
                   type="text"
-                  defaultValue={profileUser?.username}
+                  value={editProfile.username}
+                  onChange={(e) => setEditProfile({...editProfile, username: e.target.value})}
                   className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-1">Bio</label>
                 <textarea
-                  defaultValue={profileUser?.bio}
+                  value={editProfile.bio}
+                  onChange={(e) => setEditProfile({...editProfile, bio: e.target.value})}
                   className="w-full border rounded-lg px-3 py-2"
                   rows={3}
                 />
               </div>
             </div>
             <div className="flex gap-2 mt-6">
-              <button className="flex-1 bg-[#1877F2] text-white py-2 rounded-lg font-bold">Save</button>
+              <button onClick={handleSaveProfile} className="flex-1 bg-[#1877F2] text-white py-2 rounded-lg font-bold">Save</button>
               <button onClick={() => setShowEditProfile(false)} className="flex-1 bg-gray-200 py-2 rounded-lg font-bold">Cancel</button>
             </div>
           </div>
@@ -512,21 +610,46 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
                 <label className="block text-sm font-semibold mb-1">Cover Photo URL</label>
                 <input
                   type="text"
+                  value={coverPhotoUrl}
+                  onChange={(e) => setCoverPhotoUrl(e.target.value)}
                   className="w-full border rounded-lg px-3 py-2"
                   placeholder="Enter image URL"
                 />
               </div>
+              {coverPhotoUrl && (
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Preview</label>
+                  <img
+                    src={coverPhotoUrl}
+                    alt="Cover preview"
+                    className="w-full h-32 object-cover rounded-lg"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-semibold mb-1">Or upload a file</label>
                 <input
                   type="file"
                   accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setCoverPhotoUrl(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
                   className="w-full border rounded-lg px-3 py-2"
                 />
               </div>
             </div>
             <div className="flex gap-2 mt-6">
-              <button className="flex-1 bg-[#1877F2] text-white py-2 rounded-lg font-bold">Save</button>
+              <button onClick={handleSaveCoverPhoto} className="flex-1 bg-[#1877F2] text-white py-2 rounded-lg font-bold">Save</button>
               <button onClick={() => setShowEditCover(false)} className="flex-1 bg-gray-200 py-2 rounded-lg font-bold">Cancel</button>
             </div>
           </div>
