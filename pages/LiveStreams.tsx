@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, LiveStream } from '../types';
+import { User, LiveStream as LiveStreamType } from '../types';
 import LiveStream from '../components/LiveStream';
 
 interface LiveStreamsProps {
@@ -8,7 +8,7 @@ interface LiveStreamsProps {
 
 const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<'browse' | 'my_streams' | 'schedule'>('browse');
-  const [streams, setStreams] = useState<LiveStream[]>([]);
+  const [streams, setStreams] = useState<LiveStreamType[]>([]);
   const [selectedStream, setSelectedStream] = useState<LiveStream | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -42,7 +42,7 @@ const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
 
   useEffect(() => {
     // Load sample streams
-    const sampleStreams: LiveStream[] = [
+    const sampleStreams: LiveStreamType[] = [
       {
         id: '1',
         streamerId: 'user1',
@@ -138,7 +138,7 @@ const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
       // Generate stream key for backend
       const streamKey = `stream_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      const newStream: LiveStream = {
+      const newStream: LiveStreamType = {
         id: Date.now().toString(),
         streamerId: user.id,
         streamerName: user.name,
@@ -210,7 +210,7 @@ const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
     setIsScheduling(true);
     
     try {
-      const newStream: LiveStream = {
+      const newStream: LiveStreamType = {
         id: Date.now().toString(),
         streamerId: user.id,
         streamerName: user.name,

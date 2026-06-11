@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Post, User, Solution } from '../types';
+import { postsApi } from '../lib/api';
 
 interface PostCardProps {
   post: Post;
@@ -15,6 +16,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
   const [hasVoted, setHasVoted] = useState(false);
   const [newSolution, setNewSolution] = useState('');
   const [shareSuccess, setShareSuccess] = useState(false);
+  const [localPost, setLocalPost] = useState(post);
 
   const handleVoteClick = () => {
     onVote(post.id, hasVoted ? -1 : 1);
@@ -42,23 +44,44 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
     }
   };
 
-  const handleAddSolution = () => {
+  const handleAddSolution = async () => {
     if (!newSolution.trim()) return;
     
-    const solution: Solution = {
-      id: Math.random().toString(36).substr(2, 9),
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
-      text: newSolution,
-      timestamp: Date.now(),
-      upvotes: 0
-    };
-
-    post.solutions.push(solution);
-    // In a real app we'd trigger a parent update
-    setNewSolution('');
+    try {
+      const solution = await postsApi.addSolution(post.id, {
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userAvatar: currentUser.avatar,
+        text: newSolution
+      });
+      
+      setLocalPost(prev => ({
+        ...prev,
+        solutions: [...prev.solutions, solution]
+      }));
+      setNewSolution('');
+    } catch (error) {
+      console.error('Failed to add solution:', error);
+      // Fallback to local update
+      const solution: Solution = {
+        id: Math.random().toString(36).substr(2, 9),
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userAvatar: currentUser.avatar,
+        text: newSolution,
+        timestamp: Date.now(),
+        upvotes: 0,
+        helpful: 0,
+        replies: []
+      };
+      setLocalPost(prev => ({
+        ...prev,
+        solutions: [...prev.solutions, solution]
+      }));
+      setNewSolution('');
+    }
   };
+
 
   const formatDate = (ts: number) => {
     const diff = Date.now() - ts;
@@ -223,10 +246,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
                <i className="fa-solid fa-lightbulb"></i>
              </div>
           </div>
-          <span className="text-gray-500 text-base font-medium">{post.votes} helpful votes</span>
+          <span className="text-gray-500 text-base font-medium">{localPost.votes} helpful votes</span>
         </div>
         <div className="flex gap-4 text-base text-gray-500 font-medium">
-           <span className="hover:underline cursor-pointer">{post.solutions.length} solutions</span>
+           <span className="hover:underline cursor-pointer">{localPost.solutions.length} solutions</span>
            <span className="hover:underline cursor-pointer">12 shares</span>
         </div>
       </div>
@@ -243,7 +266,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
           onClick={() => navigate(`/solutions/${post.id}`)}
           className="flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-4 rounded-xl text-[#65676B] font-bold text-lg transition-colors"
         >
-          <i className="fa-regular fa-comment text-xl"></i> Suggest Solution
+          <i className="fa-regular fa-lightbulb text-xl"></i> Solution
         </button>
         <button
           onClick={handleShare}
@@ -253,17 +276,18 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
         </button>
       </div>
 
+
       {/* Solutions Section */}
       {showSolutions && (
         <div className="px-4 py-4 bg-gray-50 space-y-4 rounded-b-xl">
-          {post.solutions.map(sol => (
+          {localPost.solutions.map(sol => (
             <div key={sol.id} className="flex gap-3">
               <img src={sol.userAvatar} className="w-10 h-10 rounded-full" alt={sol.userName} />
               <div className="bg-gray-200 p-3 rounded-2xl max-w-[90%]">
                 <p className="font-bold text-sm">{sol.userName}</p>
                 <p className="text-base">{sol.text}</p>
                 <div className="flex items-center gap-4 mt-2 text-sm font-bold text-gray-500">
-                   <span className="hover:underline cursor-pointer">Helpful</span>
+                   <span className="hover:underline cursor-pointer">Helpful ({sol.helpful || 0})</span>
                    <span className="hover:underline cursor-pointer">Reply</span>
                    <span>{formatDate(sol.timestamp)}</span>
                 </div>

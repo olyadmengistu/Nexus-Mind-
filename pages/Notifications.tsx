@@ -3,12 +3,14 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { NOTIFICATIONS } from '../constants';
 import { Notification } from '../types';
+import { notificationsApi, socketClient } from '../lib/api';
 
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
+  const [userId] = useState('current_user_id'); // Would come from auth context
 
   // Load notifications from localStorage or use initial data
   useEffect(() => {
@@ -19,7 +21,19 @@ const Notifications: React.FC = () => {
       setNotifications(NOTIFICATIONS);
       localStorage.setItem('nexus_notifications', JSON.stringify(NOTIFICATIONS));
     }
-  }, []);
+
+    // Initialize WebSocket for real-time notifications
+    const socket = socketClient.connect();
+    socketClient.join(userId);
+
+    socketClient.on('notification', (notification: Notification) => {
+      setNotifications(prev => [notification, ...prev]);
+    });
+
+    return () => {
+      socketClient.off('notification');
+    };
+  }, [userId]);
 
   // Save notifications to localStorage whenever they change
   useEffect(() => {
@@ -29,25 +43,53 @@ const Notifications: React.FC = () => {
   }, [notifications]);
 
   // Mark all as read
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, read: true }))
-    );
+  const markAllAsRead = async () => {
+    try {
+      await notificationsApi.markAllAsRead(userId);
+      setNotifications(prev => 
+        prev.map(notif => ({ ...notif, read: true }))
+      );
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+      // Fallback to local state update
+      setNotifications(prev => 
+        prev.map(notif => ({ ...notif, read: true }))
+      );
+    }
   };
 
   // Mark individual notification as read
-  const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
+  const markAsRead = async (id: string) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif.id === id ? { ...notif, read: true } : notif
+        )
+      );
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+      // Fallback to local state update
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif.id === id ? { ...notif, read: true } : notif
+        )
+      );
+    }
   };
 
   // Delete notification
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== id));
-    setDropdownOpen(null);
+  const deleteNotification = async (id: string) => {
+    try {
+      await notificationsApi.deleteNotification(id);
+      setNotifications(prev => prev.filter(notif => notif.id !== id));
+      setDropdownOpen(null);
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+      // Fallback to local state update
+      setNotifications(prev => prev.filter(notif => notif.id !== id));
+      setDropdownOpen(null);
+    }
   };
 
   // Filter notifications

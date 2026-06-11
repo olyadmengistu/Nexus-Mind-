@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { User, Message, Conversation } from '../types';
 import { searchConversations, debounce } from '../lib/searchApi';
+import { socketClient } from '../lib/api';
 
 interface MessagesProps {
   user: User;
@@ -20,6 +21,41 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   const [showCallModal, setShowCallModal] = useState<{ type: 'audio' | 'video' | null }>({ type: null });
   const [newChatUser, setNewChatUser] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    const socket = socketClient.connect();
+    socketClient.join(user.id);
+
+    // Listen for new messages
+    socketClient.on('new_message', (message: Message) => {
+      setConversations(prev => prev.map(conv => {
+        if (conv.id === selectedChat) {
+          return {
+            ...conv,
+            messages: [...conv.messages, message],
+            lastMessage: message.text,
+            time: formatTime(message.timestamp)
+          };
+        }
+        return conv;
+      }));
+    });
+
+    // Listen for typing indicators
+    socketClient.on('user_typing', ({ userId, isTyping }: { userId: string; isTyping: boolean }) => {
+      console.log(`User ${userId} is typing: ${isTyping}`);
+    });
+
+    // Listen for real-time notifications
+    socketClient.on('notification', (notification: any) => {
+      console.log('New notification received:', notification);
+    });
+
+    return () => {
+      socketClient.disconnect();
+    };
+  }, [user.id, selectedChat]);
 
   // Initialize conversations from localStorage or use defaults
   useEffect(() => {
@@ -153,6 +189,14 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       timestamp: Date.now()
     };
 
+    // Send via WebSocket for real-time delivery
+    socketClient.sendMessage(selectedChat, {
+      ...newMessage,
+      senderName: user.name,
+      senderAvatar: user.avatar
+    });
+
+    // Update local state immediately for optimistic UI
     setConversations(prev => prev.map(conv => {
       if (conv.id === selectedChat) {
         return {

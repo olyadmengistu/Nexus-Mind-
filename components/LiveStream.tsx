@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { User, LiveStream, LiveChatMessage, StreamViewer } from '../types';
+import { User, LiveStream as LiveStreamType, LiveChatMessage, StreamViewer } from '../types';
 
 interface LiveStreamProps {
   user: User;
-  stream: LiveStream;
+  stream: LiveStreamType;
   isStreamer: boolean;
   onEndStream?: () => void;
   onLikeStream?: () => void;

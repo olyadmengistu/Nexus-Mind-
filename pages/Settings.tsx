@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
+import { userApi } from '../lib/api';
 
 interface SettingsProps {
   user: User;
@@ -32,17 +33,32 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     allowMessages: true,
   });
 
-  const handleSaveProfile = () => {
-    const updatedUser = { ...user, ...formData };
-    localStorage.setItem('nexus_current_user', JSON.stringify(updatedUser));
-    
-    const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-    const userIndex = users.findIndex((u: User) => u.id === user.id);
-    if (userIndex !== -1) {
-      users[userIndex] = updatedUser;
-      localStorage.setItem('nexus_users', JSON.stringify(users));
+  const handleSaveProfile = async () => {
+    try {
+      const updatedUser = await userApi.updateProfile(user.id, formData);
+      
+      // Update localStorage as fallback
+      localStorage.setItem('nexus_current_user', JSON.stringify(updatedUser));
+      const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      const userIndex = users.findIndex((u: User) => u.id === user.id);
+      if (userIndex !== -1) {
+        users[userIndex] = updatedUser;
+        localStorage.setItem('nexus_users', JSON.stringify(users));
+      }
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      // Fallback to localStorage only
+      const updatedUser = { ...user, ...formData };
+      localStorage.setItem('nexus_current_user', JSON.stringify(updatedUser));
+      const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      const userIndex = users.findIndex((u: User) => u.id === user.id);
+      if (userIndex !== -1) {
+        users[userIndex] = updatedUser;
+        localStorage.setItem('nexus_users', JSON.stringify(users));
+      }
+      alert('Profile updated successfully!');
     }
-    alert('Profile updated successfully!');
   };
 
   // Load notification settings from localStorage on mount
@@ -53,14 +69,34 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     }
   }, []);
 
-  const handleSaveNotifications = () => {
-    localStorage.setItem('nexus_notification_settings', JSON.stringify(notifications));
-    alert('Notification settings saved!');
+  const handleSaveNotifications = async () => {
+    try {
+      // Save to backend (would need to add this endpoint)
+      // await userApi.saveNotificationSettings(user.id, notifications);
+      
+      // Fallback to localStorage
+      localStorage.setItem('nexus_notification_settings', JSON.stringify(notifications));
+      alert('Notification settings saved!');
+    } catch (error) {
+      console.error('Failed to save notification settings:', error);
+      localStorage.setItem('nexus_notification_settings', JSON.stringify(notifications));
+      alert('Notification settings saved!');
+    }
   };
 
-  const handleSavePrivacy = () => {
-    localStorage.setItem('nexus_privacy', JSON.stringify(privacy));
-    alert('Privacy settings saved!');
+  const handleSavePrivacy = async () => {
+    try {
+      // Save to backend (would need to add this endpoint)
+      // await userApi.savePrivacySettings(user.id, privacy);
+      
+      // Fallback to localStorage
+      localStorage.setItem('nexus_privacy', JSON.stringify(privacy));
+      alert('Privacy settings saved!');
+    } catch (error) {
+      console.error('Failed to save privacy settings:', error);
+      localStorage.setItem('nexus_privacy', JSON.stringify(privacy));
+      alert('Privacy settings saved!');
+    }
   };
 
   return (

@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/backend/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "GMAIL_EMAIL": "@gmail_email",
+    "GMAIL_APP_PASSWORD": "@gmail_app_password",
+    "EMAIL_ADDRESS": "@email_address",
+    "ADMIN_EMAILS": "@admin_emails",
+    "CLIENT_URL": "@client_url"
+  }
+}

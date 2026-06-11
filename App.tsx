@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Feed from './components/Feed';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Welcome from './pages/Welcome';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
@@ -20,6 +21,7 @@ import SavedPosts from './pages/SavedPosts';
 import ActivityLog from './pages/ActivityLog';
 import Help from './pages/Help';
 import Feedback from './pages/Feedback';
+import Search from './pages/Search';
 import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
@@ -33,8 +35,16 @@ const App: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
     let authTimeout: NodeJS.Timeout;
+    let minLoadingTimeout: NodeJS.Timeout;
 
-    // Timeout to force loading screen to dismiss after 10 seconds
+    // Force loading screen to stay for minimum 3 seconds
+    minLoadingTimeout = setTimeout(() => {
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    }, 3000);
+
+    // Timeout to force loading screen to dismiss after 10 seconds (fallback)
     authTimeout = setTimeout(() => {
       if (isMounted && isLoading) {
         console.warn('Firebase auth initialization timeout - forcing load complete');
@@ -64,7 +74,6 @@ const App: React.FC = () => {
         const currentUser = JSON.parse(currentUserData);
         console.log('Found current user in localStorage:', currentUser);
         setUser(currentUser);
-        setIsLoading(false);
       } catch (error) {
         console.error('Error parsing current user from localStorage:', error);
       }
@@ -116,26 +125,27 @@ const App: React.FC = () => {
             localStorage.removeItem('nexus_current_user');
             localStorage.removeItem('nexus_user');
           }
-          setIsLoading(false);
+          // Don't set isLoading(false) here - let the minLoadingTimeout handle it
         }
       } catch (error) {
         console.error('Error in auth state change handler:', error);
         if (isMounted) {
           setUser(null);
-          setIsLoading(false);
+          // Don't set isLoading(false) here - let the minLoadingTimeout handle it
         }
       }
     }, (error) => {
       console.error('Firebase auth state observer error:', error);
       if (isMounted) {
         setUser(null);
-        setIsLoading(false);
+        // Don't set isLoading(false) here - let the minLoadingTimeout handle it
       }
     });
 
     return () => {
       isMounted = false;
       clearTimeout(authTimeout);
+      clearTimeout(minLoadingTimeout);
       unsubscribe();
     };
   }, []);
@@ -174,6 +184,10 @@ const App: React.FC = () => {
         <main className={user ? "pt-[56px]" : ""}>
           <Routes>
             <Route 
+              path="/welcome" 
+              element={user ? <Navigate to="/" /> : <Welcome />} 
+            />
+            <Route 
               path="/login" 
               element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} 
             />
@@ -183,7 +197,7 @@ const App: React.FC = () => {
             />
             <Route 
               path="/" 
-              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Navigate to="/login" />} 
+              element={user ? <Feed user={user} posts={posts} onAddPost={handleAddPost} onVote={handleVote} /> : <Navigate to="/welcome" />} 
             />
             <Route 
               path="/profile" 
@@ -244,6 +258,10 @@ const App: React.FC = () => {
             <Route 
               path="/feedback" 
               element={user ? <Feedback user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/search" 
+              element={user ? <Search user={user} /> : <Navigate to="/login" />} 
             />
           </Routes>
         </main>
