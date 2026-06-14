@@ -252,26 +252,26 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <footer className="mt-auto py-10 w-full max-w-[1000px] text-gray-500 text-xs">
         <div className="flex flex-wrap gap-x-4 gap-y-2 mb-2">
           <span>English (UK)</span>
-          <span>Hausa</span>
-          <span>Afaan Oromoo</span>
-          <span>Amharic</span>
-          <span>العربية</span>
-          <span>Français (France)</span>
+          <span>English (US)</span>
+          <span>Français</span>
+          <span>Español</span>
+          <span>Deutsch</span>
+          <span>Português</span>
         </div>
         <hr className="my-2" />
         <div className="flex flex-wrap gap-x-4 gap-y-2">
           <span>Sign Up</span>
           <span>Log In</span>
-          <span>Messenger</span>
-          <span>Facebook Lite</span>
-          <span>Video</span>
-          <span>Places</span>
-          <span>Games</span>
+          <span>Inspire Hub</span>
+          <span>Videos</span>
           <span>Marketplace</span>
+          <span>Groups</span>
+          <span>Collaborate</span>
+          <span>Solutions</span>
           <span>Connect</span>
           <span>Solve</span>
           <span>Grow</span>
-          <span>Instagram</span>
+          <span>Help Center</span>
         </div>
         <p className="mt-4">Connect.Solve.Grow © 2024</p>
       </footer>

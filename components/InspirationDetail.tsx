@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { DailyReflection, User } from '../types';
+import { Inspiration, User } from '../types';
 
-interface ReflectionDetailProps {
-  reflection: DailyReflection;
+interface InspirationDetailProps {
+  inspiration: Inspiration;
   currentUser: User;
   onClose: () => void;
-  onLike: (reflectionId: string) => void;
+  onLike: (inspirationId: string) => void;
 }
 
 interface Comment {
@@ -17,7 +17,7 @@ interface Comment {
   timestamp: number;
 }
 
-const ReflectionDetail: React.FC<ReflectionDetailProps> = ({ reflection, currentUser, onClose, onLike }) => {
+const InspirationDetail: React.FC<InspirationDetailProps> = ({ inspiration, currentUser, onClose, onLike }) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isLiked, setIsLiked] = useState(false);
@@ -53,20 +53,19 @@ const ReflectionDetail: React.FC<ReflectionDetailProps> = ({ reflection, current
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-    onLike(reflection.id);
+    onLike(inspiration.id);
   };
 
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'Daily Reflection',
-        text: reflection.content,
+        title: 'Inspiration',
+        text: inspiration.content,
         url: window.location.href,
       });
     } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(reflection.content);
-      alert('Reflection copied to clipboard!');
+      navigator.clipboard.writeText(inspiration.content);
+      alert('Inspiration copied to clipboard!');
     }
   };
 
@@ -76,10 +75,10 @@ const ReflectionDetail: React.FC<ReflectionDetailProps> = ({ reflection, current
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <img src={reflection.userAvatar} className="w-10 h-10 rounded-full object-cover" alt="User" />
+            <img src={inspiration.userAvatar} className="w-10 h-10 rounded-full object-cover" alt="User" />
             <div>
-              <p className="font-semibold text-sm">{reflection.userName}</p>
-              <p className="text-xs text-gray-500">{formatTimestamp(reflection.timestamp)}</p>
+              <p className="font-semibold text-sm">{inspiration.userName}</p>
+              <p className="text-xs text-gray-500">{formatTimestamp(inspiration.timestamp)}</p>
             </div>
           </div>
           <button 
@@ -90,38 +89,26 @@ const ReflectionDetail: React.FC<ReflectionDetailProps> = ({ reflection, current
           </button>
         </div>
 
-        {/* Tags */}
-        {reflection.tags && reflection.tags.length > 0 && (
-          <div className="px-4 py-2 flex flex-wrap gap-2">
-            {reflection.tags.map((tag, index) => (
-              <span 
-                key={index}
-                className="bg-purple-100 text-purple-800 text-xs px-3 py-1 rounded-full font-medium"
-              >
-                {tag}
-              </span>
-            ))}
+        {/* Challenge Badge */}
+        <div className="px-4 py-2">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-full px-4 py-2">
+            <i className="fa-solid fa-trophy text-blue-600"></i>
+            <span className="text-sm font-medium text-blue-800">{inspiration.challengeOvercome}</span>
           </div>
-        )}
+        </div>
 
         {/* Content and Image */}
         <div className="p-4">
-          {reflection.imageUrl ? (
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <p className="text-gray-800 whitespace-pre-wrap">{reflection.content}</p>
-              </div>
-              <div className="flex-shrink-0">
-                <img 
-                  src={reflection.imageUrl} 
-                  alt="Reflection" 
-                  className="w-64 h-64 object-cover rounded-lg"
-                />
-              </div>
+          {inspiration.imageUrl && (
+            <div className="mb-4">
+              <img 
+                src={inspiration.imageUrl} 
+                alt="Inspiration" 
+                className="w-full h-64 object-cover rounded-lg"
+              />
             </div>
-          ) : (
-            <p className="text-gray-800 whitespace-pre-wrap">{reflection.content}</p>
           )}
+          <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{inspiration.content}</p>
         </div>
 
         {/* Actions */}
@@ -129,11 +116,11 @@ const ReflectionDetail: React.FC<ReflectionDetailProps> = ({ reflection, current
           <button 
             onClick={handleLike}
             className={`flex items-center gap-2 transition-colors ${
-              isLiked ? 'text-red-500' : 'text-gray-600 hover:text-red-500'
+              isLiked ? 'text-pink-600' : 'text-gray-600 hover:text-pink-600'
             }`}
           >
             <i className={`${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart`}></i>
-            <span className="text-sm font-medium">{reflection.likes + (isLiked ? 1 : 0)}</span>
+            <span className="text-sm font-medium">{inspiration.likes + (isLiked ? 1 : 0)}</span>
           </button>
           <button className="flex items-center gap-2 text-gray-600 hover:text-[#1877F2] transition-colors">
             <i className="fa-regular fa-comment"></i>
@@ -145,6 +132,10 @@ const ReflectionDetail: React.FC<ReflectionDetailProps> = ({ reflection, current
           >
             <i className="fa-regular fa-share-from-square"></i>
             <span className="text-sm font-medium">Share</span>
+          </button>
+          <button className="flex items-center gap-2 text-gray-600 hover:text-yellow-600 transition-colors ml-auto">
+            <i className="fa-regular fa-bookmark"></i>
+            <span className="text-sm font-medium">Save</span>
           </button>
         </div>
 
@@ -201,4 +192,4 @@ const ReflectionDetail: React.FC<ReflectionDetailProps> = ({ reflection, current
   );
 };
 
-export default ReflectionDetail;
+export default InspirationDetail;

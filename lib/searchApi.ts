@@ -1,9 +1,5 @@
 import { User, Video, Collaboration, Group, Product, Conversation } from '../types';
-
-// Search API Service - Ready for Backend Integration
-// All functions are prepared to make actual API calls when backend is available
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
+import { searchApi } from './api';
 
 // Generic API response wrapper
 interface ApiResponse<T> {
@@ -66,24 +62,23 @@ async function simulateApiCall<T>(data: T, delay: number = 300): Promise<ApiResp
 
 // User Search API
 export const searchUsers = async (params: UserSearchParams): Promise<ApiResponse<User[]>> => {
-  console.log('Backend: Search users payload', params);
-  
-  // TODO: Replace with actual API call
-  // const response = await fetch(`${API_BASE_URL}/search/users?query=${encodeURIComponent(params.query)}&limit=${params.limit || 10}&offset=${params.offset || 0}`, {
-  //   method: 'GET',
-  //   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }
-  // });
-  // return response.json();
-  
-  // Temporary: Use localStorage for demo
-  const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-  const query = params.query.toLowerCase();
-  const results = users.filter((u: User) =>
-    u.name.toLowerCase().includes(query) ||
-    u.username.toLowerCase().includes(query)
-  ).slice(params.offset || 0, (params.offset || 0) + (params.limit || 10));
-  
-  return simulateApiCall(results);
+  try {
+    const results = await searchApi.globalSearch(params.query, 'users');
+    const users = (results.users as User[]).slice(
+      params.offset || 0,
+      (params.offset || 0) + (params.limit || 10)
+    );
+    return { data: users, success: true };
+  } catch (error) {
+    console.warn('Backend user search failed, using localStorage:', error);
+    const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+    const query = params.query.toLowerCase();
+    const results = users.filter((u: User) =>
+      u.name.toLowerCase().includes(query) ||
+      u.username.toLowerCase().includes(query)
+    ).slice(params.offset || 0, (params.offset || 0) + (params.limit || 10));
+    return simulateApiCall(results);
+  }
 };
 
 // Video Search API
@@ -168,34 +163,29 @@ export const searchCollaborations = async (params: CollaborationSearchParams): P
 
 // Group Search API
 export const searchGroups = async (params: GroupSearchParams): Promise<ApiResponse<Group[]>> => {
-  console.log('Backend: Search groups payload', params);
-  
-  // TODO: Replace with actual API call
-  // const queryParams = new URLSearchParams({
-  //   query: params.query,
-  //   ...(params.category && { category: params.category }),
-  //   limit: String(params.limit || 20),
-  //   offset: String(params.offset || 0)
-  // });
-  // const response = await fetch(`${API_BASE_URL}/search/groups?${queryParams}`, {
-  //   method: 'GET',
-  //   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` }
-  // });
-  // return response.json();
-  
-  // Temporary: Use localStorage for demo
-  const groups = JSON.parse(localStorage.getItem('nexus_groups') || '[]');
-  const query = params.query.toLowerCase();
-  let results = groups.filter((g: Group) =>
-    g.name.toLowerCase().includes(query) ||
-    g.description.toLowerCase().includes(query)
-  );
-  
-  if (params.category && params.category !== 'All') {
-    results = results.filter((g: Group) => g.category === params.category);
+  try {
+    const results = await searchApi.globalSearch(params.query, 'groups');
+    let groups = results.groups as Group[];
+    if (params.category && params.category !== 'All') {
+      groups = groups.filter((g) => g.category === params.category);
+    }
+    return {
+      data: groups.slice(params.offset || 0, (params.offset || 0) + (params.limit || 20)),
+      success: true,
+    };
+  } catch (error) {
+    console.warn('Backend group search failed, using localStorage:', error);
+    const groups = JSON.parse(localStorage.getItem('nexus_groups') || '[]');
+    const query = params.query.toLowerCase();
+    let results = groups.filter((g: Group) =>
+      g.name.toLowerCase().includes(query) ||
+      g.description.toLowerCase().includes(query)
+    );
+    if (params.category && params.category !== 'All') {
+      results = results.filter((g: Group) => g.category === params.category);
+    }
+    return simulateApiCall(results.slice(params.offset || 0, (params.offset || 0) + (params.limit || 20)));
   }
-  
-  return simulateApiCall(results.slice(params.offset || 0, (params.offset || 0) + (params.limit || 20)));
 };
 
 // Product Search API

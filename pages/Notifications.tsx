@@ -2,36 +2,56 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { NOTIFICATIONS } from '../constants';
-import { Notification } from '../types';
+import { Notification, User } from '../types';
 import { notificationsApi, socketClient } from '../lib/api';
 
-const Notifications: React.FC = () => {
+interface NotificationsProps {
+  user: User;
+}
+
+const Notifications: React.FC<NotificationsProps> = ({ user }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
-  const [userId] = useState('current_user_id'); // Would come from auth context
+  const userId = user.id;
 
-  // Load notifications from localStorage or use initial data
+  // Load notifications from backend API
   useEffect(() => {
-    const stored = localStorage.getItem('nexus_notifications');
-    if (stored) {
-      setNotifications(JSON.parse(stored));
-    } else {
-      setNotifications(NOTIFICATIONS);
-      localStorage.setItem('nexus_notifications', JSON.stringify(NOTIFICATIONS));
-    }
+    const loadNotifications = async () => {
+      try {
+        const apiNotifications = await notificationsApi.getNotifications(userId);
+        if (apiNotifications.length > 0) {
+          setNotifications(apiNotifications as Notification[]);
+          return;
+        }
+      } catch (error) {
+        console.warn('Backend unavailable for notifications, using local data:', error);
+      }
+
+      const stored = localStorage.getItem('nexus_notifications');
+      if (stored) {
+        setNotifications(JSON.parse(stored));
+      } else {
+        setNotifications(NOTIFICATIONS);
+        localStorage.setItem('nexus_notifications', JSON.stringify(NOTIFICATIONS));
+      }
+    };
+
+    loadNotifications();
 
     // Initialize WebSocket for real-time notifications
-    const socket = socketClient.connect();
+    socketClient.connect();
     socketClient.join(userId);
 
-    socketClient.on('notification', (notification: Notification) => {
+    const handleNotification = (notification: Notification) => {
       setNotifications(prev => [notification, ...prev]);
-    });
+    };
+
+    socketClient.on('notification', handleNotification);
 
     return () => {
-      socketClient.off('notification');
+      socketClient.off('notification', handleNotification);
     };
   }, [userId]);
 

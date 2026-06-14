@@ -10,9 +10,11 @@ dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
+const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
+
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: CLIENT_URL,
     methods: ['GET', 'POST']
   }
 });
@@ -20,7 +22,7 @@ const io = new Server(httpServer, {
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: CLIENT_URL, credentials: true }));
 app.use(express.json());
 
 // Connect to Firestore
@@ -193,6 +195,34 @@ app.post('/api/feedback', async (req, res) => {
 // ==================== USER MANAGEMENT ====================
 
 // Get user profile
+// Create or upsert user profile (called after Firebase Auth signup)
+app.post('/api/users', async (req, res) => {
+  try {
+    const { id, ...userData } = req.body;
+    if (!id) {
+      return res.status(400).json({ error: 'User id is required' });
+    }
+
+    const userRef = db.collection('users').doc(id);
+    const existing = await userRef.get();
+
+    const profile = {
+      ...userData,
+      reputation: userData.reputation ?? 0,
+      savedItems: userData.savedItems ?? [],
+      createdAt: existing.exists ? existing.data().createdAt : Date.now(),
+      updatedAt: Date.now(),
+    };
+
+    await userRef.set(profile, { merge: true });
+    const userDoc = await userRef.get();
+    res.status(existing.exists ? 200 : 201).json({ id: userDoc.id, ...userDoc.data() });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: 'Failed to create user profile' });
+  }
+});
+
 app.get('/api/users/:userId', async (req, res) => {
   try {
     const { userId } = req.params;

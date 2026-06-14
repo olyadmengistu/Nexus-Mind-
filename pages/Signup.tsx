@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile, reload } from 'firebase/auth';
 import { auth } from '../firebase';
 import { User } from '../types';
+import { userApi } from '../lib/api';
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -88,6 +89,13 @@ const Signup: React.FC = () => {
 
       console.log('Saving user to localStorage with avatar (base64):', photoURL.substring(0, 50) + '...');
       
+      // Persist profile to backend
+      try {
+        await userApi.createProfile(user.uid, newUser);
+      } catch (apiError) {
+        console.warn('Backend profile sync failed, using local storage:', apiError);
+      }
+
       // Get existing users from localStorage
       const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
       existingUsers.push(newUser);

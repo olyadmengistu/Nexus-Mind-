@@ -22,10 +22,12 @@ import ActivityLog from './pages/ActivityLog';
 import Help from './pages/Help';
 import Feedback from './pages/Feedback';
 import Search from './pages/Search';
+import Reflections from './pages/Reflections';
 import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, reload } from 'firebase/auth';
+import { postsApi, userApi } from './lib/api';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -52,20 +54,33 @@ const App: React.FC = () => {
       }
     }, 10000);
 
-    // Initial data load
-    try {
-      const storedPosts = localStorage.getItem('nexus_posts');
-
-      if (storedPosts) {
-        setPosts(JSON.parse(storedPosts));
-      } else {
-        setPosts(INITIAL_POSTS);
-        localStorage.setItem('nexus_posts', JSON.stringify(INITIAL_POSTS));
+    // Load posts from backend API (fallback to localStorage)
+    const loadPosts = async () => {
+      try {
+        const apiPosts = await postsApi.getAllPosts({ sortBy: 'newest' });
+        if (isMounted && apiPosts.length > 0) {
+          setPosts(apiPosts as Post[]);
+          localStorage.setItem('nexus_posts', JSON.stringify(apiPosts));
+          return;
+        }
+      } catch (error) {
+        console.warn('Backend unavailable, using local posts:', error);
       }
-    } catch (error) {
-      console.error('Error loading posts from localStorage:', error);
-      setPosts(INITIAL_POSTS);
-    }
+
+      try {
+        const storedPosts = localStorage.getItem('nexus_posts');
+        if (storedPosts) {
+          setPosts(JSON.parse(storedPosts));
+        } else {
+          setPosts(INITIAL_POSTS);
+          localStorage.setItem('nexus_posts', JSON.stringify(INITIAL_POSTS));
+        }
+      } catch (error) {
+        console.error('Error loading posts from localStorage:', error);
+        setPosts(INITIAL_POSTS);
+      }
+    };
+    loadPosts();
 
     // Check for current user in localStorage first (for immediate signup display)
     const currentUserData = localStorage.getItem('nexus_current_user');
@@ -116,6 +131,22 @@ const App: React.FC = () => {
               avatar: storedUser?.avatar || currentUser?.avatar || firebaseUser.photoURL || 'https://picsum.photos/seed/default/100/100',
               reputation: storedUser?.reputation || currentUser?.reputation || 0,
             };
+
+            // Sync profile from backend when available
+            try {
+              const backendUser = await userApi.getProfile(firebaseUser.uid);
+              if (isMounted && backendUser) {
+                Object.assign(appUser, {
+                  name: backendUser.name ?? appUser.name,
+                  username: backendUser.username ?? appUser.username,
+                  avatar: backendUser.avatar ?? appUser.avatar,
+                  reputation: backendUser.reputation ?? appUser.reputation,
+                  bio: backendUser.bio,
+                });
+              }
+            } catch {
+              // Profile may not exist yet for new users
+            }
             
             console.log('App user created:', appUser);
             console.log('Avatar sources - storedUser:', storedUser?.avatar, 'currentUser:', currentUser?.avatar, 'firebaseUser:', firebaseUser.photoURL, 'final:', appUser.avatar);
@@ -161,18 +192,38 @@ const App: React.FC = () => {
     localStorage.removeItem('nexus_user');
   };
 
-  const handleAddPost = (newPost: Post) => {
-    const updatedPosts = [newPost, ...posts];
-    setPosts(updatedPosts);
-    localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+  const handleAddPost = async (newPost: Post) => {
+    try {
+      const { id: _localId, ...postData } = newPost;
+      const created = await postsApi.createPost(postData);
+      const updatedPosts = [created as Post, ...posts];
+      setPosts(updatedPosts);
+      localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+    } catch (error) {
+      console.warn('Failed to save post to backend, saving locally:', error);
+      const updatedPosts = [newPost, ...posts];
+      setPosts(updatedPosts);
+      localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+    }
   };
 
-  const handleVote = (postId: string, delta: number) => {
-    const updatedPosts = posts.map(p => 
-      p.id === postId ? { ...p, votes: p.votes + delta } : p
-    );
-    setPosts(updatedPosts);
-    localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+  const handleVote = async (postId: string, delta: number) => {
+    if (!user) return;
+    try {
+      const updated = await postsApi.votePost(postId, delta, user.id, user.avatar);
+      const updatedPosts = posts.map(p =>
+        p.id === postId ? { ...p, votes: updated.votes } : p
+      );
+      setPosts(updatedPosts);
+      localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+    } catch (error) {
+      console.warn('Failed to vote via backend, updating locally:', error);
+      const updatedPosts = posts.map(p =>
+        p.id === postId ? { ...p, votes: p.votes + delta } : p
+      );
+      setPosts(updatedPosts);
+      localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+    }
   };
 
   if (isLoading) return <Loading />;
@@ -213,7 +264,7 @@ const App: React.FC = () => {
             />
             <Route 
               path="/notifications" 
-              element={user ? <Notifications /> : <Navigate to="/login" />} 
+              element={user ? <Notifications user={user} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/solutions/:postId" 
@@ -262,6 +313,10 @@ const App: React.FC = () => {
             <Route 
               path="/search" 
               element={user ? <Search user={user} /> : <Navigate to="/login" />} 
+            />
+            <Route 
+              path="/inspire-hub" 
+              element={user ? <Reflections user={user} /> : <Navigate to="/login" />} 
             />
           </Routes>
         </main>

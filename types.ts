@@ -305,15 +305,15 @@ export interface CollaborationApplicant {
   status: 'pending' | 'accepted' | 'rejected';
 }
 
-// Daily Reflection Types
-export interface DailyReflection {
+// Inspire Hub Types
+export interface Inspiration {
   id: string;
   userId: string;
   userName: string;
   userAvatar: string;
   content: string;
-  imageUrl?: string;
-  tags: string[];
+  imageUrl: string;
+  challengeOvercome: string;
   timestamp: number;
   likes: number;
 }

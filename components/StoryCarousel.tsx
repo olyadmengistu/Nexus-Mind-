@@ -1,9 +1,9 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { STORIES } from '../constants';
-import { DailyReflection, User } from '../types';
-import ReflectionComposer from './ReflectionComposer';
-import ReflectionDetail from './ReflectionDetail';
+import { Inspiration, User } from '../types';
+import InspirationComposer from './InspirationComposer';
+import InspirationStoryViewer from './InspirationStoryViewer';
 
 interface StoryCarouselProps {
   user: User;
@@ -11,18 +11,18 @@ interface StoryCarouselProps {
 
 const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [reflections, setReflections] = useState<DailyReflection[]>([]);
+  const [inspirations, setInspirations] = useState<Inspiration[]>([]);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
-  const [selectedReflection, setSelectedReflection] = useState<DailyReflection | null>(null);
+  const [selectedInspirationIndex, setSelectedInspirationIndex] = useState<number | null>(null);
 
   useEffect(() => {
     try {
-      const storedReflections = localStorage.getItem('nexus_reflections');
-      if (storedReflections) {
-        setReflections(JSON.parse(storedReflections));
+      const storedInspirations = localStorage.getItem('nexus_inspirations');
+      if (storedInspirations) {
+        setInspirations(JSON.parse(storedInspirations));
       }
     } catch (error) {
-      console.error('Error loading reflections:', error);
+      console.error('Error loading inspirations:', error);
     }
   }, []);
 
@@ -33,20 +33,20 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
     }
   };
 
-  const handleAddReflection = (newReflection: DailyReflection) => {
-    const updatedReflections = [newReflection, ...reflections];
-    setReflections(updatedReflections);
-    localStorage.setItem('nexus_reflections', JSON.stringify(updatedReflections));
+  const handleAddInspiration = (newInspiration: Inspiration) => {
+    const updatedInspirations = [newInspiration, ...inspirations];
+    setInspirations(updatedInspirations);
+    localStorage.setItem('nexus_inspirations', JSON.stringify(updatedInspirations));
   };
 
-  const handleLike = (reflectionId: string) => {
-    const updatedReflections = reflections.map(reflection =>
-      reflection.id === reflectionId
-        ? { ...reflection, likes: reflection.likes + 1 }
-        : reflection
+  const handleLike = (inspirationId: string) => {
+    const updatedInspirations = inspirations.map(inspiration =>
+      inspiration.id === inspirationId
+        ? { ...inspiration, likes: inspiration.likes + 1 }
+        : inspiration
     );
-    setReflections(updatedReflections);
-    localStorage.setItem('nexus_reflections', JSON.stringify(updatedReflections));
+    setInspirations(updatedInspirations);
+    localStorage.setItem('nexus_inspirations', JSON.stringify(updatedInspirations));
   };
 
   return (
@@ -67,7 +67,7 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
              <div className="absolute -top-4 w-8 h-8 bg-blue-500 rounded-full border-4 border-white flex items-center justify-center text-white">
                <i className="fa-solid fa-plus"></i>
              </div>
-             <span className="text-xs font-semibold">Daily Reflection</span>
+             <span className="text-xs font-semibold">Inspire Hub</span>
            </div>
         </div>
 
@@ -88,15 +88,15 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
           </div>
         ))}
 
-        {/* Reflections List - Horizontal Display */}
-        {reflections.slice(0, 5).map(reflection => (
+        {/* Inspirations List - Horizontal Display */}
+        {inspirations.slice(0, 5).map((inspiration, index) => (
           <div 
-            key={reflection.id} 
-            onClick={() => setSelectedReflection(reflection)}
+            key={inspiration.id} 
+            onClick={() => setSelectedInspirationIndex(index)}
             className="min-w-[112px] h-[190px] rounded-xl overflow-hidden shadow relative cursor-pointer group"
           >
-            {reflection.imageUrl ? (
-              <img src={reflection.imageUrl} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Reflection" />
+            {inspiration.imageUrl ? (
+              <img src={inspiration.imageUrl} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Inspiration" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
                 <i className="fa-solid fa-lightbulb text-white text-3xl"></i>
@@ -106,35 +106,23 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
             
             {/* Avatar Ring */}
             <div className="absolute top-3 left-3 w-10 h-10 rounded-full border-4 border-purple-500 overflow-hidden">
-               <img src={reflection.userAvatar} className="w-full h-full object-cover" alt="Avatar" />
+               <img src={inspiration.userAvatar} className="w-full h-full object-cover" alt="Avatar" />
             </div>
             
             <span className="absolute bottom-2 left-3 text-white text-xs font-semibold drop-shadow-md">
-              {reflection.userName}
+              {inspiration.userName}
             </span>
             <div className="absolute bottom-2 right-3 flex items-center gap-1 text-white text-xs drop-shadow-md">
               <i className="fa-solid fa-heart text-xs"></i>
-              <span>{reflection.likes}</span>
+              <span>{inspiration.likes}</span>
             </div>
 
-            {/* Tags Overlay */}
-            {reflection.tags && reflection.tags.length > 0 && (
-              <div className="absolute top-3 right-2 flex flex-col gap-1">
-                {reflection.tags.slice(0, 2).map((tag, index) => (
-                  <span 
-                    key={index}
-                    className="bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] px-2 py-0.5 rounded-full font-medium shadow-sm"
-                  >
-                    {tag}
-                  </span>
-                ))}
-                {reflection.tags.length > 2 && (
-                  <span className="bg-white/90 backdrop-blur-sm text-gray-800 text-[10px] px-2 py-0.5 rounded-full font-medium shadow-sm">
-                    +{reflection.tags.length - 2}
-                  </span>
-                )}
-              </div>
-            )}
+            {/* Challenge Badge */}
+            <div className="absolute top-3 right-2">
+              <span className="bg-white/90 backdrop-blur-sm text-blue-800 text-[10px] px-2 py-0.5 rounded-full font-medium shadow-sm">
+                {inspiration.challengeOvercome}
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -153,21 +141,22 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
         <i className="fa-solid fa-chevron-right"></i>
       </button>
 
-      {/* Reflection Composer Modal */}
+      {/* Inspiration Composer Modal */}
       {isComposerOpen && (
-        <ReflectionComposer
+        <InspirationComposer
           user={user}
           onClose={() => setIsComposerOpen(false)}
-          onSubmit={handleAddReflection}
+          onSubmit={handleAddInspiration}
         />
       )}
 
-      {/* Reflection Detail Modal */}
-      {selectedReflection && (
-        <ReflectionDetail
-          reflection={selectedReflection}
+      {/* Inspiration Story Viewer */}
+      {selectedInspirationIndex !== null && (
+        <InspirationStoryViewer
+          inspirations={inspirations}
+          initialIndex={selectedInspirationIndex}
           currentUser={user}
-          onClose={() => setSelectedReflection(null)}
+          onClose={() => setSelectedInspirationIndex(null)}
           onLike={handleLike}
         />
       )}

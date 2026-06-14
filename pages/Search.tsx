@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User, Post, Group, Video, Product } from '../types';
 import { useNavigate } from 'react-router-dom';
+import { searchApi } from '../lib/api';
 
 interface SearchProps {
   user: User;
@@ -68,9 +69,23 @@ const Search: React.FC<SearchProps> = ({ user }) => {
     return () => clearTimeout(timeoutId);
   }, [query, debouncedSearch]);
 
-  const performSearch = (searchQuery: string) => {
+  const performSearch = async (searchQuery: string) => {
     const q = searchQuery.toLowerCase();
-    
+
+    try {
+      const apiResults = await searchApi.globalSearch(searchQuery);
+      setResults({
+        users: (apiResults.users as User[]) ?? [],
+        posts: (apiResults.posts as Post[]) ?? [],
+        groups: (apiResults.groups as Group[]) ?? [],
+        videos: (apiResults.videos as Video[]) ?? [],
+        products: (apiResults.products as Product[]) ?? [],
+      });
+      return;
+    } catch (error) {
+      console.warn('Backend search unavailable, using local data:', error);
+    }
+
     const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
     const posts = JSON.parse(localStorage.getItem('nexus_posts') || '[]');
     const groups = JSON.parse(localStorage.getItem('nexus_groups') || '[]');

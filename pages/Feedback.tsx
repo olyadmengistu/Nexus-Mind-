@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../types';
+import { feedbackApi } from '../lib/api';
 
 interface FeedbackProps {
   user: User;
@@ -50,33 +51,15 @@ const Feedback: React.FC<FeedbackProps> = ({ user }) => {
       const existingFeedback = JSON.parse(localStorage.getItem('nexus_feedback') || '[]');
       localStorage.setItem('nexus_feedback', JSON.stringify([feedback, ...existingFeedback]));
 
-      // Try to send to API
-      try {
-        const response = await fetch('http://localhost:3001/api/feedback', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(feedback),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to submit feedback');
-        }
-        const result = await response.json();
-        console.log('Feedback API response:', result);
-      } catch (apiError) {
-        console.error('API submission failed, using localStorage only:', apiError);
-        setError(`Backend error: ${apiError.message}. Please check if the backend server is running on port 3001.`);
-      }
+      await feedbackApi.submitFeedback(feedback);
       
       setSubmitted(true);
       setFormData({ category: 'general', subject: '', message: '', rating: 5, email: user.email || '' });
       
       setTimeout(() => setSubmitted(false), 5000);
-    } catch (err) {
-      setError('Failed to submit feedback. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to submit feedback. Please try again.';
+      setError(message);
     } finally {
       setSubmitting(false);
     }
