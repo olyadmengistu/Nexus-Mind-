@@ -1,1042 +1,721 @@
 import express from 'express';
 import cors from 'cors';
-import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { connectDB, db } from './db.js';
+import { createServer } from 'http';
+import { auth, db } from './firebaseAdmin.js';
+import admin from 'firebase-admin';
+import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import nodemailer from 'nodemailer';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env from parent directory
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const app = express();
 const httpServer = createServer(app);
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
-
 const io = new Server(httpServer, {
   cors: {
-    origin: CLIENT_URL,
-    methods: ['GET', 'POST']
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
   }
 });
 
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'nexusmind_super_secret_jwt_key_2024_change_in_production';
 
 // Middleware
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Connect to Firestore
-connectDB();
+// File upload configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads'));
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage });
 
-// Email configuration
+// Email transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.GMAIL_EMAIL,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
 });
 
-// Feedback submission endpoint
-app.post('/api/feedback', async (req, res) => {
-  try {
-    const feedback = req.body;
+// Track active users and conversations
+const activeUsers = new Map();
+const conversations = new Map();
 
-    // Validate required fields
-    if (!feedback.subject || !feedback.message || !feedback.email) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
+// ==================== REAL-TIME ANALYTICS TRACKING ====================
 
-    // Send email to admin
-    const adminMailOptions = {
-      from: process.env.EMAIL_ADDRESS,
-      to: process.env.ADMIN_EMAILS,
-      subject: `[NexusMind Feedback] ${feedback.category.toUpperCase()}: ${feedback.subject}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">New Feedback Received</h1>
-            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">NexusMind Feedback System</p>
-          </div>
-          
-          <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0;">
-            <div style="margin-bottom: 20px;">
-              <strong style="color: #333; display: block; margin-bottom: 5px;">Category:</strong>
-              <span style="background: #e3f2fd; color: #1976d2; padding: 5px 12px; border-radius: 15px; font-size: 14px; font-weight: 600;">
-                ${feedback.category.toUpperCase()}
-              </span>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-              <strong style="color: #333; display: block; margin-bottom: 5px;">Subject:</strong>
-              <p style="color: #555; margin: 0; font-size: 16px;">${feedback.subject}</p>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-              <strong style="color: #333; display: block; margin-bottom: 5px;">Rating:</strong>
-              <div style="color: #ffc107; font-size: 24px;">
-                ${'★'.repeat(feedback.rating)}${'☆'.repeat(5 - feedback.rating)}
-              </div>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-              <strong style="color: #333; display: block; margin-bottom: 5px;">From:</strong>
-              <p style="color: #555; margin: 0;">${feedback.userName} (${feedback.email})</p>
-              <p style="color: #999; margin: 5px 0 0 0; font-size: 12px;">User ID: ${feedback.userId}</p>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-              <strong style="color: #333; display: block; margin-bottom: 5px;">Message:</strong>
-              <div style="background: white; padding: 15px; border-left: 4px solid #667eea; border-radius: 4px; color: #555; line-height: 1.6;">
-                ${feedback.message.replace(/\n/g, '<br>')}
-              </div>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-              <strong style="color: #333; display: block; margin-bottom: 5px;">Submitted:</strong>
-              <p style="color: #999; margin: 0; font-size: 14px;">${new Date(feedback.timestamp).toLocaleString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}</p>
-            </div>
-            
-            <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;">
-              <p style="color: #2e7d32; margin: 0; font-size: 14px;">
-                <strong>Feedback ID:</strong> ${feedback.id}
-              </p>
-            </div>
-          </div>
-          
-          <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-            <p>This feedback was submitted through the NexusMind Feedback System</p>
-          </div>
-        </div>
-      `,
-    };
+// Comprehensive user session tracking
+const userSessions = new Map(); // userId -> session data
+const analyticsData = {
+  totalUsers: 0,
+  activeUsers: 0,
+  totalSessions: 0,
+  peakActiveUsers: 0,
+  peakTime: null,
+  messagesSent: 0,
+  notificationsSent: 0,
+  hourlyStats: new Map(), // hour -> { users, sessions, messages }
+  dailyStats: new Map(), // date -> { users, sessions, messages, peakUsers }
+  userActivity: new Map(), // userId -> { lastActive, sessionCount, messagesSent }
+  geographicData: new Map(), // country -> user count
+  deviceData: new Map(), // device type -> user count
+  pageViews: new Map(), // page -> view count
+  realtimeEvents: [] // recent events for live feed
+};
 
-    // Send confirmation email to user
-    const userMailOptions = {
-      from: process.env.EMAIL_ADDRESS,
-      to: feedback.email,
-      subject: 'Thank you for your feedback - NexusMind',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">Thank You!</h1>
-            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Your feedback has been received</p>
-          </div>
-          
-          <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e0e0e0;">
-            <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
-              Dear ${feedback.userName},
-            </p>
-            
-            <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
-              Thank you for taking the time to share your feedback with us. We truly appreciate your input and will review it carefully.
-            </p>
-            
-            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; margin-bottom: 20px;">
-              <p style="color: #333; margin: 0 0 10px 0; font-weight: 600;">Feedback Summary:</p>
-              <ul style="color: #555; margin: 0; padding-left: 20px; line-height: 1.8;">
-                <li><strong>Category:</strong> ${feedback.category}</li>
-                <li><strong>Subject:</strong> ${feedback.subject}</li>
-                <li><strong>Rating:</strong> ${feedback.rating}/5</li>
-                <li><strong>Submitted:</strong> ${new Date(feedback.timestamp).toLocaleDateString()}</li>
-              </ul>
-            </div>
-            
-            <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
-              If you have any questions or need to provide additional information, please don't hesitate to contact us at support@nexusmind.com
-            </p>
-            
-            <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
-              Best regards,<br>
-              The NexusMind Team
-            </p>
-            
-            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center;">
-              <p style="color: #1976d2; margin: 0; font-size: 14px;">
-                <strong>Feedback ID:</strong> ${feedback.id}
-              </p>
-            </div>
-          </div>
-          
-          <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-            <p>© 2024 NexusMind. All rights reserved.</p>
-          </div>
-        </div>
-      `,
-    };
-
-    // Send emails
-    await transporter.sendMail(adminMailOptions);
-    await transporter.sendMail(userMailOptions);
-
-    console.log(`Feedback received from ${feedback.userName}: ${feedback.subject}`);
-    
-    res.status(200).json({ 
-      success: true, 
-      message: 'Feedback submitted successfully',
-      feedbackId: feedback.id 
-    });
-  } catch (error) {
-    console.error('Error submitting feedback:', error);
-    res.status(500).json({ 
-      error: 'Failed to submit feedback',
-      details: error.message 
+// Initialize hourly stats
+const initializeHourlyStats = () => {
+  const now = new Date();
+  const hourKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}`;
+  if (!analyticsData.hourlyStats.has(hourKey)) {
+    analyticsData.hourlyStats.set(hourKey, {
+      users: 0,
+      sessions: 0,
+      messages: 0,
+      notifications: 0,
+      pageViews: 0,
+      peakUsers: 0
     });
   }
-});
+  return hourKey;
+};
 
-// ==================== USER MANAGEMENT ====================
-
-// Get user profile
-// Create or upsert user profile (called after Firebase Auth signup)
-app.post('/api/users', async (req, res) => {
-  try {
-    const { id, ...userData } = req.body;
-    if (!id) {
-      return res.status(400).json({ error: 'User id is required' });
-    }
-
-    const userRef = db.collection('users').doc(id);
-    const existing = await userRef.get();
-
-    const profile = {
-      ...userData,
-      reputation: userData.reputation ?? 0,
-      savedItems: userData.savedItems ?? [],
-      createdAt: existing.exists ? existing.data().createdAt : Date.now(),
-      updatedAt: Date.now(),
-    };
-
-    await userRef.set(profile, { merge: true });
-    const userDoc = await userRef.get();
-    res.status(existing.exists ? 200 : 201).json({ id: userDoc.id, ...userDoc.data() });
-  } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).json({ error: 'Failed to create user profile' });
-  }
-});
-
-app.get('/api/users/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const userDoc = await db.collection('users').doc(userId).get();
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.json({ id: userDoc.id, ...userDoc.data() });
-  } catch (error) {
-    console.error('Error getting user:', error);
-    res.status(500).json({ error: 'Failed to get user' });
-  }
-});
-
-// Update user profile
-app.put('/api/users/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const updates = req.body;
-    await db.collection('users').doc(userId).update({
-      ...updates,
-      updatedAt: Date.now()
+// Initialize daily stats
+const initializeDailyStats = () => {
+  const now = new Date();
+  const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  if (!analyticsData.dailyStats.has(dateKey)) {
+    analyticsData.dailyStats.set(dateKey, {
+      users: 0,
+      sessions: 0,
+      messages: 0,
+      notifications: 0,
+      pageViews: 0,
+      peakUsers: 0,
+      peakTime: null
     });
-    const userDoc = await db.collection('users').doc(userId).get();
-    res.json({ id: userDoc.id, ...userDoc.data() });
-  } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ error: 'Failed to update user' });
   }
-});
+  return dateKey;
+};
 
-// Get all users (for search)
-app.get('/api/users', async (req, res) => {
-  try {
-    const { query } = req.query;
-    let usersQuery = db.collection('users').limit(50);
-    
-    if (query) {
-      const q = query.toLowerCase();
-      const allUsersSnapshot = await db.collection('users').get();
-      const allUsers = allUsersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const filteredUsers = allUsers.filter(u => 
-        u.name?.toLowerCase().includes(q) ||
-        u.username?.toLowerCase().includes(q) ||
-        u.bio?.toLowerCase().includes(q)
-      );
-      res.json(filteredUsers);
-    } else {
-      const allUsersSnapshot = await usersQuery.get();
-      const allUsers = allUsersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      res.json(allUsers);
-    }
-  } catch (error) {
-    console.error('Error getting users:', error);
-    res.status(500).json({ error: 'Failed to get users' });
-  }
-});
-
-// ==================== POSTS MANAGEMENT ====================
-
-// Get all posts
-app.get('/api/posts', async (req, res) => {
-  try {
-    const { userId, category, sortBy } = req.query;
-    let query = db.collection('posts').limit(100);
-    
-    if (userId) {
-      query = query.where('userId', '==', userId);
-    }
-    
-    if (category) {
-      query = query.where('category', '==', category);
-    }
-    
-    const postsSnapshot = await query.get();
-    let allPosts = postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    if (sortBy === 'newest') {
-      allPosts.sort((a, b) => b.timestamp - a.timestamp);
-    } else if (sortBy === 'oldest') {
-      allPosts.sort((a, b) => a.timestamp - b.timestamp);
-    } else if (sortBy === 'most_votes') {
-      allPosts.sort((a, b) => b.votes - a.votes);
-    }
-    
-    res.json(allPosts);
-  } catch (error) {
-    console.error('Error getting posts:', error);
-    res.status(500).json({ error: 'Failed to get posts' });
-  }
-});
-
-// Get single post
-app.get('/api/posts/:postId', async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const postDoc = await db.collection('posts').doc(postId).get();
-    if (!postDoc.exists) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    res.json({ id: postDoc.id, ...postDoc.data() });
-  } catch (error) {
-    console.error('Error getting post:', error);
-    res.status(500).json({ error: 'Failed to get post' });
-  }
-});
-
-// Create post
-app.post('/api/posts', async (req, res) => {
-  try {
-    const postData = {
-      timestamp: Date.now(),
-      votes: 0,
-      solutions: [],
-      comments: [],
-      isSolved: false,
-      ...req.body
-    };
-    
-    const postRef = await db.collection('posts').add(postData);
-    const postDoc = await postRef.get();
-    const post = { id: postDoc.id, ...postDoc.data() };
-    
-    // Log activity
-    await logActivity(post.userId, 'created_post', { postId: post.id });
-    
-    res.status(201).json(post);
-  } catch (error) {
-    console.error('Error creating post:', error);
-    res.status(500).json({ error: 'Failed to create post' });
-  }
-});
-
-// Update post
-app.put('/api/posts/:postId', async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const updates = req.body;
-    await db.collection('posts').doc(postId).update(updates);
-    const postDoc = await db.collection('posts').doc(postId).get();
-    if (!postDoc.exists) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    res.json({ id: postDoc.id, ...postDoc.data() });
-  } catch (error) {
-    console.error('Error updating post:', error);
-    res.status(500).json({ error: 'Failed to update post' });
-  }
-});
-
-// Delete post
-app.delete('/api/posts/:postId', async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const postDoc = await db.collection('posts').doc(postId).get();
-    if (!postDoc.exists) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    const post = { id: postDoc.id, ...postDoc.data() };
-    await db.collection('posts').doc(postId).delete();
-    
-    // Log activity
-    await logActivity(post.userId, 'deleted_post', { postId });
-    
-    res.json({ message: 'Post deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting post:', error);
-    res.status(500).json({ error: 'Failed to delete post' });
-  }
-});
-
-// Vote on post
-app.post('/api/posts/:postId/vote', async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const { delta, userId } = req.body;
-    const postDoc = await db.collection('posts').doc(postId).get();
-    
-    if (!postDoc.exists) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    
-    const post = { id: postDoc.id, ...postDoc.data() };
-    post.votes += delta;
-    await db.collection('posts').doc(postId).update({ votes: post.votes });
-    
-    // Create notification for post author
-    if (delta > 0 && post.userId !== userId) {
-      await createNotification(post.userId, 'vote', {
-        text: `Someone upvoted your post "${post.title}"`,
-        avatar: req.body.userAvatar,
-        actionUrl: `/solutions/${postId}`
-      });
-    }
-    
-    res.json(post);
-  } catch (error) {
-    console.error('Error voting on post:', error);
-    res.status(500).json({ error: 'Failed to vote on post' });
-  }
-});
-
-// ==================== SOLUTIONS ====================
-
-// Add solution to post
-app.post('/api/posts/:postId/solutions', async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const postDoc = await db.collection('posts').doc(postId).get();
-    
-    if (!postDoc.exists) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    
-    const post = { id: postDoc.id, ...postDoc.data() };
-    const solution = {
-      id: `sol_${Date.now()}`,
-      timestamp: Date.now(),
-      upvotes: 0,
-      helpful: 0,
-      replies: [],
-      ...req.body
-    };
-    
-    const solutions = post.solutions || [];
-    solutions.push(solution);
-    await db.collection('posts').doc(postId).update({ solutions });
-    
-    // Create notification for post author
-    if (post.userId !== req.body.userId) {
-      await createNotification(post.userId, 'solution', {
-        text: `${req.body.userName} posted a solution to your problem`,
-        avatar: req.body.userAvatar,
-        actionUrl: `/solutions/${postId}`
-      });
-    }
-    
-    // Log activity
-    await logActivity(req.body.userId, 'added_solution', { postId, solutionId: solution.id });
-    
-    res.status(201).json(solution);
-  } catch (error) {
-    console.error('Error adding solution:', error);
-    res.status(500).json({ error: 'Failed to add solution' });
-  }
-});
-
-// Vote on solution
-app.post('/api/posts/:postId/solutions/:solutionId/vote', async (req, res) => {
-  try {
-    const { postId, solutionId } = req.params;
-    const { delta } = req.body;
-    const postDoc = await db.collection('posts').doc(postId).get();
-    
-    if (!postDoc.exists) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    
-    const post = { id: postDoc.id, ...postDoc.data() };
-    const solutions = post.solutions || [];
-    const solution = solutions.find(s => s.id === solutionId);
-    if (!solution) {
-      return res.status(404).json({ error: 'Solution not found' });
-    }
-    
-    solution.upvotes += delta;
-    await db.collection('posts').doc(postId).update({ solutions });
-    
-    res.json(solution);
-  } catch (error) {
-    console.error('Error voting on solution:', error);
-    res.status(500).json({ error: 'Failed to vote on solution' });
-  }
-});
-
-// Mark solution as helpful
-app.post('/api/posts/:postId/solutions/:solutionId/helpful', async (req, res) => {
-  try {
-    const { postId, solutionId } = req.params;
-    const postDoc = await db.collection('posts').doc(postId).get();
-    
-    if (!postDoc.exists) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    
-    const post = { id: postDoc.id, ...postDoc.data() };
-    const solutions = post.solutions || [];
-    const solution = solutions.find(s => s.id === solutionId);
-    if (!solution) {
-      return res.status(404).json({ error: 'Solution not found' });
-    }
-    
-    solution.helpful += 1;
-    await db.collection('posts').doc(postId).update({ solutions });
-    
-    res.json(solution);
-  } catch (error) {
-    console.error('Error marking solution as helpful:', error);
-    res.status(500).json({ error: 'Failed to mark solution as helpful' });
-  }
-});
-
-// ==================== COMMENTS ====================
-
-// Add comment to post
-app.post('/api/posts/:postId/comments', async (req, res) => {
-  try {
-    const { postId } = req.params;
-    const postDoc = await db.collection('posts').doc(postId).get();
-    
-    if (!postDoc.exists) {
-      return res.status(404).json({ error: 'Post not found' });
-    }
-    
-    const post = { id: postDoc.id, ...postDoc.data() };
-    const comment = {
-      id: `comment_${Date.now()}`,
-      timestamp: Date.now(),
-      ...req.body
-    };
-    
-    const comments = post.comments || [];
-    comments.push(comment);
-    await db.collection('posts').doc(postId).update({ comments });
-    
-    // Create notification for post author
-    if (post.userId !== req.body.userId) {
-      await createNotification(post.userId, 'reply', {
-        text: `${req.body.userName} commented on your post`,
-        avatar: req.body.userAvatar,
-        actionUrl: `/solutions/${postId}`
-      });
-    }
-    
-    res.status(201).json(comment);
-  } catch (error) {
-    console.error('Error adding comment:', error);
-    res.status(500).json({ error: 'Failed to add comment' });
-  }
-});
-
-// ==================== NOTIFICATIONS ====================
-
-// Get user notifications
-app.get('/api/users/:userId/notifications', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const notificationsSnapshot = await db.collection('notifications')
-      .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
-      .limit(50)
-      .get();
-    const userNotifications = notificationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.json(userNotifications);
-  } catch (error) {
-    console.error('Error getting notifications:', error);
-    res.status(500).json({ error: 'Failed to get notifications' });
-  }
-});
-
-// Mark notification as read
-app.put('/api/notifications/:notificationId/read', async (req, res) => {
-  try {
-    const { notificationId } = req.params;
-    await db.collection('notifications').doc(notificationId).update({ read: true });
-    const notificationDoc = await db.collection('notifications').doc(notificationId).get();
-    if (!notificationDoc.exists) {
-      return res.status(404).json({ error: 'Notification not found' });
-    }
-    res.json({ id: notificationDoc.id, ...notificationDoc.data() });
-  } catch (error) {
-    console.error('Error marking notification as read:', error);
-    res.status(500).json({ error: 'Failed to mark notification as read' });
-  }
-});
-
-// Mark all notifications as read
-app.put('/api/users/:userId/notifications/read-all', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const notificationsSnapshot = await db.collection('notifications')
-      .where('userId', '==', userId)
-      .where('read', '==', false)
-      .get();
-    const batch = db.batch();
-    notificationsSnapshot.docs.forEach(doc => {
-      batch.update(doc.ref, { read: true });
-    });
-    await batch.commit();
-    res.json({ message: 'All notifications marked as read' });
-  } catch (error) {
-    console.error('Error marking all notifications as read:', error);
-    res.status(500).json({ error: 'Failed to mark all notifications as read' });
-  }
-});
-
-// Delete notification
-app.delete('/api/notifications/:notificationId', async (req, res) => {
-  try {
-    const { notificationId } = req.params;
-    const notificationDoc = await db.collection('notifications').doc(notificationId).get();
-    if (!notificationDoc.exists) {
-      return res.status(404).json({ error: 'Notification not found' });
-    }
-    await db.collection('notifications').doc(notificationId).delete();
-    res.json({ message: 'Notification deleted' });
-  } catch (error) {
-    console.error('Error deleting notification:', error);
-    res.status(500).json({ error: 'Failed to delete notification' });
-  }
-});
-
-// ==================== ACTIVITY LOGGING ====================
-
-// Get user activity log
-app.get('/api/users/:userId/activity', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const activitiesSnapshot = await db.collection('activities')
-      .where('userId', '==', userId)
-      .orderBy('timestamp', 'desc')
-      .limit(100)
-      .get();
-    const userActivities = activitiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.json(userActivities);
-  } catch (error) {
-    console.error('Error getting activities:', error);
-    res.status(500).json({ error: 'Failed to get activities' });
-  }
-});
-
-// ==================== GROUPS ====================
-
-// Get all groups
-app.get('/api/groups', async (req, res) => {
-  try {
-    const { query, category } = req.query;
-    let groupsQuery = db.collection('groups').limit(50);
-    
-    if (category) {
-      groupsQuery = groupsQuery.where('category', '==', category);
-    }
-    
-    const groupsSnapshot = await groupsQuery.get();
-    let allGroups = groupsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    if (query) {
-      const q = query.toLowerCase();
-      allGroups = allGroups.filter(g => 
-        g.name?.toLowerCase().includes(q) ||
-        g.description?.toLowerCase().includes(q)
-      );
-    }
-    
-    res.json(allGroups);
-  } catch (error) {
-    console.error('Error getting groups:', error);
-    res.status(500).json({ error: 'Failed to get groups' });
-  }
-});
-
-// Get single group
-app.get('/api/groups/:groupId', async (req, res) => {
-  try {
-    const { groupId } = req.params;
-    const groupDoc = await db.collection('groups').doc(groupId).get();
-    if (!groupDoc.exists) {
-      return res.status(404).json({ error: 'Group not found' });
-    }
-    res.json({ id: groupDoc.id, ...groupDoc.data() });
-  } catch (error) {
-    console.error('Error getting group:', error);
-    res.status(500).json({ error: 'Failed to get group' });
-  }
-});
-
-// Create group
-app.post('/api/groups', async (req, res) => {
-  try {
-    const groupData = {
-      timestamp: Date.now(),
-      members: [],
-      posts: [],
-      memberCount: 0,
-      ...req.body
-    };
-    
-    const groupRef = await db.collection('groups').add(groupData);
-    const groupDoc = await groupRef.get();
-    const group = { id: groupDoc.id, ...groupDoc.data() };
-    
-    // Log activity
-    await logActivity(req.body.creatorId, 'created_group', { groupId: group.id });
-    
-    res.status(201).json(group);
-  } catch (error) {
-    console.error('Error creating group:', error);
-    res.status(500).json({ error: 'Failed to create group' });
-  }
-});
-
-// Join group
-app.post('/api/groups/:groupId/join', async (req, res) => {
-  try {
-    const { groupId } = req.params;
-    const { userId } = req.body;
-    const groupDoc = await db.collection('groups').doc(groupId).get();
-    
-    if (!groupDoc.exists) {
-      return res.status(404).json({ error: 'Group not found' });
-    }
-    
-    const group = { id: groupDoc.id, ...groupDoc.data() };
-    const userDoc = await db.collection('users').doc(userId).get();
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    const user = { id: userDoc.id, ...userDoc.data() };
-    const memberData = { id: user.id, name: user.name, username: user.username, avatar: user.avatar };
-    
-    const members = group.members || [];
-    if (!members.find(m => m.id === userId)) {
-      members.push(memberData);
-      group.memberCount = members.length;
-      await db.collection('groups').doc(groupId).update({ members, memberCount: group.memberCount });
-      
-      // Log activity
-      await logActivity(userId, 'joined_group', { groupId });
-    }
-    
-    res.json(group);
-  } catch (error) {
-    console.error('Error joining group:', error);
-    res.status(500).json({ error: 'Failed to join group' });
-  }
-});
-
-// ==================== SEARCH ====================
-
-// Global search endpoint
-app.get('/api/search', async (req, res) => {
-  try {
-    const { q, type } = req.query;
-    const query = q?.toLowerCase() || '';
-    
-    const [usersSnapshot, postsSnapshot, groupsSnapshot] = await Promise.all([
-      db.collection('users').limit(50).get(),
-      db.collection('posts').limit(50).get(),
-      db.collection('groups').limit(50).get()
-    ]);
-    
-    const allUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const allPosts = postsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const allGroups = groupsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    const results = {
-      users: allUsers.filter(u => 
-        u.name?.toLowerCase().includes(query) ||
-        u.username?.toLowerCase().includes(query) ||
-        u.bio?.toLowerCase().includes(query)
-      ),
-      posts: allPosts.filter(p => 
-        p.title?.toLowerCase().includes(query) ||
-        p.content?.toLowerCase().includes(query) ||
-        p.category?.toLowerCase().includes(query)
-      ),
-      groups: allGroups.filter(g => 
-        g.name?.toLowerCase().includes(query) ||
-        g.description?.toLowerCase().includes(query)
-      ),
-      videos: [],
-      products: []
-    };
-    
-    if (type && type !== 'all') {
-      res.json({ [type]: results[type] });
-    } else {
-      res.json(results);
-    }
-  } catch (error) {
-    console.error('Error searching:', error);
-    res.status(500).json({ error: 'Failed to search' });
-  }
-});
-
-// ==================== SAVED ITEMS ====================
-
-// Get user saved items
-app.get('/api/users/:userId/saved', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const userDoc = await db.collection('users').doc(userId).get();
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    const user = { id: userDoc.id, ...userDoc.data() };
-    res.json(user.savedItems || []);
-  } catch (error) {
-    console.error('Error getting saved items:', error);
-    res.status(500).json({ error: 'Failed to get saved items' });
-  }
-});
-
-// Save item
-app.post('/api/users/:userId/saved', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const userDoc = await db.collection('users').doc(userId).get();
-    
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    const user = { id: userDoc.id, ...userDoc.data() };
-    const savedItem = {
-      id: `saved_${Date.now()}`,
-      timestamp: Date.now(),
-      ...req.body
-    };
-    
-    const savedItems = user.savedItems || [];
-    savedItems.push(savedItem);
-    await db.collection('users').doc(userId).update({ savedItems });
-    
-    res.status(201).json(savedItem);
-  } catch (error) {
-    console.error('Error saving item:', error);
-    res.status(500).json({ error: 'Failed to save item' });
-  }
-});
-
-// Remove saved item
-app.delete('/api/users/:userId/saved/:itemId', async (req, res) => {
-  try {
-    const { userId, itemId } = req.params;
-    const userDoc = await db.collection('users').doc(userId).get();
-    
-    if (!userDoc.exists) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    const user = { id: userDoc.id, ...userDoc.data() };
-    const savedItems = user.savedItems || [];
-    const itemIndex = savedItems.findIndex(i => i.id === itemId);
-    if (itemIndex === -1) {
-      return res.status(404).json({ error: 'Saved item not found' });
-    }
-    
-    savedItems.splice(itemIndex, 1);
-    await db.collection('users').doc(userId).update({ savedItems });
-    
-    res.json({ message: 'Item removed from saved' });
-  } catch (error) {
-    console.error('Error removing saved item:', error);
-    res.status(500).json({ error: 'Failed to remove saved item' });
-  }
-});
-
-// ==================== HELPER FUNCTIONS ====================
-
-async function createNotification(userId, type, data) {
-  const notification = {
-    userId,
+// Add realtime event
+const addRealtimeEvent = (type, data) => {
+  const event = {
     type,
-    createdAt: Date.now(),
-    read: false,
-    time: formatTime(Date.now()),
-    ...data
+    data,
+    timestamp: new Date().toISOString()
   };
-  
-  const notificationRef = await db.collection('notifications').add(notification);
-  const notificationDoc = await notificationRef.get();
-  const notificationData = { id: notificationDoc.id, ...notificationDoc.data() };
-  
-  // Emit via WebSocket if user is connected
-  io.to(userId).emit('notification', notificationData);
-}
+  analyticsData.realtimeEvents.unshift(event);
+  if (analyticsData.realtimeEvents.length > 100) {
+    analyticsData.realtimeEvents.pop();
+  }
+  // Broadcast to admin dashboard
+  io.emit('analytics_event', event);
+};
 
-async function logActivity(userId, action, metadata) {
-  const activity = {
-    userId,
-    action,
-    timestamp: Date.now(),
-    metadata
-  };
-  await db.collection('activities').add(activity);
-}
-
-function formatTime(timestamp) {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
-
-  if (minutes < 1) return 'Just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  if (hours < 24) return `${hours}h ago`;
-  return `${days}d ago`;
-}
-
-// ==================== WEBSOCKET (Real-time Messaging) ====================
-
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-  
-  // Join user's personal room for notifications
-  socket.on('join', (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined their room`);
-  });
-  
-  // Join conversation room
-  socket.on('join_conversation', async (conversationId) => {
-    socket.join(conversationId);
-    console.log(`User joined conversation: ${conversationId}`);
+// Update peak users
+const updatePeakUsers = (currentCount) => {
+  if (currentCount > analyticsData.peakActiveUsers) {
+    analyticsData.peakActiveUsers = currentCount;
+    analyticsData.peakTime = new Date().toISOString();
     
-    // Load conversation from Firestore if exists
-    try {
-      const conversationDoc = await db.collection('conversations').doc(conversationId).get();
-      if (conversationDoc.exists) {
-        socket.emit('conversation_loaded', { id: conversationDoc.id, ...conversationDoc.data() });
-      }
-    } catch (error) {
-      console.error('Error loading conversation:', error);
+    // Update hourly peak
+    const hourKey = initializeHourlyStats();
+    const hourStats = analyticsData.hourlyStats.get(hourKey);
+    if (currentCount > hourStats.peakUsers) {
+      hourStats.peakUsers = currentCount;
     }
-  });
-  
-  // Send message
-  socket.on('send_message', async (data) => {
-    const { conversationId, message } = data;
     
-    try {
-      const conversationDoc = await db.collection('conversations').doc(conversationId).get();
-      
-      if (conversationDoc.exists) {
-        const conversation = { id: conversationDoc.id, ...conversationDoc.data() };
-        const newMessage = {
-          id: `msg_${Date.now()}`,
-          timestamp: Date.now(),
-          ...message
-        };
-        
-        const messages = conversation.messages || [];
-        messages.push(newMessage);
-        await db.collection('conversations').doc(conversationId).update({
-          messages,
-          lastMessage: message.text,
-          time: formatTime(Date.now())
-        });
-        
-        // Broadcast to conversation room
-        io.to(conversationId).emit('new_message', newMessage);
-        
-        // Notify other participants
-        const participants = conversation.participants || [];
-        participants.forEach(p => {
-          if (p.id !== message.senderId) {
-            createNotification(p.id, 'reply', {
-              text: `New message from ${message.senderName}`,
-              avatar: message.senderAvatar,
-              actionUrl: '/messages'
-            });
-          }
-        });
-      } else {
-        // Create new conversation if it doesn't exist
-        const newConversation = {
-          participants: message.participants || [],
-          messages: [{
-            id: `msg_${Date.now()}`,
-            timestamp: Date.now(),
-            ...message
-          }],
-          lastMessage: message.text,
-          time: formatTime(Date.now()),
-          timestamp: Date.now()
-        };
-        
-        await db.collection('conversations').doc(conversationId).set(newConversation);
-        io.to(conversationId).emit('new_message', newConversation.messages[0]);
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
+    // Update daily peak
+    const dateKey = initializeDailyStats();
+    const dateStats = analyticsData.dailyStats.get(dateKey);
+    if (currentCount > dateStats.peakUsers) {
+      dateStats.peakUsers = currentCount;
+      dateStats.peakTime = new Date().toISOString();
     }
+  }
+};
+
+// Initialize stats
+initializeHourlyStats();
+initializeDailyStats();
+
+// ==================== JWT AUTHENTICATION MIDDLEWARE ====================
+
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    req.user = decoded;
+    next();
   });
-  
-  // Typing indicator
-  socket.on('typing', (data) => {
-    const { conversationId, userId, isTyping } = data;
-    socket.to(conversationId).emit('user_typing', { userId, isTyping });
-  });
-  
-  // Disconnect
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
+};
+
+const authenticateFirebaseToken = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Firebase token required' });
+  }
+
+  try {
+    const decodedToken = await auth.verifyIdToken(token);
+    req.user = decodedToken;
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: 'Invalid Firebase token' });
+  }
+};
+
+// ==================== REST API ROUTES ====================
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// ==================== HEALTH CHECK ====================
+// Basic user status endpoint
+app.get('/api/users/:userId/status', (req, res) => {
+  const { userId } = req.params;
+  const isOnline = activeUsers.has(userId);
+  res.json({ userId, isOnline, lastSeen: activeUsers.get(userId)?.lastSeen || null });
+});
 
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    message: 'NexusMind API server is running',
+// Get active conversations
+app.get('/api/conversations', (req, res) => {
+  const convoList = Array.from(conversations.values());
+  res.json(convoList);
+});
+
+// ==================== ANALYTICS API ENDPOINTS ====================
+
+// Get real-time analytics overview
+app.get('/api/analytics/overview', (req, res) => {
+  res.json({
+    activeUsers: analyticsData.activeUsers,
+    totalUsers: analyticsData.totalUsers,
+    totalSessions: analyticsData.totalSessions,
+    peakActiveUsers: analyticsData.peakActiveUsers,
+    peakTime: analyticsData.peakTime,
+    messagesSent: analyticsData.messagesSent,
+    notificationsSent: analyticsData.notificationsSent,
     timestamp: new Date().toISOString()
   });
+});
+
+// Get active users list with session details
+app.get('/api/analytics/active-users', (req, res) => {
+  const activeUsersList = Array.from(activeUsers.values()).map(session => ({
+    userId: session.userId,
+    deviceInfo: session.deviceInfo,
+    geographicInfo: session.geographicInfo,
+    joinTime: session.joinTime,
+    lastActive: session.lastActive,
+    pagesVisited: session.pagesVisited.length,
+    messagesSent: session.messagesSent
+  }));
+  res.json(activeUsersList);
+});
+
+// Get hourly stats
+app.get('/api/analytics/hourly', (req, res) => {
+  const hours = parseInt(req.query.hours) || 24;
+  const now = new Date();
+  const hourlyData = [];
+  
+  for (let i = hours - 1; i >= 0; i--) {
+    const hour = new Date(now.getTime() - i * 60 * 60 * 1000);
+    const hourKey = `${hour.getFullYear()}-${String(hour.getMonth() + 1).padStart(2, '0')}-${String(hour.getDate()).padStart(2, '0')}-${String(hour.getHours()).padStart(2, '0')}`;
+    const stats = analyticsData.hourlyStats.get(hourKey) || {
+      users: 0,
+      sessions: 0,
+      messages: 0,
+      notifications: 0,
+      pageViews: 0,
+      peakUsers: 0
+    };
+    hourlyData.push({
+      hour: hourKey,
+      ...stats
+    });
+  }
+  
+  res.json(hourlyData);
+});
+
+// Get daily stats
+app.get('/api/analytics/daily', (req, res) => {
+  const days = parseInt(req.query.days) || 7;
+  const now = new Date();
+  const dailyData = [];
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const day = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    const dateKey = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+    const stats = analyticsData.dailyStats.get(dateKey) || {
+      users: 0,
+      sessions: 0,
+      messages: 0,
+      notifications: 0,
+      pageViews: 0,
+      peakUsers: 0,
+      peakTime: null
+    };
+    dailyData.push({
+      date: dateKey,
+      ...stats
+    });
+  }
+  
+  res.json(dailyData);
+});
+
+// Get geographic distribution
+app.get('/api/analytics/geographic', (req, res) => {
+  const geographicData = Array.from(analyticsData.geographicData.entries()).map(([country, count]) => ({
+    country,
+    count
+  }));
+  res.json(geographicData);
+});
+
+// Get device distribution
+app.get('/api/analytics/devices', (req, res) => {
+  const deviceData = Array.from(analyticsData.deviceData.entries()).map(([device, count]) => ({
+    device,
+    count
+  }));
+  res.json(deviceData);
+});
+
+// Get page views
+app.get('/api/analytics/page-views', (req, res) => {
+  const pageViewsData = Array.from(analyticsData.pageViews.entries()).map(([page, count]) => ({
+    page,
+    count
+  })).sort((a, b) => b.count - a.count);
+  res.json(pageViewsData);
+});
+
+// Get user activity details
+app.get('/api/analytics/user-activity/:userId', (req, res) => {
+  const { userId } = req.params;
+  const activity = analyticsData.userActivity.get(userId);
+  const session = userSessions.get(userId);
+  
+  if (!activity && !session) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  
+  res.json({
+    userId,
+    activity: activity || null,
+    currentSession: session || null
+  });
+});
+
+// Get realtime events feed
+app.get('/api/analytics/events', (req, res) => {
+  const limit = parseInt(req.query.limit) || 50;
+  res.json(analyticsData.realtimeEvents.slice(0, limit));
+});
+
+// ==================== AUTHENTICATION ENDPOINTS ====================
+
+// Verify Firebase ID token and issue JWT
+app.post('/api/auth/verify-token', async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    const decodedToken = await auth.verifyIdToken(idToken);
+    
+    // Create JWT token
+    const jwtToken = jwt.sign(
+      { uid: decodedToken.uid, email: decodedToken.email },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
+    res.json({ 
+      uid: decodedToken.uid, 
+      email: decodedToken.email, 
+      token: jwtToken 
+    });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+// ==================== USER MANAGEMENT ENDPOINTS ====================
+// NOTE: User data operations handled by Firebase directly on frontend
+// Backend only handles authentication verification
+
+// ==================== POSTS MANAGEMENT ENDPOINTS ====================
+// NOTE: Posts data operations handled by Firebase directly on frontend
+// Backend focuses on server-side features only
+
+// ==================== FEEDBACK ENDPOINT ====================
+
+app.post('/api/feedback', async (req, res) => {
+  try {
+    const { name, email, message, type } = req.body;
+    
+    // Send email notification
+    const mailOptions = {
+      from: process.env.GMAIL_EMAIL,
+      to: process.env.ADMIN_EMAILS || process.env.GMAIL_EMAIL,
+      subject: `NexusMind Feedback - ${type || 'General'}`,
+      text: `
+Name: ${name}
+Email: ${email}
+Type: ${type || 'General'}
+
+Message:
+${message}
+      `
+    };
+    
+    await transporter.sendMail(mailOptions);
+    
+    res.json({ success: true, message: 'Feedback submitted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== FILE UPLOAD ENDPOINT ====================
+
+app.post('/api/upload', authenticateFirebaseToken, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ success: true, fileUrl });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== SOCKET.IO EVENTS ====================
+
+io.on('connection', (socket) => {
+  console.log(`[Socket] User connected: ${socket.id}`);
+
+  // User joins (sets their userId and marks online)
+  socket.on('join', (userData) => {
+    const userId = userData.userId || userData;
+    const deviceInfo = userData.deviceInfo || { type: 'unknown', browser: 'unknown' };
+    const geographicInfo = userData.geographicInfo || { country: 'unknown', city: 'unknown' };
+    
+    socket.userId = userId;
+    socket.join(userId);
+    
+    // Track detailed session data
+    const sessionData = {
+      socketId: socket.id,
+      userId,
+      deviceInfo,
+      geographicInfo,
+      joinTime: new Date().toISOString(),
+      lastActive: new Date().toISOString(),
+      status: 'online',
+      pagesVisited: [],
+      messagesSent: 0,
+      notificationsReceived: 0
+    };
+    
+    activeUsers.set(userId, sessionData);
+    userSessions.set(userId, sessionData);
+    
+    // Update analytics
+    analyticsData.activeUsers = activeUsers.size;
+    analyticsData.totalSessions++;
+    updatePeakUsers(analyticsData.activeUsers);
+    
+    // Update user activity tracking
+    if (!analyticsData.userActivity.has(userId)) {
+      analyticsData.userActivity.set(userId, {
+        lastActive: new Date().toISOString(),
+        sessionCount: 0,
+        messagesSent: 0,
+        totalSessionTime: 0
+      });
+      analyticsData.totalUsers++;
+    }
+    const userActivity = analyticsData.userActivity.get(userId);
+    userActivity.sessionCount++;
+    userActivity.lastActive = new Date().toISOString();
+    
+    // Update geographic data
+    const country = geographicInfo.country || 'unknown';
+    analyticsData.geographicData.set(country, (analyticsData.geographicData.get(country) || 0) + 1);
+    
+    // Update device data
+    const device = deviceInfo.type || 'unknown';
+    analyticsData.deviceData.set(device, (analyticsData.deviceData.get(device) || 0) + 1);
+    
+    // Update hourly stats
+    const hourKey = initializeHourlyStats();
+    const hourStats = analyticsData.hourlyStats.get(hourKey);
+    hourStats.users++;
+    hourStats.sessions++;
+    
+    // Update daily stats
+    const dateKey = initializeDailyStats();
+    const dateStats = analyticsData.dailyStats.get(dateKey);
+    dateStats.users++;
+    dateStats.sessions++;
+    
+    console.log(`[Socket] User ${userId} joined. Active users: ${activeUsers.size}`);
+    addRealtimeEvent('user_join', { userId, deviceInfo, geographicInfo });
+    
+    // Broadcast user online status
+    io.emit('user_online', { userId, status: 'online', sessionData });
+    
+    // Broadcast updated analytics
+    io.emit('analytics_update', {
+      activeUsers: analyticsData.activeUsers,
+      totalSessions: analyticsData.totalSessions,
+      peakActiveUsers: analyticsData.peakActiveUsers
+    });
+  });
+
+  // Join a conversation room
+  socket.on('join_conversation', (conversationId) => {
+    socket.join(conversationId);
+    console.log(`[Socket] ${socket.userId} joined conversation: ${conversationId}`);
+    
+    // Initialize conversation if not exists
+    if (!conversations.has(conversationId)) {
+      conversations.set(conversationId, {
+        id: conversationId,
+        participants: [],
+        messages: [],
+        createdAt: new Date().toISOString()
+      });
+    }
+    
+    // Notify others in conversation
+    io.to(conversationId).emit('user_joined_conversation', {
+      conversationId,
+      userId: socket.userId,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Send a message in conversation
+  socket.on('send_message', ({ conversationId, message }) => {
+    const timestamp = new Date().toISOString();
+    const messageData = {
+      id: `msg_${Date.now()}`,
+      conversationId,
+      userId: socket.userId,
+      text: message.text || message,
+      timestamp
+    };
+    
+    // Update analytics
+    analyticsData.messagesSent++;
+    
+    // Update user session message count
+    if (userSessions.has(socket.userId)) {
+      const session = userSessions.get(socket.userId);
+      session.messagesSent++;
+      session.lastActive = new Date().toISOString();
+    }
+    
+    // Update user activity
+    if (analyticsData.userActivity.has(socket.userId)) {
+      const userActivity = analyticsData.userActivity.get(socket.userId);
+      userActivity.messagesSent++;
+      userActivity.lastActive = new Date().toISOString();
+    }
+    
+    // Update hourly stats
+    const hourKey = initializeHourlyStats();
+    const hourStats = analyticsData.hourlyStats.get(hourKey);
+    hourStats.messages++;
+    
+    // Update daily stats
+    const dateKey = initializeDailyStats();
+    const dateStats = analyticsData.dailyStats.get(dateKey);
+    dateStats.messages++;
+    
+    // Broadcast message to conversation
+    io.to(conversationId).emit('message_received', messageData);
+    console.log(`[Socket] Message in ${conversationId} from ${socket.userId}`);
+    addRealtimeEvent('message_sent', { userId: socket.userId, conversationId });
+  });
+
+  // Typing indicator
+  socket.on('typing', ({ conversationId, userId, isTyping }) => {
+    io.to(conversationId).emit('user_typing', {
+      conversationId,
+      userId,
+      isTyping,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Send notification to specific user
+  socket.on('send_notification', ({ userId, notification }) => {
+    io.to(userId).emit('notification', {
+      id: `notif_${Date.now()}`,
+      ...notification,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Update analytics
+    analyticsData.notificationsSent++;
+    
+    // Update user session notification count
+    if (userSessions.has(userId)) {
+      const session = userSessions.get(userId);
+      session.notificationsReceived++;
+      session.lastActive = new Date().toISOString();
+    }
+    
+    // Update hourly stats
+    const hourKey = initializeHourlyStats();
+    const hourStats = analyticsData.hourlyStats.get(hourKey);
+    hourStats.notifications++;
+    
+    // Update daily stats
+    const dateKey = initializeDailyStats();
+    const dateStats = analyticsData.dailyStats.get(dateKey);
+    dateStats.notifications++;
+    
+    console.log(`[Socket] Notification sent to ${userId}`);
+    addRealtimeEvent('notification_sent', { userId });
+  });
+
+  // Handle disconnection
+  socket.on('disconnect', () => {
+    if (socket.userId) {
+      // Calculate session duration
+      const session = userSessions.get(socket.userId);
+      if (session) {
+        const sessionDuration = Date.now() - new Date(session.joinTime).getTime();
+        
+        // Update user activity with session time
+        if (analyticsData.userActivity.has(socket.userId)) {
+          const userActivity = analyticsData.userActivity.get(socket.userId);
+          userActivity.totalSessionTime += sessionDuration;
+        }
+        
+        userSessions.delete(socket.userId);
+      }
+      
+      activeUsers.delete(socket.userId);
+      analyticsData.activeUsers = activeUsers.size;
+      
+      console.log(`[Socket] User disconnected: ${socket.userId}. Active users: ${activeUsers.size}`);
+      addRealtimeEvent('user_disconnect', { userId: socket.userId });
+      
+      io.emit('user_offline', { userId: socket.userId, status: 'offline' });
+      
+      // Broadcast updated analytics
+      io.emit('analytics_update', {
+        activeUsers: analyticsData.activeUsers,
+        totalSessions: analyticsData.totalSessions
+      });
+    }
+  });
+
+  // Page view tracking
+  socket.on('page_view', (pageData) => {
+    const { page, userId } = pageData;
+    
+    // Update page views
+    analyticsData.pageViews.set(page, (analyticsData.pageViews.get(page) || 0) + 1);
+    
+    // Update user session pages visited
+    if (userSessions.has(userId || socket.userId)) {
+      const session = userSessions.get(userId || socket.userId);
+      session.pagesVisited.push({
+        page,
+        timestamp: new Date().toISOString()
+      });
+      session.lastActive = new Date().toISOString();
+    }
+    
+    // Update hourly stats
+    const hourKey = initializeHourlyStats();
+    const hourStats = analyticsData.hourlyStats.get(hourKey);
+    hourStats.pageViews++;
+    
+    // Update daily stats
+    const dateKey = initializeDailyStats();
+    const dateStats = analyticsData.dailyStats.get(dateKey);
+    dateStats.pageViews++;
+    
+    addRealtimeEvent('page_view', { userId: userId || socket.userId, page });
+  });
+
+  // Error handling
+  socket.on('error', (error) => {
+    console.error(`[Socket] Error from ${socket.userId}:`, error);
+  });
+});
+
+// ==================== ERROR HANDLING ====================
+
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: err.message || 'Internal server error' });
 });
 
 // ==================== START SERVER ====================
 
 httpServer.listen(PORT, () => {
-  console.log(`NexusMind API server running on port ${PORT}`);
-  console.log(`WebSocket server ready for real-time messaging`);
-  console.log(`Email service configured for: ${process.env.GMAIL_EMAIL}`);
+  console.log(`
+╔═══════════════════════════════════════╗
+║    NexusMind Backend Server Started    ║
+╚═══════════════════════════════════════╝
+🚀 Server running on http://localhost:${PORT}
+🔌 WebSocket ready
+📡 CORS enabled for ${process.env.FRONTEND_URL || 'http://localhost:5173'}
+🔐 JWT Authentication enabled
+📧 Email notifications enabled
+📁 File upload enabled
+  `);
+});
+
+process.on('SIGINT', () => {
+  console.log('\n[Server] Shutting down gracefully...');
+  httpServer.close(() => {
+    console.log('[Server] Closed');
+    process.exit(0);
+  });
 });
