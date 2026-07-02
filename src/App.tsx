@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import Feed from './components/Feed';
@@ -32,10 +32,14 @@ import { auth } from './firebase';
 import { onAuthStateChanged, signOut, reload } from 'firebase/auth';
 import { postsApi, userApi } from './lib/firebaseApi';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const location = useLocation();
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Hide navbar and bottom nav on onboarding page
+  const isOnboardingPage = location.pathname === '/onboarding';
 
   useEffect(() => {
     let isMounted = true;
@@ -215,11 +219,10 @@ const App: React.FC = () => {
   if (isLoading) return <Loading />;
 
   return (
-    <Router>
-      <div className="min-h-screen">
-        {user && <Navbar user={user} onLogout={handleLogout} />}
-        <main className={user ? "pt-[56px] pb-[72px] md:pb-0" : ""}>
-          <Routes>
+    <div className="min-h-screen">
+      {user && !isOnboardingPage && <Navbar user={user} onLogout={handleLogout} />}
+      <main className={user && !isOnboardingPage ? "pt-[56px] pb-[72px] md:pb-0" : ""}>
+        <Routes>
             <Route 
               path="/welcome" 
               element={user ? <Navigate to="/" /> : <Welcome />} 
@@ -330,8 +333,15 @@ const App: React.FC = () => {
             />
           </Routes>
         </main>
-        {user && <BottomNav />}
+        {user && !isOnboardingPage && <BottomNav />}
       </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 };
