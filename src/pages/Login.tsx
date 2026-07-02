@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { auth } from '../firebase';
-import { authApi } from '../lib/backendApi';
+import { authApi } from '../lib/firebaseApi';
 
 interface LoginProps {
   onLogin: (user: User) => void;

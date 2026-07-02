@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { NOTIFICATIONS } from '../constants';
 import { Notification, User } from '../types';
-import { notificationsApi } from '../lib/backendApi';
-import { socketClient } from '../lib/api';
+import { notificationsApi } from '../lib/firebaseApi';
 
 interface NotificationsProps {
   user: User;

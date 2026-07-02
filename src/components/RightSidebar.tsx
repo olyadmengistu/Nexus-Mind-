@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Contact, SponsoredContent, Post, Solution } from '../types';
-import { postsApi } from '../lib/backendApi';
+import { postsApi } from '../lib/firebaseApi';
 
 const RightSidebar: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([

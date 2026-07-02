@@ -212,7 +212,7 @@ const Onboarding: React.FC = () => {
 
           // Try to sync with backend
           try {
-            const { userApi } = await import('../lib/backendApi');
+            const { userApi } = await import('../lib/firebaseApi');
             await userApi.updateProfile(user.uid, { interests: selectedInterests });
           } catch (backendError) {
             console.warn('Backend sync failed, using local storage:', backendError);

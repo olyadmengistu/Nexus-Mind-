@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { socketClient } from '../lib/socketClient';
-import { analyticsApi } from '../lib/backendApi';
+import { analyticsApi } from '../lib/firebaseApi';
 
 interface AnalyticsOverview {
   activeUsers: number;

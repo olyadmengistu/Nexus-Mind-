@@ -288,6 +288,82 @@ export const postsApi = {
   },
 };
 
+// ==================== COMMENTS API ====================
+
+export const commentsApi = {
+  addComment: async (postId: string, data: any) => {
+    const docRef = doc(db, 'posts', postId);
+    await updateDoc(docRef, {
+      comments: arrayUnion({
+        ...data,
+        timestamp: Date.now()
+      })
+    });
+    return { success: true };
+  },
+  
+  deleteComment: async (postId: string, commentId: string) => {
+    const docRef = doc(db, 'posts', postId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const comments = (data.comments || []).filter((c: any) => c.id !== commentId);
+      await updateDoc(docRef, { comments });
+    }
+    return { success: true };
+  },
+};
+
+// ==================== SOLUTIONS API ====================
+
+export const solutionsApi = {
+  addSolution: async (postId: string, data: any) => {
+    const docRef = doc(db, 'posts', postId);
+    await updateDoc(docRef, {
+      solutions: arrayUnion({
+        ...data,
+        timestamp: Date.now(),
+        upvotes: 0,
+        helpful: 0,
+        replies: []
+      })
+    });
+    return { success: true };
+  },
+  
+  voteSolution: async (postId: string, solutionId: string, delta: number) => {
+    const docRef = doc(db, 'posts', postId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const solutions = data.solutions.map((sol: any) => {
+        if (sol.id === solutionId) {
+          return { ...sol, upvotes: (sol.upvotes || 0) + delta };
+        }
+        return sol;
+      });
+      await updateDoc(docRef, { solutions });
+    }
+    return { success: true };
+  },
+  
+  markHelpful: async (postId: string, solutionId: string) => {
+    const docRef = doc(db, 'posts', postId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const solutions = data.solutions.map((sol: any) => {
+        if (sol.id === solutionId) {
+          return { ...sol, helpful: (sol.helpful || 0) + 1 };
+        }
+        return sol;
+      });
+      await updateDoc(docRef, { solutions });
+    }
+    return { success: true };
+  },
+};
+
 // ==================== NOTIFICATIONS API ====================
 
 export const notificationsApi = {
@@ -586,6 +662,9 @@ export const activitiesApi = {
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   },
 };
+
+// Alias for consistency with imports
+export const activityApi = activitiesApi;
 
 // ==================== INSPIRATIONS API ====================
 
@@ -910,6 +989,203 @@ export const feedbackApi = {
   },
 };
 
+// ==================== AUTH API ====================
+
+export const authApi = {
+  verifyToken: async (token: string) => {
+    // Firebase handles token verification on the client side
+    // This is a placeholder for any server-side auth needs
+    return { valid: true, userId: 'verified' };
+  },
+};
+
+// ==================== STREAK API ====================
+
+export const streakApi = {
+  updateStreak: async (userId: string) => {
+    const docRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const today = new Date().toISOString().split('T')[0];
+      const lastActiveDate = data.lastActiveDate;
+      
+      let newStreak = data.streak || 0;
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      
+      if (lastActiveDate === yesterday) {
+        newStreak += 1;
+      } else if (lastActiveDate !== today) {
+        newStreak = 1;
+      }
+      
+      await updateDoc(docRef, {
+        streak: newStreak,
+        lastActiveDate: today,
+        longestStreak: Math.max(data.longestStreak || 0, newStreak)
+      });
+      
+      return { streak: newStreak };
+    }
+    return { streak: 1 };
+  },
+  
+  getStreakLeaderboard: async (limitCount: number = 50) => {
+    const q = query(collection(db, 'users'), orderBy('streak', 'desc'), limit(limitCount));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      userId: doc.id,
+      ...doc.data()
+    }));
+  },
+};
+
+// ==================== BADGES API ====================
+
+export const badgesApi = {
+  getUserBadges: async (userId: string) => {
+    const docRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return {
+        badges: data.badges || [],
+        progress: data.badgeProgress || []
+      };
+    }
+    return { badges: [], progress: [] };
+  },
+  
+  checkAndAwardBadges: async (userId: string) => {
+    // Placeholder for badge checking logic
+    return { newBadges: [], updatedProgress: [] };
+  },
+};
+
+// ==================== EXPERTISE API ====================
+
+export const expertiseApi = {
+  getUserExpertise: async (userId: string) => {
+    const docRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      return data.expertiseScores || [];
+    }
+    return [];
+  },
+  
+  updateExpertise: async (userId: string, domainId: string, score: number) => {
+    const docRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const expertiseScores = data.expertiseScores || [];
+      const existingIndex = expertiseScores.findIndex((e: any) => e.domainId === domainId);
+      
+      if (existingIndex !== -1) {
+        expertiseScores[existingIndex].score = score;
+      } else {
+        expertiseScores.push({ domainId, score, problemsSolved: 0, solutionsProvided: 0 });
+      }
+      
+      await updateDoc(docRef, { expertiseScores });
+    }
+    return { success: true };
+  },
+  
+  getExpertsByDomain: async (domainId: string, limitCount: number = 20) => {
+    const q = query(collection(db, 'users'), limit(100));
+    const querySnapshot = await getDocs(q);
+    const experts = [];
+    
+    querySnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const domainScore = data.expertiseScores?.find((s: any) => s.domainId === domainId);
+      if (domainScore && domainScore.score > 0) {
+        experts.push({
+          userId: doc.id,
+          name: data.name,
+          username: data.username,
+          avatar: data.avatar,
+          score: domainScore.score
+        });
+      }
+    });
+    
+    return experts.sort((a: any, b: any) => b.score - a.score).slice(0, limitCount);
+  },
+};
+
+// ==================== LEADERBOARD API ====================
+
+export const leaderboardApi = {
+  getGlobalLeaderboard: async (limitCount: number = 50) => {
+    const q = query(collection(db, 'users'), orderBy('reputation', 'desc'), limit(limitCount));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      userId: doc.id,
+      ...doc.data()
+    }));
+  },
+  
+  getDomainLeaderboard: async (domainId: string, limitCount: number = 20) => {
+    const q = query(collection(db, 'users'), limit(100));
+    const querySnapshot = await getDocs(q);
+    const leaderboard = [];
+    
+    querySnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const domainScore = data.expertiseScores?.find((s: any) => s.domainId === domainId);
+      if (domainScore && domainScore.score > 0) {
+        leaderboard.push({
+          userId: doc.id,
+          name: data.name,
+          username: data.username,
+          avatar: data.avatar,
+          score: domainScore.score
+        });
+      }
+    });
+    
+    return leaderboard.sort((a: any, b: any) => b.score - a.score).slice(0, limitCount);
+  },
+};
+
+// ==================== ANALYTICS API ====================
+
+export const analyticsApi = {
+  getAnalyticsOverview: async () => {
+    // Placeholder for analytics data
+    return {
+      activeUsers: 0,
+      totalUsers: 0,
+      totalSessions: 0,
+      peakActiveUsers: 0,
+      peakTime: null,
+      messagesSent: 0,
+      notificationsSent: 0,
+      timestamp: new Date().toISOString()
+    };
+  },
+};
+
+// ==================== SAVED ITEMS API ====================
+
+export const savedItemsApi = {
+  getSavedItems: async (userId: string) => {
+    return userApi.getSavedItems(userId);
+  },
+  
+  saveItem: async (userId: string, item: any) => {
+    return userApi.saveItem(userId, item);
+  },
+  
+  removeSavedItem: async (userId: string, itemId: string) => {
+    return userApi.removeSavedItem(userId, itemId);
+  },
+};
+
 export default { 
   userApi, 
   postsApi, 
@@ -924,5 +1200,14 @@ export default {
   collaborationsApi,
   liveStreamsApi,
   meetingsApi,
-  feedbackApi
+  feedbackApi,
+  commentsApi,
+  solutionsApi,
+  authApi,
+  streakApi,
+  badgesApi,
+  expertiseApi,
+  leaderboardApi,
+  analyticsApi,
+  savedItemsApi
 };

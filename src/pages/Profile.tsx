@@ -6,7 +6,7 @@ import PostCard from '../components/PostCard';
 import StreakBadge from '../components/StreakBadge';
 import BadgeGrid from '../components/BadgeGrid';
 import ExpertiseGraph from '../components/ExpertiseGraph';
-import { userApi, savedItemsApi, streakApi, badgesApi, expertiseApi } from '../lib/backendApi';
+import { userApi, savedItemsApi, streakApi, badgesApi, expertiseApi } from '../lib/firebaseApi';
 import { userApi as firebaseUserApi } from '../lib/firebaseApi';
 
 interface ProfileProps {

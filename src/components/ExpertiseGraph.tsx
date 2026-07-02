@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ExpertiseScore } from '../types';
-import { expertiseApi } from '../lib/backendApi';
+import { expertiseApi } from '../lib/firebaseApi';
 import { EXPERTISE_DOMAINS, getExpertiseLevel, getExpertiseProgress } from '../constants/expertise';
 
 interface ExpertiseGraphProps {

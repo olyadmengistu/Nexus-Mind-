@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
-import { userApi } from '../lib/backendApi';
+import { userApi } from '../lib/firebaseApi';
 
 interface SettingsProps {
   user: User;

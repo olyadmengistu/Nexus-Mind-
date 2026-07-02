@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { User, Post, Poll, PollOption } from '../types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase';
-import { postsApi } from '../lib/backendApi';
+import { postsApi } from '../lib/firebaseApi';
 
 interface ComposerModalProps {
   user: User;

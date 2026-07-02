@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User, Post, Group, Video, Product } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { searchApi } from '../lib/backendApi';
+import { searchApi } from '../lib/firebaseApi';
 
 interface SearchProps {
   user: User;

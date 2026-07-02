@@ -30,7 +30,7 @@ import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, reload } from 'firebase/auth';
-import { postsApi, userApi } from './lib/backendApi';
+import { postsApi, userApi } from './lib/firebaseApi';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);

@@ -2,8 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { User, Message, Conversation } from '../types';
 import { searchConversations, debounce } from '../lib/searchApi';
-import { socketClient } from '../lib/api';
-import { conversationsApi } from '../lib/backendApi';
+import { conversationsApi } from '../lib/firebaseApi';
 
 interface MessagesProps {
   user: User;

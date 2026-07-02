@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
-import { activityApi } from '../lib/backendApi';
+import { activityApi } from '../lib/firebaseApi';
 
 interface ActivityLogProps {
   user: User;

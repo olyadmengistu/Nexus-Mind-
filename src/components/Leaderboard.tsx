@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { leaderboardApi } from '../lib/backendApi';
+import { leaderboardApi } from '../lib/firebaseApi';
 import { EXPERTISE_DOMAINS } from '../constants/expertise';
 
 interface LeaderboardEntry {

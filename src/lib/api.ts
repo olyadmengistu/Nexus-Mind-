@@ -1,4 +1,4 @@
-// Unified API client — Firebase for direct data access, Backend for server-side features
+// Firebase API client for all data operations
 export {
   userApi,
   postsApi,
@@ -15,14 +15,3 @@ export {
   inspirationsApi,
   feedbackApi,
 } from './firebaseApi';
-
-// Backend API for server-side features (auth, feedback, uploads, health check)
-export {
-  authApi,
-  backendFeedbackApi,
-  backendUploadApi,
-  backendHealthApi,
-} from './backendApi';
-
-export { socketClient } from './socketClient';
-export { apiRequest, checkBackendHealth, ApiError } from './httpClient';

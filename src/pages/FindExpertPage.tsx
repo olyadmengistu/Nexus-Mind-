@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
-import { expertiseApi } from '../lib/backendApi';
+import { expertiseApi } from '../lib/firebaseApi';
 import { EXPERTISE_DOMAINS } from '../constants/expertise';
 
 interface Expert {

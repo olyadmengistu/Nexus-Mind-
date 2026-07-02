@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Post, User, Solution } from '../types';
-import { solutionsApi, commentsApi, postsApi } from '../lib/backendApi';
+import { solutionsApi, commentsApi, postsApi } from '../lib/firebaseApi';
 
 interface PostCardProps {
   post: Post;

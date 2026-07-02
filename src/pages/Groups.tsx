@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User, Group, GroupPost, GroupComment } from '../types';
 import { searchGroups, debounce } from '../lib/searchApi';
-import { groupsApi } from '../lib/backendApi';
+import { groupsApi } from '../lib/firebaseApi';
 
 interface GroupsProps {
   user: User;

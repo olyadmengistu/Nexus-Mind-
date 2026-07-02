@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { streakApi } from '../lib/backendApi';
+import { streakApi } from '../lib/firebaseApi';
 import StreakBadge from './StreakBadge';
 
 interface LeaderboardEntry {

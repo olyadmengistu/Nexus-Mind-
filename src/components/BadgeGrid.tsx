@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Badge, BadgeProgress } from '../types';
-import { badgesApi } from '../lib/backendApi';
+import { badgesApi } from '../lib/firebaseApi';
 import { RARITY_COLORS, RARITY_BORDER, CATEGORY_ICONS } from '../constants/badges';
 
 interface BadgeGridProps {
