@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
-import { userApi as firebaseUserApi } from '../lib/firebaseApi';
+import { userApi } from '../lib/backendApi';
 
 interface SettingsProps {
   user: User;
@@ -35,7 +35,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
   const handleSaveProfile = async () => {
     try {
-      await firebaseUserApi.updateProfile(user.id, formData);
+      await userApi.updateUser(user.id, formData);
       alert('Profile updated successfully!');
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -43,11 +43,11 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
     }
   };
 
-  // Load notification settings from Firestore on mount
+  // Load notification settings from backend on mount
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const profile = await firebaseUserApi.getProfile(user.id);
+        const profile = await userApi.getUser(user.id);
         if (profile.settings?.notifications) {
           setNotifications(profile.settings.notifications);
         }
@@ -55,7 +55,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
           setPrivacy(profile.settings.privacy);
         }
       } catch (error) {
-        console.error('Error loading settings from Firestore:', error);
+        console.error('Error loading settings from backend:', error);
       }
     };
     loadSettings();
@@ -63,7 +63,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
   const handleSaveNotifications = async () => {
     try {
-      await firebaseUserApi.updateProfile(user.id, {
+      await userApi.updateUser(user.id, {
         settings: {
           notifications: notifications
         }
@@ -77,7 +77,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
 
   const handleSavePrivacy = async () => {
     try {
-      await firebaseUserApi.updateProfile(user.id, {
+      await userApi.updateUser(user.id, {
         settings: {
           privacy: privacy
         }
@@ -90,12 +90,12 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[56px]">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto p-3 sm:p-6">
         <h1 className="text-3xl font-bold mb-8">Settings</h1>
 
         {/* Profile Settings */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>
           <div className="space-y-4">
             <div>
@@ -144,7 +144,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
         </div>
 
         {/* Notification Settings */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-xl font-semibold mb-4">Notification Settings</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -280,7 +280,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
         </div>
 
         {/* Privacy Settings */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-xl font-semibold mb-4">Privacy Settings</h2>
           <div className="space-y-4">
             <div>
@@ -329,7 +329,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
         </div>
 
         {/* Language Settings */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-xl font-semibold mb-4">Language & Region</h2>
           <div className="space-y-4">
             <div>
@@ -352,7 +352,7 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
         </div>
 
         {/* Accessibility Settings */}
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
           <h2 className="text-xl font-semibold mb-4">Accessibility</h2>
           <div className="space-y-4">
             <div className="flex items-center justify-between">

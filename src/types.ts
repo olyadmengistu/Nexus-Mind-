@@ -13,6 +13,53 @@ export interface User {
   work?: string;
   expertise?: string[];
   coverPhoto?: string;
+  // Streak system fields
+  streak?: number;
+  longestStreak?: number;
+  lastActiveDate?: string;
+  streakFreezes?: number;
+  streakHistory?: number[];
+  // Badge system fields
+  badges?: Badge[];
+  badgeProgress?: BadgeProgress[];
+  // Expertise system fields
+  expertiseScores?: ExpertiseScore[];
+  overallExpertise?: number;
+  // Interest selection fields
+  interests?: string[];
+  onboardingComplete?: boolean;
+  // Social fields
+  following?: string[];
+  followers?: string[];
+}
+
+export interface ExpertiseScore {
+  domainId: string;
+  domainName: string;
+  score: number;
+  problemsSolved: number;
+  solutionsProvided: number;
+  helpfulVotes: number;
+  lastUpdated: number;
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: 'solving' | 'helping' | 'streaks' | 'expertise' | 'social' | 'special';
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  earnedAt?: number;
+  progress?: number;
+  maxProgress?: number;
+}
+
+export interface BadgeProgress {
+  badgeId: string;
+  currentProgress: number;
+  maxProgress: number;
+  unlocked: boolean;
 }
 
 export interface SavedItem {
@@ -98,7 +145,7 @@ export interface Story {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'mention' | 'reply' | 'like' | 'follow' | 'solution' | 'vote' | 'system';
+  type: 'mention' | 'reply' | 'like' | 'follow' | 'solution' | 'vote' | 'system' | 'streak_reminder' | 'streak_milestone' | 'streak_warning' | 'badge_earned';
   text: string;
   time: string;
   createdAt: number;

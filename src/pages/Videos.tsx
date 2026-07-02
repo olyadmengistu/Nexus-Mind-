@@ -383,7 +383,7 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
   }, [videos]);
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
+    <div className="max-w-7xl mx-auto p-3 sm:p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Videos & Meetings</h1>
@@ -474,7 +474,7 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
       {activeTab === 'videos' && (
         <div>
           {selectedVideo ? (
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6">
               <button
                 onClick={() => setSelectedVideo(null)}
                 className="mb-4 text-gray-600 hover:text-gray-800"
@@ -603,7 +603,7 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {filteredVideos.length > 0 ? filteredVideos.map(video => (
                 <div
                   key={video.id}
@@ -643,7 +643,7 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
       {activeTab === 'meetings' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {meetings.map(meeting => (
-            <div key={meeting.id} className="bg-white rounded-lg shadow p-6">
+            <div key={meeting.id} className="bg-white rounded-lg shadow p-4 sm:p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <img src={meeting.hostAvatar} className="w-12 h-12 rounded-full" alt="" />
@@ -699,7 +699,7 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
       {/* Upload Video Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-3 sm:mx-0">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Upload Video</h2>
               <button
@@ -798,7 +798,7 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
       {/* Schedule Meeting Modal */}
       {showMeetingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-3 sm:mx-0">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Schedule Meeting</h2>
               <button

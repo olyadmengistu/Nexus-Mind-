@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User, Group, GroupPost, GroupComment } from '../types';
 import { searchGroups, debounce } from '../lib/searchApi';
-import { groupsApi } from '../lib/firebaseApi';
+import { groupsApi } from '../lib/backendApi';
 
 interface GroupsProps {
   user: User;
@@ -24,10 +24,10 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
   useEffect(() => {
     const loadGroups = async () => {
       try {
-        const data = await groupsApi.getAllGroups();
+        const data = await groupsApi.getGroups();
         setGroups(data as Group[]);
       } catch (error) {
-        console.error('Error loading groups from Firestore:', error);
+        console.error('Error loading groups from backend:', error);
         setGroups([]);
       }
     };
@@ -79,19 +79,6 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
       ));
     } catch (error) {
       console.error('Error joining group:', error);
-    }
-  };
-
-  const handleLeaveGroup = async (groupId: string) => {
-    try {
-      await groupsApi.leaveGroup(groupId, user.id);
-      setGroups(groups.map(g => 
-        g.id === groupId 
-          ? { ...g, members: g.members.filter(m => m.id !== user.id), memberCount: g.memberCount - 1 }
-          : g
-      ));
-    } catch (error) {
-      console.error('Error leaving group:', error);
     }
   };
 
@@ -153,7 +140,7 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
   const isMember = (group: Group) => group.members.some(m => m.id === user.id);
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
+    <div className="max-w-7xl mx-auto p-3 sm:p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Groups</h1>
@@ -201,7 +188,7 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
                 <i className="fa-solid fa-arrow-left mr-2"></i>Back
               </button>
             </div>
-            <div className="p-6 relative">
+            <div className="p-4 sm:p-6 relative">
               <div className="flex items-start gap-4">
                 <img src={selectedGroup.avatar} className="w-20 h-20 rounded-lg border-4 border-white -mt-10 relative z-10" alt="" />
                 <div className="flex-1">
@@ -367,7 +354,7 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
           </div>
 
           {/* Groups Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {isSearching ? (
               <div className="col-span-full text-center py-12 text-gray-500">
                 <i className="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
@@ -417,7 +404,7 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
       {/* Create Group Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-3 sm:mx-0">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Create Group</h2>
               <button

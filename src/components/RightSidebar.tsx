@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Contact, SponsoredContent } from '../types';
+import { Contact, SponsoredContent, Post, Solution } from '../types';
+import { postsApi } from '../lib/backendApi';
 
 const RightSidebar: React.FC = () => {
   const [contacts, setContacts] = useState<Contact[]>([
@@ -10,6 +11,7 @@ const RightSidebar: React.FC = () => {
     { id: '4', name: 'Maria Lopez', status: 'online', avatar: 'https://picsum.photos/seed/maria/50/50', username: 'marialopez' },
     { id: '5', name: 'Tom Hardy', status: 'offline', avatar: 'https://picsum.photos/seed/tom/50/50', username: 'tomhardy' }
   ]);
+  const [trendingSolutions, setTrendingSolutions] = useState<{ post: Post; solution: Solution }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -52,6 +54,38 @@ const RightSidebar: React.FC = () => {
   ]);
   const [selectedSponsored, setSelectedSponsored] = useState<SponsoredContent | null>(null);
   const [showSponsoredModal, setShowSponsoredModal] = useState(false);
+
+  // Load trending solutions on mount
+  useEffect(() => {
+    const loadTrendingSolutions = async () => {
+      try {
+        const posts = await postsApi.getPosts({ limit: 50 });
+        // Flatten all solutions from all posts and sort by helpful votes
+        const allSolutions: { post: Post; solution: Solution }[] = [];
+        
+        posts.forEach((post: Post) => {
+          if (post.solutions && post.solutions.length > 0) {
+            post.solutions.forEach((solution: Solution) => {
+              allSolutions.push({ post, solution });
+            });
+          }
+        });
+        
+        // Sort by helpful votes (descending) and take top 5
+        const sorted = allSolutions
+          .sort((a, b) => (b.solution.helpful || 0) - (a.solution.helpful || 0))
+          .slice(0, 5);
+        
+        setTrendingSolutions(sorted);
+      } catch (error) {
+        console.error('Error loading trending solutions:', error);
+        // Fallback to mock data if API fails
+        setTrendingSolutions([]);
+      }
+    };
+    
+    loadTrendingSolutions();
+  }, []);
 
   // Filter contacts based on search query
   const filteredContacts = contacts.filter(contact =>
@@ -240,20 +274,30 @@ const RightSidebar: React.FC = () => {
       <section className="mb-6 pt-4 border-t border-gray-300">
         <h3 className="text-gray-500 font-bold text-lg mb-3">Trending Solutions</h3>
         <div className="space-y-3">
-          <div className="flex items-center gap-4 p-3 cursor-pointer hover:bg-gray-200 rounded-xl">
-            <i className="fa-solid fa-lightbulb text-3xl text-yellow-500"></i>
-            <div>
-              <p className="text-base font-bold">Climate Change Initiative</p>
-              <p className="text-sm text-gray-500">1.2k solvers engaged</p>
+          {trendingSolutions.length > 0 ? (
+            trendingSolutions.map(({ post, solution }) => (
+              <div 
+                key={solution.id} 
+                className="flex items-center gap-4 p-3 cursor-pointer hover:bg-gray-200 rounded-xl transition-colors"
+                onClick={() => window.location.hash = `/solutions/${post.id}`}
+              >
+                <div className="relative">
+                  <img src={solution.userAvatar} className="w-12 h-12 rounded-full object-cover" alt={solution.userName} />
+                  <div className="absolute -bottom-1 -right-1 bg-yellow-500 text-white p-1 rounded-full border-2 border-white text-xs">
+                    <i className="fa-solid fa-lightbulb"></i>
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-bold truncate">{solution.text.substring(0, 40)}{solution.text.length > 40 ? '...' : ''}</p>
+                  <p className="text-sm text-gray-500">by {solution.userName} · {solution.helpful || 0} helpful</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-4 text-gray-500 text-sm">
+              No trending solutions yet
             </div>
-          </div>
-          <div className="flex items-center gap-4 p-3 cursor-pointer hover:bg-gray-200 rounded-xl">
-            <i className="fa-solid fa-rocket text-3xl text-purple-500"></i>
-            <div>
-              <p className="text-base font-bold">Tech Startup Accelerator</p>
-              <p className="text-sm text-gray-500">856 solvers engaged</p>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 

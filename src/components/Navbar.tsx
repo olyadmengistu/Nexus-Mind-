@@ -87,12 +87,13 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-2 sm:px-4 flex items-center justify-between">
       {/* Left */}
-      <div className="flex items-center gap-3">
-        <Link to="/" className="flex items-center justify-center w-12 h-12 bg-[#1877F2] rounded-xl">
-            <i className="fa-solid fa-brain text-white text-2xl"></i>
+      <div className="flex items-center gap-2 sm:gap-3">
+        <Link to="/" className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#1877F2] rounded-xl">
+            <i className="fa-solid fa-brain text-white text-xl sm:text-2xl"></i>
         </Link>
+        {/* Search bar - desktop only */}
         <div className="relative group hidden sm:block">
           <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg"></i>
           <input
@@ -142,13 +143,13 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
         </div>
       </div>
 
-      {/* Center - Icons Only */}
-      <div className="hidden md:flex items-center h-full gap-2">
+      {/* Center - Icons Only (desktop) */}
+      <div className="hidden lg:flex items-center h-full gap-1 xl:gap-2">
         {navItems.map((item) => (
           <Link 
             key={item.path}
             to={item.path}
-            className={`flex items-center justify-center w-[140px] h-full border-b-4 transition-all ${
+            className={`flex items-center justify-center w-[88px] xl:w-[140px] h-full border-b-4 transition-all ${
               location.pathname === item.path ? 'border-[#1877F2] text-[#1877F2]' : 'border-transparent text-gray-600 hover:bg-gray-100'
             }`}
           >
@@ -158,17 +159,27 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
+        {/* Search icon - mobile only */}
+        <Link 
+          to="/search" 
+          className="flex sm:hidden w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full items-center justify-center"
+        >
+          <i className="fa-solid fa-magnifying-glass text-xl"></i>
+        </Link>
+        {/* Menu button - mobile only */}
         <button 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center"
+          className="flex sm:hidden w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full items-center justify-center"
         >
           <i className="fa-solid fa-bars text-xl"></i>
         </button>
-        <Link to="/messages" className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
+        {/* Messages */}
+        <Link to="/messages" className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
           <i className="fa-brands fa-facebook-messenger text-xl"></i>
         </Link>
-        <Link to="/notifications" className="relative w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
+        {/* Notifications */}
+        <Link to="/notifications" className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
           <i className="fa-solid fa-bell text-xl"></i>
           {unreadCount > 0 && (
             <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
@@ -176,13 +187,15 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
             </span>
           )}
         </Link>
-        <Link to="/feedback" className="w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
+        {/* Feedback - desktop only */}
+        <Link to="/feedback" className="hidden sm:flex w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full items-center justify-center">
           <i className="fa-solid fa-comment-dots text-xl"></i>
         </Link>
+        {/* Profile */}
         <div className="relative dropdown-container">
           <button 
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="relative w-12 h-12 rounded-full flex items-center justify-center"
+            className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center"
           >
             <img src={user.avatar} className="w-full h-full rounded-full object-cover" alt="Avatar" />
             <div className="absolute bottom-0 right-0 bg-gray-600 rounded-full w-5 h-5 flex items-center justify-center">
@@ -190,7 +203,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
             </div>
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="fixed left-2 right-2 top-[60px] max-h-[calc(100vh-76px)] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96" onClick={(e) => e.stopPropagation()}>
               <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                 <div className="flex items-center gap-4">
                   <img src={user.avatar} className="w-16 h-16 rounded-full object-cover border-3 border-blue-500" alt="Avatar" />
@@ -278,6 +291,14 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
 
                 <div className="px-4 py-3 border-t border-gray-100">
                   <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Support</p>
+                  <Link 
+                    to="/feedback"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-4 px-4 py-4 hover:bg-gray-100 rounded-xl transition-colors"
+                  >
+                    <i className="fa-solid fa-comment-dots text-gray-600 w-6 text-lg"></i>
+                    <span className="text-base font-medium">Send Feedback</span>
+                  </Link>
                   <Link 
                     to="/help"
                     onClick={() => setDropdownOpen(false)}
@@ -398,7 +419,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={() => setMobileMenuOpen(false)}
           ></div>
-          <div className="fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-lg transform transition-transform">
+          <div className="fixed top-0 left-0 h-full w-[86vw] max-w-80 bg-white z-50 shadow-lg transform transition-transform">
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">

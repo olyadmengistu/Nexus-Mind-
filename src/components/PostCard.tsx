@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Post, User, Solution } from '../types';
-import { postsApi } from '../lib/api';
+import { solutionsApi, commentsApi, postsApi } from '../lib/backendApi';
 
 interface PostCardProps {
   post: Post;
@@ -17,10 +17,150 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
   const [newSolution, setNewSolution] = useState('');
   const [shareSuccess, setShareSuccess] = useState(false);
   const [localPost, setLocalPost] = useState(post);
+  const [showMenu, setShowMenu] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [solutionVotes, setSolutionVotes] = useState<Record<string, 'up' | 'down' | null>>({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(post.title || '');
+  const [editContent, setEditContent] = useState(post.content || '');
 
-  const handleVoteClick = () => {
-    onVote(post.id, hasVoted ? -1 : 1);
-    setHasVoted(!hasVoted);
+  // Load comments when solutions section is shown
+  useEffect(() => {
+    if (showSolutions && comments.length === 0) {
+      loadComments();
+    }
+  }, [showSolutions]);
+
+  const loadComments = async () => {
+    setLoadingComments(true);
+    try {
+      const fetchedComments = await commentsApi.getComments(post.id);
+      setComments(fetchedComments);
+    } catch (error) {
+      console.error('Failed to load comments:', error);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    
+    try {
+      const comment = await commentsApi.addComment(post.id, currentUser.id, newComment);
+      setComments([...comments, {
+        id: comment.id,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userAvatar: currentUser.avatar,
+        text: newComment,
+        timestamp: Date.now(),
+      }]);
+      setNewComment('');
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+      // Fallback to local update
+      const localComment = {
+        id: Math.random().toString(36).substr(2, 9),
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userAvatar: currentUser.avatar,
+        text: newComment,
+        timestamp: Date.now(),
+      };
+      setComments([...comments, localComment]);
+      setNewComment('');
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await commentsApi.deleteComment(commentId);
+      setComments(comments.filter(c => c.id !== commentId));
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+    }
+  };
+
+  const handleSolutionVote = async (solutionId: string, voteType: 'up' | 'down') => {
+    const currentVote = solutionVotes[solutionId];
+    const newVote = currentVote === voteType ? null : voteType;
+    
+    // Update local state
+    setSolutionVotes(prev => ({ ...prev, [solutionId]: newVote }));
+    
+    // Update solution upvotes locally
+    const delta = newVote === 'up' ? 1 : newVote === 'down' ? -1 : currentVote === 'up' ? -1 : 1;
+    setLocalPost(prev => ({
+      ...prev,
+      solutions: prev.solutions.map(sol =>
+        sol.id === solutionId ? { ...sol, upvotes: Math.max(0, (sol.upvotes || 0) + delta) } : sol
+      )
+    }));
+
+    try {
+      await solutionsApi.voteSolution(solutionId, currentUser.id, newVote || 'up');
+    } catch (error) {
+      console.error('Failed to vote on solution:', error);
+      // Revert on error
+      setSolutionVotes(prev => ({ ...prev, [solutionId]: currentVote }));
+    }
+  };
+
+  const handleMarkHelpful = async (solutionId: string, isHelpful: boolean) => {
+    try {
+      await solutionsApi.markHelpful(solutionId, isHelpful);
+      setLocalPost(prev => ({
+        ...prev,
+        solutions: prev.solutions.map(sol =>
+          sol.id === solutionId ? { ...sol, helpful: isHelpful ? (sol.helpful || 0) + 1 : Math.max(0, (sol.helpful || 0) - 1) } : sol
+        )
+      }));
+    } catch (error) {
+      console.error('Failed to mark solution as helpful:', error);
+    }
+  };
+
+  const handleEditPost = async () => {
+    if (!editTitle.trim() && !editContent.trim()) return;
+    
+    try {
+      await postsApi.updatePost(post.id, { title: editTitle, content: editContent });
+      setLocalPost(prev => ({ ...prev, title: editTitle, content: editContent }));
+      setIsEditing(false);
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Failed to update post:', error);
+      alert('Failed to update post. Please try again.');
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) return;
+    
+    try {
+      await postsApi.deletePost(post.id);
+      setShowMenu(false);
+      // Navigate back to feed or refresh
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to delete post:', error);
+      alert('Failed to delete post. Please try again.');
+    }
+  };
+
+  const handleVoteClick = async () => {
+    const newVoteState = !hasVoted;
+    const delta = newVoteState ? 1 : -1;
+    
+    // Update local state immediately for responsiveness
+    setHasVoted(newVoteState);
+    setLocalPost(prev => ({ ...prev, votes: prev.votes + delta }));
+    
+    // Call parent handler
+    onVote(post.id, delta);
   };
 
   const handleShare = async () => {
@@ -48,16 +188,21 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
     if (!newSolution.trim()) return;
     
     try {
-      const solution = await postsApi.addSolution(post.id, {
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userAvatar: currentUser.avatar,
-        text: newSolution
-      });
+      const solution = await solutionsApi.addSolution(post.id, currentUser.id, newSolution);
       
       setLocalPost(prev => ({
         ...prev,
-        solutions: [...prev.solutions, solution]
+        solutions: [...prev.solutions, {
+          id: solution.id,
+          userId: currentUser.id,
+          userName: currentUser.name,
+          userAvatar: currentUser.avatar,
+          text: newSolution,
+          timestamp: Date.now(),
+          upvotes: 0,
+          helpful: 0,
+          replies: []
+        }]
       }));
       setNewSolution('');
     } catch (error) {
@@ -92,23 +237,23 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm">
+    <div className="bg-white sm:rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="p-3 sm:p-4 flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <div className="relative">
-             <img src={post.userAvatar} className="w-12 h-12 rounded-full object-cover" alt={post.userName} />
+             <img src={post.userAvatar} className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover" alt={post.userName} />
              {post.isSolved && (
                <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-1 rounded-full border-2 border-white text-xs">
                  <i className="fa-solid fa-check"></i>
                </div>
              )}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="font-bold text-base leading-tight cursor-pointer hover:underline">{post.userName}</h4>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <h4 className="font-bold text-sm sm:text-base leading-tight cursor-pointer hover:underline truncate max-w-[150px] sm:max-w-none">{post.userName}</h4>
               <span className="text-gray-500 text-sm">•</span>
-              <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold uppercase">{post.category}</span>
+              <span className="bg-blue-100 text-blue-600 px-2 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase">{post.category}</span>
               {post.privacy && (
                 <>
                   <span className="text-gray-500 text-sm">•</span>
@@ -120,7 +265,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
                 </>
               )}
             </div>
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 text-xs sm:text-sm">
               {post.scheduledTime && post.scheduledTime > Date.now() ? (
                 <>
                   <i className="fa-solid fa-clock"></i> Scheduled for {formatDate(post.scheduledTime)}
@@ -133,19 +278,128 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
             </p>
           </div>
         </div>
-        <button className="text-gray-500 hover:bg-gray-100 w-10 h-10 rounded-full transition-colors">
-          <i className="fa-solid fa-ellipsis text-lg"></i>
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setShowMenu(!showMenu)}
+            className="text-gray-500 hover:bg-gray-100 w-10 h-10 rounded-full transition-colors"
+          >
+            <i className="fa-solid fa-ellipsis text-lg"></i>
+          </button>
+          {showMenu && (
+            <div className="absolute right-0 top-12 bg-white shadow-lg rounded-lg border border-gray-200 py-2 w-48 z-50">
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  navigate(`/post/${post.id}`);
+                }}
+                className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
+              >
+                View Post Details
+              </button>
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
+                }}
+                className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
+              >
+                Copy Link
+              </button>
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  setShowSolutions(!showSolutions);
+                }}
+                className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
+              >
+                {showSolutions ? 'Hide' : 'Show'} Solutions
+              </button>
+              {post.userId === currentUser.id && (
+                <>
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      setIsEditing(true);
+                      setEditTitle(localPost.title || '');
+                      setEditContent(localPost.content || '');
+                    }}
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
+                  >
+                    Edit Post
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      handleDeletePost();
+                    }}
+                    className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium text-red-600"
+                  >
+                    Delete Post
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  // TODO: Implement report functionality
+                  alert('Report functionality coming soon');
+                }}
+                className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
+              >
+                Report Post
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content */}
-      <div className="px-4 pb-3 space-y-3">
-        {post.title && <h3 className="font-bold text-lg">{post.title}</h3>}
-        <p className="text-base whitespace-pre-wrap">{post.content}</p>
+      <div className="px-3 sm:px-4 pb-2 sm:pb-3 space-y-2 sm:space-y-3">
+        {isEditing ? (
+          <div className="space-y-3">
+            <input
+              type="text"
+              value={editTitle}
+              onChange={(e) => setEditTitle(e.target.value)}
+              placeholder="Post title (optional)"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <textarea
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              placeholder="What's on your mind?"
+              rows={4}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleEditPost}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium"
+              >
+                Save Changes
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditTitle(localPost.title || '');
+                  setEditContent(localPost.content || '');
+                }}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {localPost.title && <h3 className="font-bold text-sm sm:text-base sm:text-lg">{localPost.title}</h3>}
+            <p className="text-sm sm:text-base whitespace-pre-wrap break-words leading-relaxed">{localPost.content}</p>
+          </>
+        )}
         
         {/* Emoji Display */}
         {post.emoji && (
-          <div className="flex items-center gap-3 text-base text-gray-600">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm sm:text-base text-gray-600">
             <span className="text-2xl">{post.emoji}</span>
             <span className="font-medium">feeling</span>
           </div>
@@ -153,7 +407,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
 
         {/* Location Display */}
         {post.location && (
-          <div className="flex items-center gap-3 text-base text-gray-600">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm sm:text-base text-gray-600">
             <i className="fa-solid fa-location-dot text-[#F3425E] text-xl"></i>
             <span className="font-medium">{post.location}</span>
             {post.locationCoordinates && (
@@ -236,7 +490,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
       )}
 
       {/* Stats */}
-      <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+      <div className="px-3 sm:px-4 py-2 sm:py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100">
         <div className="flex items-center gap-2 cursor-pointer hover:underline group">
           <div className="flex -space-x-1">
              <div className="bg-blue-500 w-5 h-5 rounded-full flex items-center justify-center text-xs text-white">
@@ -246,70 +500,152 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
                <i className="fa-solid fa-lightbulb"></i>
              </div>
           </div>
-          <span className="text-gray-500 text-base font-medium">{localPost.votes} helpful votes</span>
+          <span className="text-gray-500 text-sm sm:text-base font-medium">{localPost.votes} helpful votes</span>
         </div>
-        <div className="flex gap-4 text-base text-gray-500 font-medium">
-           <span className="hover:underline cursor-pointer">{localPost.solutions.length} solutions</span>
-           <span className="hover:underline cursor-pointer">12 shares</span>
+        <div className="flex gap-4 text-sm sm:text-base text-gray-500 font-medium">
+           <button 
+             onClick={() => setShowSolutions(!showSolutions)}
+             className="hover:underline cursor-pointer"
+           >
+             {localPost.solutions.length} solutions
+           </button>
+           <span className="hover:underline cursor-pointer">{shareSuccess ? '13' : '12'} shares</span>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="px-4 py-2 flex items-center justify-around">
+      <div className="px-2 sm:px-4 py-2 flex items-center justify-around">
         <button
           onClick={handleVoteClick}
-          className={`flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 active:scale-95 ${hasVoted ? 'text-blue-500' : 'text-[#65676B]'}`}
+          className={`flex items-center gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2.5 sm:py-4 rounded-xl font-bold text-xs sm:text-lg transition-all hover:scale-105 active:scale-95 ${hasVoted ? 'text-blue-500' : 'text-[#65676B]'}`}
         >
-          <i className={`fa-regular fa-thumbs-up text-xl ${hasVoted ? 'fa-solid' : ''}`}></i> Helpful
+          <i className={`fa-regular fa-thumbs-up text-lg sm:text-xl ${hasVoted ? 'fa-solid' : ''}`}></i> <span className="hidden sm:inline">Helpful</span><span className="sm:hidden">Help</span>
         </button>
         <button
           onClick={() => navigate(`/solutions/${post.id}`)}
-          className="flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-4 rounded-xl text-[#65676B] font-bold text-lg transition-colors"
+          className="flex items-center gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2.5 sm:py-4 rounded-xl text-[#65676B] font-bold text-xs sm:text-lg transition-colors"
         >
-          <i className="fa-regular fa-lightbulb text-xl"></i> Solution
+          <i className="fa-regular fa-lightbulb text-lg sm:text-xl"></i> <span className="hidden sm:inline">Solution</span><span className="sm:hidden">Solve</span>
         </button>
         <button
           onClick={handleShare}
-          className="flex items-center gap-3 hover:bg-gray-100 flex-1 justify-center py-4 rounded-xl text-[#65676B] font-bold text-lg transition-colors"
+          className="flex items-center gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2.5 sm:py-4 rounded-xl text-[#65676B] font-bold text-xs sm:text-lg transition-colors"
         >
-          <i className={`fa-solid text-xl ${shareSuccess ? 'fa-check' : 'fa-share'}`}></i> {shareSuccess ? 'Copied!' : 'Share'}
+          <i className={`fa-solid text-lg sm:text-xl ${shareSuccess ? 'fa-check' : 'fa-share'}`}></i> {shareSuccess ? 'Copied!' : 'Share'}
         </button>
       </div>
 
 
       {/* Solutions Section */}
       {showSolutions && (
-        <div className="px-4 py-4 bg-gray-50 space-y-4 rounded-b-xl">
-          {localPost.solutions.map(sol => (
-            <div key={sol.id} className="flex gap-3">
-              <img src={sol.userAvatar} className="w-10 h-10 rounded-full" alt={sol.userName} />
-              <div className="bg-gray-200 p-3 rounded-2xl max-w-[90%]">
-                <p className="font-bold text-sm">{sol.userName}</p>
-                <p className="text-base">{sol.text}</p>
-                <div className="flex items-center gap-4 mt-2 text-sm font-bold text-gray-500">
-                   <span className="hover:underline cursor-pointer">Helpful ({sol.helpful || 0})</span>
-                   <span className="hover:underline cursor-pointer">Reply</span>
-                   <span>{formatDate(sol.timestamp)}</span>
+        <div className="px-3 sm:px-4 py-4 bg-gray-50 space-y-4 rounded-b-xl">
+          {/* Comments Section */}
+          <div className="space-y-3">
+            <h4 className="font-bold text-sm text-gray-700">Comments ({comments.length})</h4>
+            {loadingComments ? (
+              <p className="text-sm text-gray-500">Loading comments...</p>
+            ) : (
+              comments.map(comment => (
+                <div key={comment.id} className="flex gap-3">
+                  <img src={comment.userAvatar} className="w-8 h-8 rounded-full" alt={comment.userName} />
+                  <div className="flex-1">
+                    <div className="bg-white p-3 rounded-2xl shadow-sm">
+                      <p className="font-bold text-xs">{comment.userName}</p>
+                      <p className="text-sm">{comment.text}</p>
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                      <span>{formatDate(comment.timestamp)}</span>
+                      {comment.userId === currentUser.id && (
+                        <button
+                          onClick={() => handleDeleteComment(comment.id)}
+                          className="hover:text-red-500 cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
+              ))
+            )}
+            
+            {/* New Comment Input */}
+            <div className="flex gap-3 items-center mt-3">
+              <img src={currentUser.avatar} className="w-8 h-8 rounded-full" alt="Me" />
+              <div className="flex-1 relative">
+                <input 
+                  type="text" 
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                  placeholder="Write a comment..."
+                  className="w-full bg-white px-4 py-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+                />
               </div>
             </div>
-          ))}
+          </div>
 
-          {/* New Solution Input */}
-          <div className="flex gap-3 items-center">
-            <img src={currentUser.avatar} className="w-10 h-10 rounded-full" alt="Me" />
-            <div className="flex-1 relative">
-              <input 
-                type="text" 
-                value={newSolution}
-                onChange={(e) => setNewSolution(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddSolution()}
-                placeholder="Suggest a solution..."
-                className="w-full bg-[#F0F2F5] px-4 py-3 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-3 text-gray-500 text-lg">
-                <i className="fa-regular fa-face-smile cursor-pointer"></i>
-                <i className="fa-solid fa-camera cursor-pointer"></i>
+          {/* Solutions */}
+          <div className="space-y-3 pt-3 border-t border-gray-200">
+            <h4 className="font-bold text-sm text-gray-700">Solutions ({localPost.solutions.length})</h4>
+            {localPost.solutions.map(sol => (
+              <div key={sol.id} className="flex gap-3">
+                <img src={sol.userAvatar} className="w-10 h-10 rounded-full" alt={sol.userName} />
+                <div className="bg-gray-200 p-3 rounded-2xl max-w-[calc(100%-52px)] sm:max-w-[90%]">
+                  <p className="font-bold text-sm">{sol.userName}</p>
+                  <p className="text-base">{sol.text}</p>
+                  <div className="flex items-center gap-4 mt-2 text-sm font-bold text-gray-500">
+                     <button 
+                       onClick={() => handleSolutionVote(sol.id, 'up')}
+                       className={`hover:underline cursor-pointer flex items-center gap-1 ${solutionVotes[sol.id] === 'up' ? 'text-blue-500' : ''}`}
+                     >
+                       <i className={`fa-solid fa-thumbs-up ${solutionVotes[sol.id] === 'up' ? '' : 'fa-regular'}`}></i>
+                       {sol.upvotes || 0}
+                     </button>
+                     <button 
+                       onClick={() => handleSolutionVote(sol.id, 'down')}
+                       className={`hover:underline cursor-pointer flex items-center gap-1 ${solutionVotes[sol.id] === 'down' ? 'text-red-500' : ''}`}
+                     >
+                       <i className={`fa-solid fa-thumbs-down ${solutionVotes[sol.id] === 'down' ? '' : 'fa-regular'}`}></i>
+                     </button>
+                     <button 
+                       onClick={() => handleMarkHelpful(sol.id, true)}
+                       className="hover:underline cursor-pointer flex items-center gap-1"
+                     >
+                       <i className="fa-solid fa-lightbulb"></i>
+                       Helpful ({sol.helpful || 0})
+                     </button>
+                     <button 
+                       onClick={() => {
+                         // TODO: Implement solution reply
+                         alert('Solution reply coming soon');
+                       }}
+                       className="hover:underline cursor-pointer"
+                     >
+                       Reply
+                     </button>
+                     <span>{formatDate(sol.timestamp)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* New Solution Input */}
+            <div className="flex gap-3 items-center">
+              <img src={currentUser.avatar} className="w-10 h-10 rounded-full" alt="Me" />
+              <div className="flex-1 relative">
+                <input 
+                  type="text" 
+                  value={newSolution}
+                  onChange={(e) => setNewSolution(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddSolution()}
+                  placeholder="Suggest a solution..."
+                  className="w-full bg-[#F0F2F5] px-4 py-3 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-3 text-gray-500 text-lg">
+                  <i className="fa-regular fa-face-smile cursor-pointer"></i>
+                  <i className="fa-solid fa-camera cursor-pointer"></i>
+                </div>
               </div>
             </div>
           </div>

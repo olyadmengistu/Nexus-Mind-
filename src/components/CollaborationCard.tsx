@@ -29,7 +29,7 @@ const CollaborationCard: React.FC<CollaborationCardProps> = ({ collaboration, on
 
   return (
     <div
-      className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer"
+      className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition-shadow cursor-pointer"
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-4">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { User, Post, Group, Video, Product } from '../types';
 import { useNavigate } from 'react-router-dom';
-import { searchApi } from '../lib/api';
+import { searchApi } from '../lib/backendApi';
 
 interface SearchProps {
   user: User;
@@ -61,13 +61,13 @@ const Search: React.FC<SearchProps> = ({ user }) => {
 
   const performSearch = async (searchQuery: string) => {
     try {
-      const apiResults = await searchApi.globalSearch(searchQuery);
+      const apiResults = await searchApi.search(searchQuery);
       setResults({
         users: (apiResults.users as User[]) ?? [],
         posts: (apiResults.posts as Post[]) ?? [],
         groups: (apiResults.groups as Group[]) ?? [],
-        videos: (apiResults.videos as Video[]) ?? [],
-        products: (apiResults.products as Product[]) ?? [],
+        videos: [],
+        products: []
       });
     } catch (error) {
       console.error('Search error:', error);
@@ -101,7 +101,7 @@ const Search: React.FC<SearchProps> = ({ user }) => {
 
   return (
     <div className="min-h-screen bg-[#F0F2F5]">
-      <div className="max-w-[800px] mx-auto p-4">
+      <div className="max-w-[800px] mx-auto p-3 sm:p-4">
         {/* Search Header */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
           <div className="relative">

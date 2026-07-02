@@ -3,6 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { User, Post, SavedItem } from '../types';
 import PostCard from '../components/PostCard';
+import StreakBadge from '../components/StreakBadge';
+import BadgeGrid from '../components/BadgeGrid';
+import ExpertiseGraph from '../components/ExpertiseGraph';
+import { userApi, savedItemsApi, streakApi, badgesApi, expertiseApi } from '../lib/backendApi';
 import { userApi as firebaseUserApi } from '../lib/firebaseApi';
 
 interface ProfileProps {
@@ -20,6 +24,11 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
   const [showEditCover, setShowEditCover] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showManagePosts, setShowManagePosts] = useState(false);
+  const [showStreakCelebration, setShowStreakCelebration] = useState(false);
+  const [streakData, setStreakData] = useState<{ streak: number; longestStreak: number; streakFreezes: number }>({ streak: 0, longestStreak: 0, streakFreezes: 0 });
+  const [showBadgeCelebration, setShowBadgeCelebration] = useState(false);
+  const [newBadges, setNewBadges] = useState<any[]>([]);
+  const [isFollowing, setIsFollowing] = useState(false);
   const [editDetails, setEditDetails] = useState({
     education: '',
     location: '',
@@ -39,65 +48,93 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
   });
 
   useEffect(() => {
-    if (userId) {
-      // Look up user from localStorage
-      const users = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-      const foundUser = users.find((u: User) => u.id === userId);
-      if (foundUser) {
-        console.log('Profile - Found user from localStorage with avatar:', foundUser.avatar);
-        setProfileUser(foundUser);
+    const loadUserProfile = async () => {
+      try {
+        const targetUserId = userId || user.id;
+        const profileData = await userApi.getUser(targetUserId);
+        setProfileUser(profileData);
         setEditDetails({
-          education: foundUser.education || '',
-          location: foundUser.location || '',
-          work: foundUser.work || '',
-          expertise: foundUser.expertise?.join(', ') || ''
+          education: profileData.education || '',
+          location: profileData.location || '',
+          work: profileData.work || '',
+          expertise: profileData.expertise?.join(', ') || ''
         });
         setEditProfile({
-          name: foundUser.name,
-          username: foundUser.username,
-          bio: foundUser.bio || ''
+          name: profileData.name,
+          username: profileData.username,
+          bio: profileData.bio || ''
         });
-        setCoverPhotoUrl(foundUser.coverPhoto || '');
-      } else {
-        // If not found in localStorage, use current user (for own profile)
-        console.log('Profile - Using current user with avatar:', user.avatar);
-        setProfileUser(user);
-        setEditDetails({
-          education: user.education || '',
-          location: user.location || '',
-          work: user.work || '',
-          expertise: user.expertise?.join(', ') || ''
+        setCoverPhotoUrl(profileData.coverPhoto || '');
+        
+        // Load streak data
+        setStreakData({
+          streak: profileData.streak || 0,
+          longestStreak: profileData.longestStreak || 0,
+          streakFreezes: profileData.streakFreezes || 0
         });
-        setEditProfile({
-          name: user.name,
-          username: user.username,
-          bio: user.bio || ''
-        });
-        setCoverPhotoUrl(user.coverPhoto || '');
-      }
-    } else {
-      console.log('Profile - No userId provided, using current user with avatar:', user.avatar);
-      setProfileUser(user);
-      setEditDetails({
-        education: user.education || '',
-        location: user.location || '',
-        work: user.work || '',
-        expertise: user.expertise?.join(', ') || ''
-      });
-      setEditProfile({
-        name: user.name,
-        username: user.username,
-        bio: user.bio || ''
-      });
-      setCoverPhotoUrl(user.coverPhoto || '');
-    }
 
-    // Load saved items from localStorage
-    const savedItemsKey = `nexus_saved_items_${userId || user.id}`;
-    const storedSavedItems = localStorage.getItem(savedItemsKey);
-    if (storedSavedItems) {
-      setSavedItems(JSON.parse(storedSavedItems));
-    }
+        // Check if current user is following this profile
+        if (userId && userId !== user.id) {
+          const followingList = JSON.parse(localStorage.getItem('nexus_following') || '[]');
+          setIsFollowing(followingList.includes(userId));
+        }
+      } catch (error) {
+        console.error('Error loading user profile:', error);
+        // Fallback to current user
+        setProfileUser(user);
+      }
+    };
+
+    const loadSavedItems = async () => {
+      try {
+        const targetUserId = userId || user.id;
+        const savedData = await userApi.getSavedItems(targetUserId);
+        setSavedItems(savedData);
+      } catch (error) {
+        console.error('Error loading saved items:', error);
+      }
+    };
+
+    // Update streak if viewing own profile
+    const updateStreak = async () => {
+      if (!userId || userId === user.id) {
+        try {
+          const streakResult = await streakApi.updateStreak(user.id);
+          setStreakData({
+            streak: streakResult.streak,
+            longestStreak: streakResult.longestStreak,
+            streakFreezes: streakResult.streakFreezes
+          });
+          
+          // Show celebration if streak increased
+          if (streakResult.message === 'Streak increased!' && streakResult.streak > 1) {
+            setShowStreakCelebration(true);
+          }
+        } catch (error) {
+          console.error('Error updating streak:', error);
+        }
+      }
+    };
+
+    // Check for new badges if viewing own profile
+    const checkBadges = async () => {
+      if (!userId || userId === user.id) {
+        try {
+          const badgeResult = await badgesApi.checkBadges(user.id);
+          if (badgeResult.newBadges.length > 0) {
+            setNewBadges(badgeResult.newBadges);
+            setShowBadgeCelebration(true);
+          }
+        } catch (error) {
+          console.error('Error checking badges:', error);
+        }
+      }
+    };
+
+    loadUserProfile();
+    loadSavedItems();
+    updateStreak();
+    checkBadges();
   }, [userId, user]);
 
   if (!profileUser) {
@@ -106,10 +143,10 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
 
   const myPosts = posts.filter(p => p.userId === profileUser.id);
 
-  const handleRemoveSavedItem = async (itemId: string) => {
+  const handleRemoveSavedItem = async (savedId: string) => {
     try {
-      await firebaseUserApi.removeSavedItem(userId || user.id, itemId);
-      const updatedSavedItems = savedItems.filter(item => item.id !== itemId);
+      await savedItemsApi.removeSavedItem(userId || user.id, savedId);
+      const updatedSavedItems = savedItems.filter(item => item.id !== savedId);
       setSavedItems(updatedSavedItems);
     } catch (error) {
       console.error('Error removing saved item:', error);
@@ -128,7 +165,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
     };
 
     try {
-      await firebaseUserApi.updateProfile(profileUser.id, {
+      await userApi.updateUser(profileUser.id, {
         education: updatedUser.education,
         location: updatedUser.location,
         work: updatedUser.work,
@@ -160,7 +197,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
     };
 
     try {
-      await firebaseUserApi.updateProfile(profileUser.id, {
+      await userApi.updateUser(profileUser.id, {
         name: updatedUser.name,
         username: updatedUser.username,
         bio: updatedUser.bio,
@@ -181,7 +218,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
     };
 
     try {
-      await firebaseUserApi.updateProfile(profileUser.id, {
+      await userApi.updateUser(profileUser.id, {
         coverPhoto: updatedUser.coverPhoto,
       });
       setProfileUser(updatedUser);
@@ -203,10 +240,57 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
     // In a real backend, this would make an API call
   };
 
-  const handleEditPost = (postId: string) => {
-    // Edit post - backend ready
-    console.log('Editing post:', postId);
-    // In a real backend, this would open an edit modal or navigate to edit page
+  const handleAddStreakFreeze = async () => {
+    try {
+      const result = await streakApi.addStreakFreeze(user.id);
+      setStreakData({
+        ...streakData,
+        streakFreezes: result.streakFreezes
+      });
+      alert('Streak freeze added! You can use it to protect your streak if you miss a day.');
+    } catch (error) {
+      console.error('Error adding streak freeze:', error);
+      alert('Failed to add streak freeze. Maximum of 3 freezes allowed.');
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!profileUser || !userId) return;
+
+    try {
+      if (isFollowing) {
+        // Unfollow
+        await firebaseUserApi.unfollowUser(user.id, userId);
+        const followingList = JSON.parse(localStorage.getItem('nexus_following') || '[]');
+        const updatedList = followingList.filter((id: string) => id !== userId);
+        localStorage.setItem('nexus_following', JSON.stringify(updatedList));
+        setIsFollowing(false);
+      } else {
+        // Follow
+        await firebaseUserApi.followUser(user.id, userId);
+        const followingList = JSON.parse(localStorage.getItem('nexus_following') || '[]');
+        if (!followingList.includes(userId)) {
+          followingList.push(userId);
+          localStorage.setItem('nexus_following', JSON.stringify(followingList));
+        }
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      // Fallback to localStorage only
+      const followingList = JSON.parse(localStorage.getItem('nexus_following') || '[]');
+      if (isFollowing) {
+        const updatedList = followingList.filter((id: string) => id !== userId);
+        localStorage.setItem('nexus_following', JSON.stringify(updatedList));
+        setIsFollowing(false);
+      } else {
+        if (!followingList.includes(userId)) {
+          followingList.push(userId);
+          localStorage.setItem('nexus_following', JSON.stringify(followingList));
+        }
+        setIsFollowing(true);
+      }
+    }
   };
 
   return (
@@ -234,29 +318,62 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           <div className="px-10 pb-4 relative">
              <div className="flex flex-col md:flex-row items-center md:items-end gap-4 -mt-10 md:-mt-20">
                 <div className="relative group">
-                  <img src={profileUser.avatar} className="w-[168px] h-[168px] rounded-full border-4 border-white shadow" alt="Avatar" />
+                  <img src={profileUser.avatar} className="w-28 h-28 sm:w-[168px] sm:h-[168px] rounded-full border-4 border-white shadow" alt="Avatar" />
                   <button className="absolute bottom-4 right-2 bg-gray-200 hover:bg-gray-300 w-9 h-9 rounded-full border-4 border-white flex items-center justify-center">
                     <i className="fa-solid fa-camera"></i>
                   </button>
                 </div>
                 <div className="flex-1 mb-4 text-center md:text-left">
                   <h1 className="text-4xl font-bold">{profileUser.name}</h1>
-                  <p className="text-gray-500 font-semibold">{profileUser.reputation} Reputation Points</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="text-gray-500 font-semibold">{profileUser.reputation} Reputation Points</p>
+                    {streakData.streak > 0 && (
+                      <StreakBadge streak={streakData.streak} size="small" />
+                    )}
+                  </div>
                   <p className="text-gray-600 mt-2">{profileUser.bio}</p>
                 </div>
                 <div className="flex gap-2 mb-4">
+                  {userId && userId !== user.id && (
+                    <button
+                      onClick={handleFollow}
+                      className={`
+                        px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors
+                        ${isFollowing 
+                          ? 'bg-black text-white hover:bg-gray-800' 
+                          : 'bg-[#42B72A] text-white hover:bg-[#36a420]'
+                        }
+                      `}
+                    >
+                      {isFollowing ? (
+                        <>
+                          <i className="fa-solid fa-check"></i> Following
+                        </>
+                      ) : (
+                        <>
+                          <i className="fa-solid fa-user-plus"></i> Follow
+                        </>
+                      )}
+                    </button>
+                  )}
                   <button className="bg-[#1877F2] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2">
                     <i className="fa-solid fa-bookmark"></i> Saved
                   </button>
-                  <button onClick={handleEditProfile} className="bg-gray-200 px-4 py-2 rounded-lg font-bold flex items-center gap-2">
-                    <i className="fa-solid fa-pen"></i> Edit profile
-                  </button>
+                  {!userId || userId === user.id ? (
+                    <button onClick={handleEditProfile} className="bg-gray-200 px-4 py-2 rounded-lg font-bold flex items-center gap-2">
+                      <i className="fa-solid fa-pen"></i> Edit profile
+                    </button>
+                  ) : (
+                    <button className="bg-gray-200 px-4 py-2 rounded-lg font-bold flex items-center gap-2">
+                      <i className="fa-solid fa-message"></i> Message
+                    </button>
+                  )}
                 </div>
              </div>
              
              {/* Tabs */}
              <div className="mt-8 flex border-t border-gray-200 pt-1">
-                {['Challenges', 'About', 'Expertise', 'Solutions', 'Saved', 'More'].map((tab, idx) => (
+                {['Challenges', 'Badges', 'About', 'Expertise', 'Solutions', 'Saved', 'More'].map((tab, idx) => (
                    <button
                      key={tab}
                      onClick={() => setActiveTab(tab)}
@@ -271,13 +388,36 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
       </div>
 
       {/* Main Grid */}
-      <div className="max-w-[1100px] mx-auto px-4 py-4 flex flex-col lg:flex-row gap-4">
+      <div className="max-w-[1100px] mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col lg:flex-row gap-4">
         {/* Left Side (Intro/Photos) */}
         <div className="w-full lg:w-[400px] space-y-4">
           <div className="bg-white p-4 rounded-lg shadow-sm">
              <h2 className="text-xl font-bold mb-4">Intro</h2>
              <div className="space-y-4 text-sm text-gray-700">
                 <p className="text-center italic">{profileUser.bio || 'No bio added yet'}</p>
+                
+                {/* Streak Section */}
+                {streakData.streak > 0 && (
+                  <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-3 rounded-lg border border-orange-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-bold text-orange-800">Current Streak</span>
+                      <StreakBadge streak={streakData.streak} size="small" showLabel={false} />
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
+                      <span>Longest: {streakData.longestStreak} days</span>
+                      <span>Freezes: {streakData.streakFreezes}/3</span>
+                    </div>
+                    {streakData.streakFreezes < 3 && userId === user.id && (
+                      <button 
+                        onClick={handleAddStreakFreeze}
+                        className="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 py-1.5 rounded text-xs font-semibold transition-colors"
+                      >
+                        + Add Streak Freeze
+                      </button>
+                    )}
+                  </div>
+                )}
+                
                 {profileUser.work && (
                   <div className="flex items-center gap-3">
                      <i className="fa-solid fa-briefcase text-gray-500 text-lg"></i>
@@ -374,7 +514,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           )}
 
           {activeTab === 'About' && (
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
               <h2 className="font-bold text-xl mb-4">About</h2>
               <div className="space-y-4 text-gray-700">
                 <p className="text-lg">{profileUser.bio || 'No bio added yet.'}</p>
@@ -393,25 +533,41 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
             </div>
           )}
 
+          {activeTab === 'Badges' && (
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+              <h2 className="font-bold text-xl mb-4">Achievement Badges</h2>
+              <BadgeGrid userId={profileUser.id} showProgress={true} />
+            </div>
+          )}
+
           {activeTab === 'Expertise' && (
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="font-bold text-xl mb-4">Expertise</h2>
-              {profileUser.expertise && profileUser.expertise.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {profileUser.expertise.map((skill, idx) => (
-                    <span key={idx} className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-semibold">
-                      {skill}
-                    </span>
-                  ))}
+            <div className="space-y-4">
+              <ExpertiseGraph userId={profileUser.id} showUpdateButton={userId === user.id} />
+              
+              {profileUser.expertise && profileUser.expertise.length > 0 && (
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+                  <h2 className="font-bold text-xl mb-4">Skills & Interests</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {profileUser.expertise.map((skill, idx) => (
+                      <span key={idx} className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-semibold">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              ) : (
-                <p className="text-gray-500 italic">No expertise added yet. Click "Edit Details" to add your skills.</p>
+              )}
+              
+              {(!profileUser.expertise || profileUser.expertise.length === 0) && (
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
+                  <h2 className="font-bold text-xl mb-4">Skills & Interests</h2>
+                  <p className="text-gray-500 italic">No expertise added yet. Click "Edit Details" to add your skills.</p>
+                </div>
               )}
             </div>
           )}
 
           {activeTab === 'Solutions' && (
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
               <h2 className="font-bold text-xl mb-4">Solutions</h2>
               <div className="text-gray-500 italic">
                 Solutions posted by {profileUser.name} will appear here.
@@ -420,7 +576,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           )}
 
           {activeTab === 'Saved' && (
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
               <h2 className="font-bold text-xl mb-4">Saved Items</h2>
               {savedItems.length > 0 ? (
                 <div className="space-y-4">
@@ -450,7 +606,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           )}
 
           {activeTab === 'More' && (
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
               <h2 className="font-bold text-xl mb-4">More</h2>
               <div className="space-y-2">
                 <button className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-lg flex items-center gap-3">
@@ -479,10 +635,66 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
         </div>
       </div>
 
+      {/* Streak Celebration Modal */}
+      {showStreakCelebration && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 sm:p-8 w-full max-w-md mx-3 sm:mx-4 text-center">
+            <div className="text-6xl mb-4">🔥</div>
+            <h2 className="text-2xl font-bold mb-2">Streak Continued!</h2>
+            <p className="text-gray-600 mb-4">You're on fire! Your streak is now <span className="font-bold text-orange-500">{streakData.streak} days</span>.</p>
+            <StreakBadge streak={streakData.streak} size="large" showLabel={false} className="mb-6" />
+            <button 
+              onClick={() => setShowStreakCelebration(false)}
+              className="w-full bg-[#1877F2] text-white py-3 rounded-lg font-bold hover:bg-blue-600"
+            >
+              Keep it going!
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Badge Celebration Modal */}
+      {showBadgeCelebration && newBadges.length > 0 && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 sm:p-8 w-full max-w-md mx-3 sm:mx-4 text-center">
+            <div className="text-6xl mb-4">🎉</div>
+            <h2 className="text-2xl font-bold mb-2">
+              {newBadges.length === 1 ? 'New Badge Earned!' : 'New Badges Earned!'}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {newBadges.length === 1 
+                ? `You earned the "${newBadges[0].name}" badge!` 
+                : `You earned ${newBadges.length} new badges!`}
+            </p>
+            
+            <div className="flex flex-wrap justify-center gap-4 mb-6">
+              {newBadges.map((badge) => (
+                <div key={badge.id} className="flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-4xl shadow-lg">
+                    {badge.icon}
+                  </div>
+                  <span className="text-sm font-semibold mt-2">{badge.name}</span>
+                </div>
+              ))}
+            </div>
+            
+            <button 
+              onClick={() => {
+                setShowBadgeCelebration(false);
+                setNewBadges([]);
+              }}
+              className="w-full bg-[#1877F2] text-white py-3 rounded-lg font-bold hover:bg-blue-600"
+            >
+              Awesome!
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Edit Details Modal */}
       {showEditDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-3 sm:mx-4">
             <h2 className="text-xl font-bold mb-4">Edit Details</h2>
             <div className="space-y-4">
               <div>
@@ -537,7 +749,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
       {/* Edit Profile Modal */}
       {showEditProfile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-3 sm:mx-4">
             <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
             <div className="space-y-4">
               <div>
@@ -579,7 +791,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
       {/* Edit Cover Photo Modal */}
       {showEditCover && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-3 sm:mx-4">
             <h2 className="text-xl font-bold mb-4">Edit Cover Photo</h2>
             <div className="space-y-4">
               <div>
@@ -635,7 +847,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
       {/* Filters Modal */}
       {showFilters && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-3 sm:mx-4">
             <h2 className="text-xl font-bold mb-4">Filter Posts</h2>
             <div className="space-y-4">
               <div>
@@ -691,7 +903,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
       {/* Manage Posts Modal */}
       {showManagePosts && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl mx-3 sm:mx-4 max-h-[80vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Manage Posts</h2>
             {myPosts.length > 0 ? (
               <div className="space-y-3">

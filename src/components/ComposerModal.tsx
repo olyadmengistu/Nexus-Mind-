@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { User, Post, Poll, PollOption } from '../types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase';
+import { postsApi } from '../lib/backendApi';
 
 interface ComposerModalProps {
   user: User;
@@ -180,8 +181,7 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
       scheduledTime = new Date(`${scheduledDate}T${scheduledTime}`).getTime();
     }
 
-    const newPost: Post = {
-      id: Math.random().toString(36).substr(2, 9),
+    const postData = {
       userId: user.id,
       userName: user.name,
       userAvatar: user.avatar,
@@ -204,13 +204,25 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
       privacy
     };
 
-    onSubmit(newPost);
-    onClose();
+    try {
+      const createdPost = await postsApi.createPost(postData);
+      onSubmit(createdPost as Post);
+      onClose();
+    } catch (error) {
+      console.error('Failed to create post:', error);
+      // Fallback to local submission
+      const newPost: Post = {
+        id: Math.random().toString(36).substr(2, 9),
+        ...postData
+      };
+      onSubmit(newPost);
+      onClose();
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-[500px] rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white w-full max-w-[500px] mx-3 sm:mx-0 rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between shrink-0">
           <div className="w-8"></div>

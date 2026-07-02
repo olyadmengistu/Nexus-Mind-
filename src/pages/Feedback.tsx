@@ -87,24 +87,24 @@ const Feedback: React.FC<FeedbackProps> = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pt-[56px]">
-      <div className="max-w-5xl mx-auto p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="max-w-5xl mx-auto p-3 sm:p-6">
         {/* Header Section */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-6 sm:mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
             <i className="fa-solid fa-comments text-white text-2xl"></i>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+          <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
             Feedback Center
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
             Your feedback helps us improve NexusMind. Share your thoughts, report issues, or suggest new features.
           </p>
         </div>
 
         {/* Success Message */}
         {submitted && (
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-6 mb-8 animate-in slide-in-from-top-2">
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 animate-in slide-in-from-top-2">
             <div className="flex items-center gap-4">
               <div className="flex-shrink-0 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
                 <i className="fa-solid fa-check text-white text-xl"></i>
@@ -128,12 +128,12 @@ const Feedback: React.FC<FeedbackProps> = ({ user }) => {
         )}
 
         {/* Main Feedback Form */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-gray-100">
-          <div className="flex items-center gap-3 mb-8">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-8 mb-6 sm:mb-8 border border-gray-100">
+          <div className="flex items-center gap-3 mb-5 sm:mb-8">
             <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
               <i className="fa-solid fa-paper-plane text-blue-600"></i>
             </div>
-            <h2 className="text-2xl font-bold text-gray-800">Submit Your Feedback</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Submit Your Feedback</h2>
           </div>
           
           <div className="space-y-8">
@@ -279,13 +279,13 @@ const Feedback: React.FC<FeedbackProps> = ({ user }) => {
         </div>
 
         {/* Feedback History */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-8 border border-gray-100">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
                 <i className="fa-solid fa-clock-rotate-left text-purple-600"></i>
               </div>
-              <h2 className="text-2xl font-bold text-gray-800">Your Recent Feedback</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Your Recent Feedback</h2>
             </div>
           </div>
           
@@ -343,7 +343,7 @@ const Feedback: React.FC<FeedbackProps> = ({ user }) => {
         </div>
 
         {/* Help Section */}
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">
+        <div className="mt-6 sm:mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 sm:p-6 border border-blue-100">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
               <i className="fa-solid fa-headset text-white text-xl"></i>

@@ -116,7 +116,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
+    <div className="max-w-7xl mx-auto p-3 sm:p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Marketplace</h1>
@@ -209,7 +209,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
           </div>
 
           {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {isSearching ? (
               <div className="col-span-full text-center py-12 text-gray-500">
                 <i className="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
@@ -302,7 +302,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
                   </div>
                 ))}
               </div>
-              <div className="bg-white rounded-lg shadow p-6 h-fit">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6 h-fit">
                 <h3 className="text-lg font-bold mb-4">Order Summary</h3>
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between">
@@ -341,7 +341,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
           ) : (
             <div className="space-y-4">
               {orders.map(order => (
-                <div key={order.id} className="bg-white rounded-lg shadow p-6">
+                <div key={order.id} className="bg-white rounded-lg shadow p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="font-semibold">Order #{order.id}</h3>
@@ -373,7 +373,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
       {/* Sell Tab */}
       {activeTab === 'sell' && (
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <h2 className="text-xl font-bold mb-6">List an Item for Sale</h2>
             <form className="space-y-4">
               <div>
@@ -384,7 +384,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
                 <label className="block text-sm font-medium mb-1">Description</label>
                 <textarea className="w-full px-3 py-2 border rounded-lg" rows={4} placeholder="Describe your product" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Price ($)</label>
                   <input type="number" className="w-full px-3 py-2 border rounded-lg" placeholder="0.00" />
@@ -394,7 +394,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
                   <input type="number" className="w-full px-3 py-2 border rounded-lg" placeholder="Quantity" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Category</label>
                   <select className="w-full px-3 py-2 border rounded-lg">
@@ -433,7 +433,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
       {/* Sell Item Modal */}
       {showProductModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-3 sm:mx-0">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Sell Item</h2>
               <button

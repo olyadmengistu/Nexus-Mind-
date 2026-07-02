@@ -1,12 +1,49 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import InterestSelection from '../components/InterestSelection';
+import { auth } from '../firebase';
+import { updateProfile } from 'firebase/auth';
 
 const Onboarding: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
   const steps = [
+    {
+      title: 'Welcome to NexusMind!',
+      content: (
+        <div className="space-y-4">
+          <div className="bg-blue-100 border-l-4 border-blue-500 p-4">
+            <p className="font-bold text-blue-800 text-lg">🎉 Let's Personalize Your Experience</p>
+          </div>
+          <p className="text-gray-700">
+            To help us recommend the most relevant content and connect you with like-minded problem solvers, please select your interests.
+          </p>
+          <p className="text-gray-700">
+            Choose topics that matter to you - from technology and health to business and creative arts. This will help us tailor your feed and suggestions.
+          </p>
+          <div className="bg-yellow-50 border-2 border-yellow-400 p-4 rounded">
+            <p className="font-bold text-yellow-800">💡 Why This Matters</p>
+            <p className="text-sm text-gray-700 mt-2">
+              Your interests help us show you relevant problems to solve, connect you with experts in your fields, and recommend content that matches your passions.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: 'Select Your Interests',
+      content: (
+        <InterestSelection
+          selectedInterests={selectedInterests}
+          onInterestsChange={setSelectedInterests}
+          minSelection={3}
+          maxSelection={10}
+        />
+      )
+    },
     {
       title: 'LEGAL WARNING - READ CAREFULLY',
       content: (
@@ -136,6 +173,11 @@ const Onboarding: React.FC = () => {
   ];
 
   const handleNext = () => {
+    // Validate interest selection before proceeding from step 1
+    if (currentStep === 1 && selectedInterests.length < 3) {
+      alert('Please select at least 3 interests to continue.');
+      return;
+    }
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -147,10 +189,43 @@ const Onboarding: React.FC = () => {
     }
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (agreedToTerms) {
-      localStorage.setItem('nexus_onboarding_complete', 'true');
-      navigate('/');
+      try {
+        // Save interests to Firebase user profile
+        const user = auth.currentUser;
+        if (user) {
+          // Store interests in custom data (will be synced with backend)
+          const userData = JSON.parse(localStorage.getItem('nexus_current_user') || '{}');
+          userData.interests = selectedInterests;
+          userData.onboardingComplete = true;
+          localStorage.setItem('nexus_current_user', JSON.stringify(userData));
+
+          // Also update in nexus_users array
+          const allUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+          const userIndex = allUsers.findIndex((u: any) => u.id === user.uid);
+          if (userIndex !== -1) {
+            allUsers[userIndex].interests = selectedInterests;
+            allUsers[userIndex].onboardingComplete = true;
+            localStorage.setItem('nexus_users', JSON.stringify(allUsers));
+          }
+
+          // Try to sync with backend
+          try {
+            const { userApi } = await import('../lib/backendApi');
+            await userApi.updateProfile(user.uid, { interests: selectedInterests });
+          } catch (backendError) {
+            console.warn('Backend sync failed, using local storage:', backendError);
+          }
+        }
+
+        localStorage.setItem('nexus_onboarding_complete', 'true');
+        localStorage.setItem('nexus_user_interests', JSON.stringify(selectedInterests));
+        navigate('/');
+      } catch (error) {
+        console.error('Error completing onboarding:', error);
+        alert('There was an error saving your preferences. Please try again.');
+      }
     }
   };
 
@@ -163,9 +238,10 @@ const Onboarding: React.FC = () => {
             {steps.map((_, index) => (
               <div
                 key={index}
-                className={`w-1/4 h-2 rounded ${
+                className={`flex-1 h-2 rounded ${
                   index <= currentStep ? 'bg-red-600' : 'bg-gray-300'
                 }`}
+                style={{ marginRight: index < steps.length - 1 ? '4px' : '0' }}
               />
             ))}
           </div>

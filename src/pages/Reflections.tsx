@@ -58,17 +58,17 @@ const Reflections: React.FC<ReflectionsProps> = ({ user }) => {
     <div className="flex justify-center min-h-screen">
       <LeftSidebar user={user} />
 
-      <div className="w-full max-w-[680px] px-4 py-4 space-y-4 lg:ml-[280px] lg:mr-[300px]">
+      <div className="w-full max-w-[680px] px-0 py-2 space-y-3 sm:px-4 sm:py-4 sm:space-y-4 lg:ml-[280px] xl:mr-[300px]">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-white sm:rounded-lg shadow-sm p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Inspire Hub</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Inspire Hub</h1>
               <p className="text-gray-500 text-sm mt-1">Share your journey and inspire the NexusMind community</p>
             </div>
             <button
               onClick={() => setIsComposerOpen(true)}
-              className="flex items-center gap-2 bg-[#1877F2] text-white px-4 py-2 rounded-lg hover:bg-[#166FE5] transition-colors"
+              className="flex w-full items-center justify-center gap-2 bg-[#1877F2] text-white px-4 py-2 rounded-lg hover:bg-[#166FE5] transition-colors sm:w-auto"
             >
               <i className="fa-solid fa-camera"></i>
               <span className="font-medium">Share Inspiration</span>

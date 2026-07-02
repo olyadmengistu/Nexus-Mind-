@@ -35,9 +35,43 @@ export const userApi = {
     throw new Error('User not found');
   },
   
+  createProfile: async (userId: string, data: any) => {
+    const docRef = doc(db, 'users', userId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      await addDoc(collection(db, 'users'), {
+        ...data,
+        id: userId,
+        interests: [],
+        onboardingComplete: false,
+        createdAt: Date.now()
+      });
+    }
+    return { success: true };
+  },
+  
   updateProfile: async (userId: string, data: any) => {
     const docRef = doc(db, 'users', userId);
-    await updateDoc(docRef, data);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      await updateDoc(docRef, data);
+    } else {
+      // Create profile if it doesn't exist
+      await addDoc(collection(db, 'users'), {
+        ...data,
+        id: userId,
+        createdAt: Date.now()
+      });
+    }
+    return { success: true };
+  },
+  
+  updateInterests: async (userId: string, interests: string[]) => {
+    const docRef = doc(db, 'users', userId);
+    await updateDoc(docRef, { 
+      interests,
+      onboardingComplete: true 
+    });
     return { success: true };
   },
   
@@ -48,6 +82,46 @@ export const userApi = {
     }
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  },
+  
+  getUsersByInterests: async (interests: string[]) => {
+    if (interests.length === 0) return [];
+    // Get users who have at least one matching interest
+    const q = query(collection(db, 'users'), where('interests', 'array-contains-any', interests));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  },
+  
+  followUser: async (currentUserId: string, targetUserId: string) => {
+    // Add targetUserId to current user's following list
+    const currentUserRef = doc(db, 'users', currentUserId);
+    await updateDoc(currentUserRef, {
+      following: arrayUnion(targetUserId)
+    });
+    
+    // Add currentUserId to target user's followers list
+    const targetUserRef = doc(db, 'users', targetUserId);
+    await updateDoc(targetUserRef, {
+      followers: arrayUnion(currentUserId)
+    });
+    
+    return { success: true };
+  },
+  
+  unfollowUser: async (currentUserId: string, targetUserId: string) => {
+    // Remove targetUserId from current user's following list
+    const currentUserRef = doc(db, 'users', currentUserId);
+    await updateDoc(currentUserRef, {
+      following: arrayRemove(targetUserId)
+    });
+    
+    // Remove currentUserId from target user's followers list
+    const targetUserRef = doc(db, 'users', targetUserId);
+    await updateDoc(targetUserRef, {
+      followers: arrayRemove(currentUserId)
+    });
+    
+    return { success: true };
   },
   
   getSavedItems: async (userId: string) => {
@@ -126,7 +200,15 @@ export const postsApi = {
       solutions: [],
       comments: []
     });
-    return { id: docRef.id, ...data };
+    return { 
+      id: docRef.id, 
+      ...data,
+      timestamp: Date.now(),
+      votes: 0,
+      isSolved: false,
+      solutions: [],
+      comments: []
+    };
   },
   
   updatePost: async (postId: string, data: any) => {

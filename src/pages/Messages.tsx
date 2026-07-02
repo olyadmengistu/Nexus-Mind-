@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { User, Message, Conversation } from '../types';
 import { searchConversations, debounce } from '../lib/searchApi';
 import { socketClient } from '../lib/api';
-import { conversationsApi } from '../lib/firebaseApi';
+import { conversationsApi } from '../lib/backendApi';
 
 interface MessagesProps {
   user: User;
@@ -21,6 +21,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showCallModal, setShowCallModal] = useState<{ type: 'audio' | 'video' | null }>({ type: null });
   const [newChatUser, setNewChatUser] = useState('');
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize WebSocket connection
@@ -58,25 +59,70 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
     };
   }, [user.id, selectedChat]);
 
-  // Initialize conversations from Firestore
+  // Initialize conversations from backend
   useEffect(() => {
     const loadConversations = async () => {
       try {
-        const data = await conversationsApi.getAllConversations();
-        const userConversations = data.filter((conv: Conversation) => 
-          conv.participants.some(p => p.id === user.id)
-        ) as Conversation[];
-        setConversations(userConversations);
-        if (userConversations.length > 0) {
-          setSelectedChat(userConversations[0].id);
+        const data = await conversationsApi.getConversations();
+        // Transform backend data to match frontend Conversation type
+        const transformedConversations = data.map((conv: any) => ({
+          id: conv.id,
+          participants: conv.participants.map((p: any) => ({
+            id: p,
+            name: 'User',
+            username: 'user',
+            email: '',
+            avatar: 'https://picsum.photos/seed/default/100/100',
+            reputation: 0
+          })),
+          messages: [],
+          lastMessage: conv.lastMessage || 'No messages yet',
+          time: conv.lastMessageAt ? formatTime(new Date(conv.lastMessageAt).getTime()) : 'Just now',
+          timestamp: conv.lastMessageAt ? new Date(conv.lastMessageAt).getTime() : Date.now()
+        })) as Conversation[];
+        
+        setConversations(transformedConversations);
+        if (transformedConversations.length > 0 && window.innerWidth >= 768) {
+          setSelectedChat(transformedConversations[0].id);
         }
       } catch (error) {
-        console.error('Error loading conversations from Firestore:', error);
+        console.error('Error loading conversations from backend:', error);
         setConversations([]);
       }
     };
     loadConversations();
   }, [user]);
+
+  // Load messages when conversation is selected
+  useEffect(() => {
+    const loadMessages = async () => {
+      if (!selectedChat) return;
+      
+      setLoadingMessages(true);
+      try {
+        const messages = await conversationsApi.getMessages(selectedChat, 50);
+        // Transform backend messages to match frontend Message type
+        const transformedMessages = messages.map((msg: any) => ({
+          id: msg.id,
+          senderId: msg.senderId,
+          text: msg.text,
+          timestamp: msg.timestamp ? new Date(msg.timestamp).getTime() : Date.now()
+        })) as Message[];
+        
+        setConversations(prev => prev.map(conv => 
+          conv.id === selectedChat 
+            ? { ...conv, messages: transformedMessages }
+            : conv
+        ));
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      } finally {
+        setLoadingMessages(false);
+      }
+    };
+    
+    loadMessages();
+  }, [selectedChat]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -145,8 +191,8 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   const handleSend = async () => {
     if (!messageText.trim() || !selectedChat) return;
     
-    const newMessage: Message = {
-      id: `m${Date.now()}`,
+    const tempMessage: Message = {
+      id: `temp_${Date.now()}`,
       senderId: user.id,
       text: messageText.trim(),
       timestamp: Date.now()
@@ -155,20 +201,28 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
     try {
       // Send via WebSocket for real-time delivery
       socketClient.sendMessage(selectedChat, {
-        ...newMessage,
+        ...tempMessage,
         senderName: user.name,
         senderAvatar: user.avatar
       });
 
-      // Save to Firestore
-      await conversationsApi.sendMessage(selectedChat, newMessage);
+      // Save to backend
+      const savedMessage = await conversationsApi.sendMessage(selectedChat, messageText.trim());
+      
+      // Transform saved message to match frontend type
+      const transformedMessage: Message = {
+        id: savedMessage.id,
+        senderId: savedMessage.senderId,
+        text: savedMessage.text,
+        timestamp: savedMessage.timestamp ? new Date(savedMessage.timestamp).getTime() : Date.now()
+      };
 
-      // Update local state immediately for optimistic UI
+      // Update local state
       setConversations(prev => prev.map(conv => {
         if (conv.id === selectedChat) {
           return {
             ...conv,
-            messages: [...conv.messages, newMessage],
+            messages: [...conv.messages.filter(m => m.id !== tempMessage.id), transformedMessage],
             lastMessage: messageText.trim(),
             time: formatTime(Date.now())
           };
@@ -180,33 +234,51 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       setShowEmojiPicker(false);
     } catch (error) {
       console.error('Error sending message:', error);
+      // Fallback: keep temp message if backend fails
+      setConversations(prev => prev.map(conv => {
+        if (conv.id === selectedChat) {
+          return {
+            ...conv,
+            messages: [...conv.messages, tempMessage],
+            lastMessage: messageText.trim(),
+            time: formatTime(Date.now())
+          };
+        }
+        return conv;
+      }));
+      setMessageText('');
+      setShowEmojiPicker(false);
     }
   };
 
   const handleCreateNewChat = async () => {
     if (!newChatUser.trim()) return;
     
-    const newConversation: Conversation = {
-      id: `c${Date.now()}`,
-      participants: [
-        user,
-        { id: `u${Date.now()}`, name: newChatUser, username: newChatUser.toLowerCase().replace(/\s+/g, ''), email: `${newChatUser.toLowerCase()}@example.com`, avatar: `https://picsum.photos/seed/${newChatUser}/100/100`, reputation: 0 }
-      ],
-      messages: [],
-      lastMessage: 'New conversation',
-      time: 'Just now',
-      timestamp: Date.now()
-    };
-
     try {
-      const { id: _localId, ...conversationPayload } = newConversation;
-      const created = await conversationsApi.createConversation(conversationPayload);
-      setConversations(prev => [created as Conversation, ...prev]);
-      setSelectedChat(created.id);
+      // For now, create a mock user ID since we don't have user search
+      const participantId = `u${Date.now()}`;
+      const created = await conversationsApi.createConversation([participantId], newChatUser, false);
+      
+      // Transform to match frontend Conversation type
+      const transformedConversation: Conversation = {
+        id: created.id,
+        participants: [
+          user,
+          { id: participantId, name: newChatUser, username: newChatUser.toLowerCase().replace(/\s+/g, ''), email: '', avatar: `https://picsum.photos/seed/${newChatUser}/100/100`, reputation: 0 }
+        ],
+        messages: [],
+        lastMessage: 'New conversation',
+        time: 'Just now',
+        timestamp: Date.now()
+      };
+      
+      setConversations(prev => [transformedConversation, ...prev]);
+      setSelectedChat(transformedConversation.id);
       setNewChatUser('');
       setShowNewChatModal(false);
     } catch (error) {
       console.error('Error creating conversation:', error);
+      alert('Failed to create conversation. Please try again.');
     }
   };
 
@@ -227,11 +299,11 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-56px)] bg-white">
+    <div className="flex h-[calc(100vh-136px)] bg-white md:h-[calc(100vh-56px)]">
       {/* Sidebar */}
-      <div className="w-[360px] border-r border-gray-200 flex flex-col">
-        <div className="p-4 flex items-center justify-between">
-           <h1 className="text-2xl font-bold">Chats</h1>
+      <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} w-full md:w-[360px] border-r border-gray-200 flex-col`}>
+        <div className="p-3 sm:p-4 flex items-center justify-between">
+           <h1 className="text-xl sm:text-2xl font-bold">Chats</h1>
            <div className="flex gap-2">
              <button className="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center" title="More options">
                <i className="fa-solid fa-ellipsis"></i>
@@ -245,7 +317,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
              </button>
            </div>
         </div>
-        <div className="px-4 mb-4">
+        <div className="px-3 sm:px-4 mb-3 sm:mb-4">
            <div className="relative">
              <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
              <input 
@@ -253,7 +325,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
                placeholder="Search Messenger" 
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
-               className="w-full bg-gray-100 pl-10 pr-4 py-2 rounded-full outline-none"
+               className="w-full bg-gray-100 pl-10 pr-4 py-2 rounded-full outline-none text-sm"
              />
              {isSearching && (
                <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -272,12 +344,12 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
                 <div 
                   key={conv.id}
                   onClick={() => setSelectedChat(conv.id)}
-                  className={`flex items-center gap-3 p-2 mx-2 rounded-lg cursor-pointer transition-colors ${selectedChat === conv.id ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
+                  className={`flex items-center gap-3 p-2.5 sm:p-3 mx-2 rounded-lg cursor-pointer transition-colors ${selectedChat === conv.id ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
                 >
-                  <img src={otherUser.avatar} className="w-14 h-14 rounded-full" alt="Chat" />
-                  <div className="flex-1">
-                     <p className="font-semibold">{otherUser.name}</p>
-                     <p className="text-sm text-gray-500 truncate w-[180px]">{conv.lastMessage} · {conv.time}</p>
+                  <img src={otherUser.avatar} className="w-12 h-12 sm:w-14 sm:h-14 rounded-full" alt="Chat" />
+                  <div className="flex-1 min-w-0">
+                     <p className="font-semibold text-sm sm:text-base truncate">{otherUser.name}</p>
+                     <p className="text-xs sm:text-sm text-gray-500 truncate">{conv.lastMessage} · {conv.time}</p>
                   </div>
                 </div>
               );
@@ -287,19 +359,26 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className={`${selectedChat ? 'flex' : 'hidden md:flex'} flex-1 flex-col min-w-0`}>
         {selectedConversation && otherUser ? (
           <>
             {/* Chat Header */}
-            <div className="p-3 border-b border-gray-200 flex items-center justify-between shadow-sm">
-               <div className="flex items-center gap-3">
-                 <img src={otherUser.avatar} className="w-10 h-10 rounded-full" alt="Avatar" />
-                 <div>
-                   <p className="font-bold">{otherUser.name}</p>
+            <div className="p-2.5 sm:p-3 border-b border-gray-200 flex items-center justify-between shadow-sm">
+               <div className="flex items-center gap-2 sm:gap-3">
+                 <button
+                   onClick={() => setSelectedChat(null)}
+                   className="md:hidden w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                   aria-label="Back to conversations"
+                 >
+                   <i className="fa-solid fa-arrow-left text-gray-700"></i>
+                 </button>
+                 <img src={otherUser.avatar} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full" alt="Avatar" />
+                 <div className="min-w-0">
+                   <p className="font-bold text-sm sm:text-base truncate">{otherUser.name}</p>
                    <p className="text-xs text-gray-500">Active {selectedConversation.time}</p>
                  </div>
                </div>
-               <div className="flex gap-5 text-[#1877F2] text-xl">
+               <div className="flex gap-2 sm:gap-3 md:gap-5 text-[#1877F2] text-lg sm:text-xl">
                  <i 
                    onClick={() => handleStartCall('audio')}
                    className="fa-solid fa-phone cursor-pointer hover:text-blue-600"
@@ -341,8 +420,12 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
             )}
 
             {/* Messages */}
-            <div className="flex-1 bg-white p-4 overflow-y-auto flex flex-col gap-2">
-              {selectedConversation.messages.length === 0 ? (
+            <div className="flex-1 bg-white p-3 sm:p-4 overflow-y-auto flex flex-col gap-2">
+              {loadingMessages ? (
+                <div className="flex-1 flex items-center justify-center text-gray-500">
+                  <p>Loading messages...</p>
+                </div>
+              ) : selectedConversation.messages.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center text-gray-500">
                   <p>No messages yet. Start the conversation!</p>
                 </div>
@@ -352,7 +435,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
                   const sender = isOwn ? user : otherUser;
                   return (
                     <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[60%] ${isOwn ? 'bg-[#1877F2] text-white' : 'bg-gray-200'} p-3 rounded-2xl`}>
+                      <div className={`max-w-[82%] sm:max-w-[70%] md:max-w-[60%] ${isOwn ? 'bg-[#1877F2] text-white' : 'bg-gray-200'} p-3 rounded-2xl`}>
                         <p>{msg.text}</p>
                         <p className={`text-xs mt-1 ${isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
                           {formatMessageTime(msg.timestamp)}
@@ -383,8 +466,8 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
             )}
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-200 flex items-center gap-3 relative">
-              <div className="flex gap-4 text-[#1877F2] text-xl">
+            <div className="p-3 sm:p-4 border-t border-gray-200 flex items-center gap-2 sm:gap-3 relative">
+              <div className="flex gap-3 sm:gap-4 text-[#1877F2] text-xl">
                 <i 
                   onClick={() => handleAttachment('image')}
                   className="fa-solid fa-circle-plus cursor-pointer hover:text-blue-600"
@@ -397,12 +480,12 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
                 ></i>
                 <i 
                   onClick={() => handleAttachment('note')}
-                  className="fa-solid fa-note-sticky cursor-pointer hover:text-blue-600"
+                  className="hidden sm:inline fa-solid fa-note-sticky cursor-pointer hover:text-blue-600"
                   title="Send note"
                 ></i>
                 <i 
                   onClick={() => handleAttachment('gift')}
-                  className="fa-solid fa-gift cursor-pointer hover:text-blue-600"
+                  className="hidden sm:inline fa-solid fa-gift cursor-pointer hover:text-blue-600"
                   title="Send gift"
                 ></i>
               </div>
@@ -439,7 +522,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       {/* New Chat Modal */}
       {showNewChatModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-3 sm:mx-0">
             <h2 className="text-xl font-bold mb-4">Start a new conversation</h2>
             <input
               type="text"
@@ -473,7 +556,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       {/* Call Modal */}
       {showCallModal.type && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-sm text-center">
+          <div className="bg-white rounded-lg p-6 sm:p-8 w-full max-w-sm text-center mx-3 sm:mx-0">
             <div className="mb-6">
               {otherUser && (
                 <>

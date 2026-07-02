@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import BottomNav from './components/BottomNav';
 import Feed from './components/Feed';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -29,7 +30,7 @@ import { User, Post } from './types';
 import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, reload } from 'firebase/auth';
-import { postsApi, userApi } from './lib/api';
+import { postsApi, userApi } from './lib/backendApi';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -59,7 +60,7 @@ const App: React.FC = () => {
     // Load posts from backend API (fallback to localStorage)
     const loadPosts = async () => {
       try {
-        const apiPosts = await postsApi.getAllPosts({ sortBy: 'newest' });
+        const apiPosts = await postsApi.getPosts();
         if (isMounted && apiPosts.length > 0) {
           setPosts(apiPosts as Post[]);
           localStorage.setItem('nexus_posts', JSON.stringify(apiPosts));
@@ -125,7 +126,7 @@ const App: React.FC = () => {
 
             // Sync profile from backend when available
             try {
-              const backendUser = await userApi.getProfile(firebaseUser.uid);
+              const backendUser = await userApi.getUser(firebaseUser.uid);
               if (isMounted && backendUser) {
                 Object.assign(appUser, {
                   name: backendUser.name ?? appUser.name,
@@ -180,12 +181,17 @@ const App: React.FC = () => {
   };
 
   const handleAddPost = async (newPost: Post) => {
+    console.log('handleAddPost called with:', newPost);
     try {
       const { id: _localId, ...postData } = newPost;
+      console.log('Sending to API:', postData);
       const created = await postsApi.createPost(postData);
+      console.log('Created post from API:', created);
       const updatedPosts = [created as Post, ...posts];
+      console.log('Updated posts array:', updatedPosts);
       setPosts(updatedPosts);
       localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
+      console.log('Post saved to localStorage');
     } catch (error) {
       console.error('Error saving post to backend:', error);
     }
@@ -194,11 +200,13 @@ const App: React.FC = () => {
   const handleVote = async (postId: string, delta: number) => {
     if (!user) return;
     try {
-      await postsApi.votePost(postId, delta, user.id, user.avatar);
+      const voteType = delta > 0 ? 'up' : 'down';
+      await postsApi.votePost(postId, user.id, voteType);
       const updatedPosts = posts.map(p =>
         p.id === postId ? { ...p, votes: p.votes + delta } : p
       );
       setPosts(updatedPosts);
+      localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
     } catch (error) {
       console.error('Error voting on post:', error);
     }
@@ -210,7 +218,7 @@ const App: React.FC = () => {
     <Router>
       <div className="min-h-screen">
         {user && <Navbar user={user} onLogout={handleLogout} />}
-        <main className={user ? "pt-[56px]" : ""}>
+        <main className={user ? "pt-[56px] pb-[72px] md:pb-0" : ""}>
           <Routes>
             <Route 
               path="/welcome" 
@@ -322,6 +330,7 @@ const App: React.FC = () => {
             />
           </Routes>
         </main>
+        {user && <BottomNav />}
       </div>
     </Router>
   );

@@ -145,7 +145,7 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
+    <div className="max-w-7xl mx-auto p-3 sm:p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Collaborate</h1>
@@ -197,7 +197,7 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
           >
             <i className="fa-solid fa-arrow-left mr-2"></i>Back to Opportunities
           </button>
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <img src={selectedCollaboration.creatorAvatar} className="w-12 h-12 rounded-full" alt="" />
@@ -335,7 +335,7 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
           </div>
 
           {/* Collaborations Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {isSearching ? (
               <div className="col-span-full text-center py-12 text-gray-500">
                 <i className="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
@@ -344,7 +344,7 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
             ) : filteredCollaborations.length > 0 ? filteredCollaborations.map(collab => (
               <div
                 key={collab.id}
-                className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => setSelectedCollaboration(collab)}
               >
                 <div className="flex items-start justify-between mb-4">
@@ -397,7 +397,7 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
       {/* Create Collaboration Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto mx-3 sm:mx-0">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Create Collaboration Opportunity</h2>
               <button
@@ -416,7 +416,7 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
                 <label className="block text-sm font-medium mb-1">Description</label>
                 <textarea className="w-full px-3 py-2 border rounded-lg" rows={4} placeholder="Describe the opportunity" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Category</label>
                   <select className="w-full px-3 py-2 border rounded-lg">
@@ -442,7 +442,7 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
                 <label className="block text-sm font-medium mb-1">Required Skills (comma separated)</label>
                 <input type="text" className="w-full px-3 py-2 border rounded-lg" placeholder="React, Python, Design" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Budget (optional)</label>
                   <input type="number" className="w-full px-3 py-2 border rounded-lg" placeholder="0" />

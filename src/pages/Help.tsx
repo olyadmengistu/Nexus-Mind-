@@ -2,11 +2,11 @@ import React from 'react';
 
 const Help: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 pt-[56px]">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-50">
+    <div className="max-w-4xl mx-auto p-3 sm:p-6">
         <h1 className="text-3xl font-bold mb-8">Help & Support</h1>
         
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-xl font-semibold mb-4">Frequently Asked Questions</h2>
           <div className="space-y-4">
             <details className="border border-gray-200 rounded-lg p-4">
@@ -28,7 +28,7 @@ const Help: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-xl font-semibold mb-4">Contact Support</h2>
           <div className="space-y-4">
             <div>
@@ -56,7 +56,7 @@ const Help: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
           <h2 className="text-xl font-semibold mb-4">Additional Resources</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 cursor-pointer">

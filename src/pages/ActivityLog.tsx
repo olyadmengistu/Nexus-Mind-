@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '../types';
-import { activitiesApi } from '../lib/firebaseApi';
+import { activityApi } from '../lib/backendApi';
 
 interface ActivityLogProps {
   user: User;
@@ -20,16 +20,16 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ user }) => {
   useEffect(() => {
     const loadActivities = async () => {
       try {
-        const data = await activitiesApi.getUserActivities(user.id);
+        const data = await activityApi.getUserActivities(user.id);
         const formattedActivities = data.map((log: any) => ({
           id: log.id,
           type: log.action,
-          description: getActivityDescription(log.action, log.metadata),
+          description: getActivityDescription(log.action, log.details),
           timestamp: log.timestamp
         }));
         setActivities(formattedActivities);
       } catch (error) {
-        console.error('Error loading activities from Firestore:', error);
+        console.error('Error loading activities from backend:', error);
         setActivities([]);
       }
     };
@@ -101,13 +101,13 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[56px]">
-      <div className="max-w-4xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto p-3 sm:p-6">
         <h1 className="text-3xl font-bold mb-8">Activity Log</h1>
         
         {/* Analytics Cards */}
         {activities.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div className="bg-white rounded-lg shadow-md p-4 text-center">
               <p className="text-3xl font-bold text-blue-500">{analytics.totalActivities}</p>
               <p className="text-sm text-gray-600">Total</p>
@@ -158,7 +158,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ user }) => {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md">
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="space-y-4">
                 {filteredActivities.map((activity) => (
                   <div key={activity.id} className="flex items-start gap-4 p-4 hover:bg-gray-50 rounded-lg transition-colors">

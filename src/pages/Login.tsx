@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { User } from '../types';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { auth } from '../firebase';
+import { authApi } from '../lib/backendApi';
 
 interface LoginProps {
   onLogin: (user: User) => void;
@@ -73,13 +74,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
+      const idToken = await firebaseUser.getIdToken();
 
-      // First check if user already exists in localStorage (from signup)
-      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-      const storedUser = existingUsers.find((u: User) => u.id === firebaseUser.uid);
+      // Verify token with backend and get JWT
+      const backendAuth = await authApi.verifyToken(idToken);
 
-      // Use stored user data if available, otherwise create from Firebase data
-      const user: User = storedUser || {
+      // Create user object
+      const user: User = {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
         username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
@@ -88,13 +89,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         reputation: 0,
       };
 
-      // Save/update user to localStorage for searchability
-      if (!storedUser) {
-        existingUsers.push(user);
-        localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
-      }
-
-      // Also save current user directly for immediate access
+      // Store JWT token
+      localStorage.setItem('nexus_jwt_token', backendAuth.token);
       localStorage.setItem('nexus_current_user', JSON.stringify(user));
 
       onLogin(user);
@@ -126,13 +122,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       
       const userCredential = await signInWithPopup(auth, provider);
       const firebaseUser = userCredential.user;
+      const idToken = await firebaseUser.getIdToken();
 
-      // First check if user already exists in localStorage (from signup)
-      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-      const storedUser = existingUsers.find((u: User) => u.id === firebaseUser.uid);
+      // Verify token with backend and get JWT
+      const backendAuth = await authApi.verifyToken(idToken);
 
-      // Use stored user data if available, otherwise create from Firebase data
-      const user: User = storedUser || {
+      // Create user object
+      const user: User = {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
         username: firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
@@ -141,13 +137,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         reputation: 0,
       };
 
-      // Save/update user to localStorage for searchability
-      if (!storedUser) {
-        existingUsers.push(user);
-        localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
-      }
-
-      // Also save current user directly for immediate access
+      // Store JWT token
+      localStorage.setItem('nexus_jwt_token', backendAuth.token);
       localStorage.setItem('nexus_current_user', JSON.stringify(user));
 
       onLogin(user);
