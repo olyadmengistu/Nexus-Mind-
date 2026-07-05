@@ -31,12 +31,14 @@ import { INITIAL_POSTS } from './constants';
 import { auth } from './firebase';
 import { onAuthStateChanged, signOut, reload } from 'firebase/auth';
 import { postsApi, userApi } from './lib/firebaseApi';
+import { useScrollDirection } from './hooks/useScrollDirection';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { isNavVisible } = useScrollDirection();
 
   // Hide navbar and bottom nav on onboarding page
   const isOnboardingPage = location.pathname === '/onboarding';
@@ -220,8 +222,8 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      {user && !isOnboardingPage && <Navbar user={user} onLogout={handleLogout} />}
-      <main className={user && !isOnboardingPage ? "pt-[56px] pb-[72px] md:pb-0" : ""}>
+      {user && !isOnboardingPage && <Navbar user={user} onLogout={handleLogout} isVisible={isNavVisible} />}
+      <main className={user && !isOnboardingPage ? `pt-[56px] pb-[72px] md:pb-0 md:pt-[56px] transition-all duration-300 ${isNavVisible ? '' : 'md:pt-[56px] pt-0 pb-0'}` : ""}>
         <Routes>
             <Route 
               path="/welcome" 
@@ -333,7 +335,7 @@ const AppContent: React.FC = () => {
             />
           </Routes>
         </main>
-        {user && !isOnboardingPage && <BottomNav />}
+        {user && !isOnboardingPage && <BottomNav isVisible={isNavVisible} />}
       </div>
   );
 };

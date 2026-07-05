@@ -7,9 +7,10 @@ import { searchUsers, debounce } from '../lib/searchApi';
 interface NavbarProps {
   user: User;
   onLogout: () => void;
+  isVisible?: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
+const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
@@ -87,7 +88,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-2 sm:px-4 flex items-center justify-between">
+    <header className={`fixed top-0 left-0 right-0 h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-2 sm:px-4 flex items-center justify-between transition-transform duration-300 md:translate-y-0 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       {/* Left */}
       <div className="flex items-center gap-2 sm:gap-3">
         <Link to="/" className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#1877F2] rounded-xl">
