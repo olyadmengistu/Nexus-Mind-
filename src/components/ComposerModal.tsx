@@ -221,473 +221,940 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
   };
 
   return (
-    <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white w-full max-w-[500px] mx-2 sm:mx-3 rounded-xl sm:rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
-        {/* Header */}
-        <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center justify-between shrink-0">
-          <div className="w-8"></div>
-          <h2 className="text-lg sm:text-xl font-bold">Create Post</h2>
-          <button 
-            onClick={onClose}
-            className="w-9 h-9 sm:w-8 sm:h-8 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-600 transition-colors"
-          >
-            <i className="fa-solid fa-xmark text-base sm:text-sm"></i>
-          </button>
-        </div>
+    <>
+      {/* Mobile Full-Screen Composer Modal */}
+      <div className="md:hidden fixed inset-0 bg-white z-[100] overflow-y-auto">
+        {/* Mobile Full-Screen Close Button */}
+        <button
+          onClick={onClose}
+          className="fixed top-4 right-4 w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 transition-colors z-10 shadow-lg"
+        >
+          <i className="fa-solid fa-xmark text-2xl"></i>
+        </button>
+        <div className="p-6 pt-20">
+          <h2 className="text-2xl font-bold mb-6">Create Post</h2>
 
-        {/* User Info */}
-        <div className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3 shrink-0">
-          <img src={user.avatar} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full" alt="Avatar" />
-          <div className="space-y-1 flex-1">
-            <h4 className="font-semibold text-xs sm:text-sm truncate">{user.name}</h4>
-            <div className="flex gap-1.5 sm:gap-2">
-              <select 
-                value={privacy}
-                onChange={(e) => setPrivacy(e.target.value as any)}
-                className="bg-gray-200 px-1.5 sm:px-2 py-0.5 rounded flex items-center gap-1 text-[10px] sm:text-[11px] font-bold cursor-pointer outline-none"
-              >
-                <option value="public">🌐 Public</option>
-                <option value="friends">👥 Friends</option>
-                <option value="private">🔒 Private</option>
-              </select>
-              <select 
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="bg-gray-200 px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold cursor-pointer outline-none"
-              >
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Text Area */}
-        <div className="p-3 sm:p-4 flex-1 overflow-y-auto space-y-2 sm:space-y-3">
-          <input 
-            type="text" 
-            placeholder="Title (optional)" 
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full text-base sm:text-lg font-semibold focus:outline-none placeholder-gray-400"
-          />
-          <textarea 
-            placeholder={`What's on your mind?`}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="w-full min-h-[120px] sm:min-h-[150px] text-base sm:text-xl focus:outline-none resize-none placeholder-gray-400"
-          ></textarea>
-          
-          {/* Image Preview */}
-          {imageUrl && (
-            <div className="relative">
-              <img src={imageUrl} alt="Preview" className="w-full max-h-[300px] object-cover rounded-lg" />
-              <button 
-                onClick={() => setImageUrl('')}
-                className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-          )}
-
-          {/* Video Preview */}
-          {videoUrl && (
-            <div className="relative">
-              <video src={videoUrl} controls className="w-full max-h-[300px] rounded-lg" />
-              <button 
-                onClick={() => setVideoUrl('')}
-                className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-          )}
-
-          {/* GIF Preview */}
-          {gifUrl && (
-            <div className="relative">
-              <img src={gifUrl} alt="GIF" className="w-full max-h-[300px] object-cover rounded-lg" />
-              <button 
-                onClick={() => setGifUrl('')}
-                className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-          )}
-
-          {/* Emoji Display */}
-          {emoji && (
-            <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg w-fit">
-              <span className="text-2xl">{emoji}</span>
-              <button 
-                onClick={() => setEmoji('')}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-          )}
-
-          {/* Location Display */}
-          {location && (
-            <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg w-fit">
-              <i className="fa-solid fa-location-dot text-[#F3425E]"></i>
-              <span className="text-sm">{location}</span>
-              <button 
-                onClick={() => setLocation('')}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-            </div>
-          )}
-
-          {/* Tagged Users Display */}
-          {taggedUsers.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {taggedUsers.map((tag, index) => (
-                <div key={index} className="flex items-center gap-1 bg-blue-100 px-2 py-1 rounded-full">
-                  <span className="text-sm text-blue-700">@{tag}</span>
-                  <button 
-                    onClick={() => setTaggedUsers(taggedUsers.filter((_, i) => i !== index))}
-                    className="text-blue-500 hover:text-blue-700 text-xs"
-                  >
-                    <i className="fa-solid fa-xmark"></i>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Poll Preview */}
-          {showPollCreator && (
-            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-              <input
-                type="text"
-                placeholder="Ask a question..."
-                value={pollQuestion}
-                onChange={(e) => setPollQuestion(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
-              {pollOptions.map((option, index) => (
-                <div key={index} className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder={`Option ${index + 1}`}
-                    value={option}
-                    onChange={(e) => handleUpdatePollOption(index, e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  />
-                  {pollOptions.length > 2 && (
-                    <button
-                      onClick={() => handleRemovePollOption(index)}
-                      className="px-2 text-red-500 hover:text-red-700"
-                    >
-                      <i className="fa-solid fa-xmark"></i>
-                    </button>
-                  )}
-                </div>
-              ))}
-              {pollOptions.length < 10 && (
-                <button
-                  onClick={handleAddPollOption}
-                  className="text-blue-500 hover:text-blue-700 text-sm font-medium"
-                >
-                  + Add Option
-                </button>
-              )}
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-600">Poll expires in:</label>
+          {/* User Info */}
+          <div className="flex items-center gap-3 mb-6">
+            <img src={user.avatar} className="w-12 h-12 rounded-full" alt="Avatar" />
+            <div className="space-y-1 flex-1">
+              <h4 className="font-semibold text-base">{user.name}</h4>
+              <div className="flex gap-2">
                 <select
-                  value={pollExpiry}
-                  onChange={(e) => setPollExpiry(Number(e.target.value))}
-                  className="px-2 py-1 border border-gray-300 rounded-lg text-sm"
+                  value={privacy}
+                  onChange={(e) => setPrivacy(e.target.value as any)}
+                  className="bg-gray-200 px-2 py-1 rounded flex items-center gap-1 text-sm font-bold cursor-pointer outline-none"
                 >
-                  <option value={1}>1 hour</option>
-                  <option value={6}>6 hours</option>
-                  <option value={24}>1 day</option>
-                  <option value={72}>3 days</option>
-                  <option value={168}>1 week</option>
+                  <option value="public">🌐 Public</option>
+                  <option value="friends">👥 Friends</option>
+                  <option value="private">🔒 Private</option>
+                </select>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="bg-gray-200 px-2 py-1 rounded text-sm font-bold cursor-pointer outline-none"
+                >
+                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
             </div>
-          )}
-
-          {/* Schedule Preview */}
-          {showSchedulePicker && (
-            <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <label className="text-sm text-gray-600 block mb-1">Date</label>
-                  <input
-                    type="date"
-                    value={scheduledDate}
-                    onChange={(e) => setScheduledDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="text-sm text-gray-600 block mb-1">Time</label>
-                  <input
-                    type="time"
-                    value={scheduledTime}
-                    onChange={(e) => setScheduledTime(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Add to Post */}
-        <div className="mx-3 sm:mx-4 mb-3 sm:mb-4 p-2.5 sm:p-3 border border-gray-300 rounded-lg flex items-center justify-between shrink-0">
-          <span className="font-semibold text-xs sm:text-sm">Add to post</span>
-          <div className="flex gap-2 sm:gap-3 text-xl sm:text-2xl">
-            <input 
-              type="file" 
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              accept="image/*"
-              className="hidden"
-            />
-            <input 
-              type="file" 
-              ref={videoInputRef}
-              onChange={handleVideoUpload}
-              accept="video/*"
-              className="hidden"
-            />
-            <i 
-              className="fa-solid fa-images text-[#45BD62] cursor-pointer hover:opacity-80"
-              onClick={() => fileInputRef.current?.click()}
-              title="Add Photo/Video"
-            ></i>
-            <i 
-              className="fa-solid fa-video text-[#1877F2] cursor-pointer hover:opacity-80"
-              onClick={() => videoInputRef.current?.click()}
-              title="Add Video"
-            ></i>
-            <i 
-              className="fa-solid fa-user-tag text-[#1877F2] cursor-pointer hover:opacity-80"
-              onClick={() => setShowTagPicker(!showTagPicker)}
-              title="Tag People"
-            ></i>
-            <i 
-              className="fa-regular fa-face-smile text-[#F7B928] cursor-pointer hover:opacity-80"
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              title="Add Emoji"
-            ></i>
-            <i 
-              className="fa-solid fa-location-dot text-[#F3425E] cursor-pointer hover:opacity-80"
-              onClick={() => setShowLocationPicker(!showLocationPicker)}
-              title="Add Location"
-            ></i>
-            <i 
-              className="fa-solid fa-ellipsis text-gray-400 cursor-pointer hover:opacity-80"
-              onClick={() => setShowMoreOptions(!showMoreOptions)}
-              title="More Options"
-            ></i>
           </div>
-        </div>
 
-        {/* Emoji Picker */}
-        {showEmojiPicker && (
-          <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
+          {/* Text Area */}
+          <div className="space-y-4 mb-6">
             <input
               type="text"
-              placeholder="Search emojis..."
-              value={emojiSearch}
-              onChange={(e) => setEmojiSearch(e.target.value)}
-              className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              placeholder="Title (optional)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full text-xl font-semibold focus:outline-none placeholder-gray-400"
             />
-            {!emojiSearch && (
-              <div className="flex gap-2 mb-2 overflow-x-auto pb-2">
-                {Object.keys(emojiCategories).map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedEmojiCategory(cat)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                      selectedEmojiCategory === cat ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
-                    }`}
-                  >
-                    {cat}
-                  </button>
+            <textarea
+              placeholder={`What's on your mind?`}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="w-full min-h-[200px] text-xl focus:outline-none resize-none placeholder-gray-400"
+            ></textarea>
+
+            {/* Image Preview */}
+            {imageUrl && (
+              <div className="relative">
+                <img src={imageUrl} alt="Preview" className="w-full max-h-[400px] object-cover rounded-lg" />
+                <button
+                  onClick={() => setImageUrl('')}
+                  className="absolute top-2 right-2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Video Preview */}
+            {videoUrl && (
+              <div className="relative">
+                <video src={videoUrl} controls className="w-full max-h-[400px] rounded-lg" />
+                <button
+                  onClick={() => setVideoUrl('')}
+                  className="absolute top-2 right-2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* GIF Preview */}
+            {gifUrl && (
+              <div className="relative">
+                <img src={gifUrl} alt="GIF" className="w-full max-h-[400px] object-cover rounded-lg" />
+                <button
+                  onClick={() => setGifUrl('')}
+                  className="absolute top-2 right-2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Emoji Display */}
+            {emoji && (
+              <div className="flex items-center gap-2 bg-gray-100 px-4 py-3 rounded-lg w-fit">
+                <span className="text-3xl">{emoji}</span>
+                <button
+                  onClick={() => setEmoji('')}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Location Display */}
+            {location && (
+              <div className="flex items-center gap-2 bg-gray-100 px-4 py-3 rounded-lg w-fit">
+                <i className="fa-solid fa-location-dot text-[#F3425E]"></i>
+                <span className="text-base">{location}</span>
+                <button
+                  onClick={() => setLocation('')}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Tagged Users Display */}
+            {taggedUsers.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {taggedUsers.map((tag, index) => (
+                  <div key={index} className="flex items-center gap-1 bg-blue-100 px-3 py-2 rounded-full">
+                    <span className="text-base text-blue-700">@{tag}</span>
+                    <button
+                      onClick={() => setTaggedUsers(taggedUsers.filter((_, i) => i !== index))}
+                      className="text-blue-500 hover:text-blue-700 text-sm"
+                    >
+                      <i className="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
-            <div className="grid grid-cols-8 gap-1 max-h-[200px] overflow-y-auto">
-              {filteredEmojis.map((e) => (
-                <button
-                  key={e}
-                  onClick={() => {
-                    setEmoji(e);
-                    setShowEmojiPicker(false);
-                    setEmojiSearch('');
-                  }}
-                  className="text-2xl hover:bg-gray-100 rounded p-1 transition-colors"
-                >
-                  {e}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* Location Picker */}
-        {showLocationPicker && (
-          <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
-            <button
-              onClick={handleGetCurrentLocation}
-              disabled={gettingLocation}
-              className="w-full mb-3 px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
-            >
-              {gettingLocation ? (
-                <>
-                  <i className="fa-solid fa-spinner fa-spin"></i>
-                  Getting location...
-                </>
-              ) : (
-                <>
-                  <i className="fa-solid fa-crosshairs"></i>
-                  Use my current location
-                </>
-              )}
-            </button>
-            <div className="relative mb-2">
-              <i className="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-              <input
-                type="text"
-                placeholder="Search location..."
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
-            </div>
-            <div className="max-h-[150px] overflow-y-auto space-y-1">
-              {['New York, USA', 'London, UK', 'Tokyo, Japan', 'Paris, France', 'Berlin, Germany', 'Sydney, Australia', 'Toronto, Canada', 'Dubai, UAE', 'Singapore', 'Mumbai, India'].map((loc) => (
-                <button
-                  key={loc}
-                  onClick={() => {
-                    setLocation(loc);
-                    setShowLocationPicker(false);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded transition-colors text-sm"
-                >
-                  <i className="fa-solid fa-location-dot text-[#F3425E] mr-2"></i>
-                  {loc}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tag Picker */}
-        {showTagPicker && (
-          <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
-            <div className="flex gap-2 mb-2">
-              <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">@</span>
+            {/* Poll Preview */}
+            {showPollCreator && (
+              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
                 <input
                   type="text"
-                  placeholder="Search users..."
-                  value={tagSearch}
-                  onChange={(e) => setTagSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                      setTaggedUsers([...taggedUsers, e.currentTarget.value.trim().replace('@', '')]);
-                      setTagSearch('');
-                      e.currentTarget.value = '';
-                    }
-                  }}
+                  placeholder="Ask a question..."
+                  value={pollQuestion}
+                  onChange={(e) => setPollQuestion(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+                />
+                {pollOptions.map((option, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder={`Option ${index + 1}`}
+                      value={option}
+                      onChange={(e) => handleUpdatePollOption(index, e.target.value)}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+                    />
+                    {pollOptions.length > 2 && (
+                      <button
+                        onClick={() => handleRemovePollOption(index)}
+                        className="px-3 text-red-500 hover:text-red-700"
+                      >
+                        <i className="fa-solid fa-xmark"></i>
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {pollOptions.length < 10 && (
+                  <button
+                    onClick={handleAddPollOption}
+                    className="text-blue-500 hover:text-blue-700 text-base font-medium"
+                  >
+                    + Add Option
+                  </button>
+                )}
+                <div className="flex items-center gap-2">
+                  <label className="text-base text-gray-600">Poll expires in:</label>
+                  <select
+                    value={pollExpiry}
+                    onChange={(e) => setPollExpiry(Number(e.target.value))}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-base"
+                  >
+                    <option value={1}>1 hour</option>
+                    <option value={6}>6 hours</option>
+                    <option value={24}>1 day</option>
+                    <option value={72}>3 days</option>
+                    <option value={168}>1 week</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Schedule Preview */}
+            {showSchedulePicker && (
+              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="text-base text-gray-600 block mb-1">Date</label>
+                    <input
+                      type="date"
+                      value={scheduledDate}
+                      onChange={(e) => setScheduledDate(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-base text-gray-600 block mb-1">Time</label>
+                    <input
+                      type="time"
+                      value={scheduledTime}
+                      onChange={(e) => setScheduledTime(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Add to Post */}
+          <div className="mb-6 p-4 border border-gray-300 rounded-lg flex items-center justify-between">
+            <span className="font-semibold text-base">Add to post</span>
+            <div className="flex gap-3 text-2xl">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <input
+                type="file"
+                ref={videoInputRef}
+                onChange={handleVideoUpload}
+                accept="video/*"
+                className="hidden"
+              />
+              <i
+                className="fa-solid fa-images text-[#45BD62] cursor-pointer hover:opacity-80"
+                onClick={() => fileInputRef.current?.click()}
+                title="Add Photo/Video"
+              ></i>
+              <i
+                className="fa-solid fa-video text-[#1877F2] cursor-pointer hover:opacity-80"
+                onClick={() => videoInputRef.current?.click()}
+                title="Add Video"
+              ></i>
+              <i
+                className="fa-solid fa-user-tag text-[#1877F2] cursor-pointer hover:opacity-80"
+                onClick={() => setShowTagPicker(!showTagPicker)}
+                title="Tag People"
+              ></i>
+              <i
+                className="fa-regular fa-face-smile text-[#F7B928] cursor-pointer hover:opacity-80"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                title="Add Emoji"
+              ></i>
+              <i
+                className="fa-solid fa-location-dot text-[#F3425E] cursor-pointer hover:opacity-80"
+                onClick={() => setShowLocationPicker(!showLocationPicker)}
+                title="Add Location"
+              ></i>
+              <i
+                className="fa-solid fa-ellipsis text-gray-400 cursor-pointer hover:opacity-80"
+                onClick={() => setShowMoreOptions(!showMoreOptions)}
+                title="More Options"
+              ></i>
+            </div>
+          </div>
+
+          {/* Emoji Picker */}
+          {showEmojiPicker && (
+            <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-white">
+              <input
+                type="text"
+                placeholder="Search emojis..."
+                value={emojiSearch}
+                onChange={(e) => setEmojiSearch(e.target.value)}
+                className="w-full mb-3 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+              />
+              {!emojiSearch && (
+                <div className="flex gap-2 mb-3 overflow-x-auto pb-3">
+                  {Object.keys(emojiCategories).map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedEmojiCategory(cat)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${
+                        selectedEmojiCategory === cat ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="grid grid-cols-8 gap-2 max-h-[250px] overflow-y-auto">
+                {filteredEmojis.map((e) => (
+                  <button
+                    key={e}
+                    onClick={() => {
+                      setEmoji(e);
+                      setShowEmojiPicker(false);
+                      setEmojiSearch('');
+                    }}
+                    className="text-3xl hover:bg-gray-100 rounded p-2 transition-colors"
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Location Picker */}
+          {showLocationPicker && (
+            <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-white">
+              <button
+                onClick={handleGetCurrentLocation}
+                disabled={gettingLocation}
+                className="w-full mb-4 px-6 py-4 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg font-medium flex items-center justify-center gap-2 transition-colors text-base"
+              >
+                {gettingLocation ? (
+                  <>
+                    <i className="fa-solid fa-spinner fa-spin"></i>
+                    Getting location...
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-crosshairs"></i>
+                    Use my current location
+                  </>
+                )}
+              </button>
+              <div className="relative mb-3">
+                <i className="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input
+                  type="text"
+                  placeholder="Search location..."
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
                 />
               </div>
+              <div className="max-h-[200px] overflow-y-auto space-y-1">
+                {['New York, USA', 'London, UK', 'Tokyo, Japan', 'Paris, France', 'Berlin, Germany', 'Sydney, Australia', 'Toronto, Canada', 'Dubai, UAE', 'Singapore', 'Mumbai, India'].map((loc) => (
+                  <button
+                    key={loc}
+                    onClick={() => {
+                      setLocation(loc);
+                      setShowLocationPicker(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded transition-colors text-base"
+                  >
+                    <i className="fa-solid fa-location-dot text-[#F3425E] mr-2"></i>
+                    {loc}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tag Picker */}
+          {showTagPicker && (
+            <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-white">
+              <div className="flex gap-2 mb-3">
+                <div className="relative flex-1">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">@</span>
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={tagSearch}
+                    onChange={(e) => setTagSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                        setTaggedUsers([...taggedUsers, e.currentTarget.value.trim().replace('@', '')]);
+                        setTagSearch('');
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={() => setShowTagPicker(false)}
+                  className="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors text-base"
+                >
+                  Done
+                </button>
+              </div>
+              <p className="text-base text-gray-500">Type a username and press Enter to tag</p>
+            </div>
+          )}
+
+          {/* GIF Picker */}
+          {showGifPicker && (
+            <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-white">
+              <input
+                type="text"
+                placeholder="Search GIFs..."
+                value={gifSearch}
+                onChange={(e) => setGifSearch(e.target.value)}
+                className="w-full mb-4 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-base"
+              />
+              <div className="grid grid-cols-2 gap-3 max-h-[250px] overflow-y-auto">
+                {sampleGifs.map((gif) => (
+                  <button
+                    key={gif}
+                    onClick={() => {
+                      setGifUrl(gif);
+                      setShowGifPicker(false);
+                    }}
+                    className="rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                  >
+                    <img src={gif} alt="GIF" className="w-full h-32 object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* More Options */}
+          {showMoreOptions && (
+            <div className="mb-6 p-4 border border-gray-300 rounded-lg bg-white">
               <button
-                onClick={() => setShowTagPicker(false)}
-                className="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+                onClick={() => {
+                  setShowGifPicker(!showGifPicker);
+                  setShowMoreOptions(false);
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded transition-colors text-base flex items-center gap-3"
               >
-                Done
+                <i className="fa-solid fa-gif text-purple-500 text-xl"></i>
+                Add GIF
+              </button>
+              <button
+                onClick={() => {
+                  setShowPollCreator(!showPollCreator);
+                  setShowMoreOptions(false);
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded transition-colors text-base flex items-center gap-3"
+              >
+                <i className="fa-solid fa-poll text-green-500 text-xl"></i>
+                Add Poll
+              </button>
+              <button
+                onClick={() => {
+                  setShowSchedulePicker(!showSchedulePicker);
+                  setShowMoreOptions(false);
+                }}
+                className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded transition-colors text-base flex items-center gap-3"
+              >
+                <i className="fa-solid fa-calendar text-orange-500 text-xl"></i>
+                Schedule Post
               </button>
             </div>
-            <p className="text-xs text-gray-500">Type a username and press Enter to tag</p>
-          </div>
-        )}
+          )}
 
-        {/* GIF Picker */}
-        {showGifPicker && (
-          <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
-            <input
-              type="text"
-              placeholder="Search GIFs..."
-              value={gifSearch}
-              onChange={(e) => setGifSearch(e.target.value)}
-              className="w-full mb-3 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            />
-            <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto">
-              {sampleGifs.map((gif) => (
-                <button
-                  key={gif}
-                  onClick={() => {
-                    setGifUrl(gif);
-                    setShowGifPicker(false);
-                  }}
-                  className="rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-                >
-                  <img src={gif} alt="GIF" className="w-full h-24 object-cover" />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* More Options */}
-        {showMoreOptions && (
-          <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
-            <button 
-              onClick={() => {
-                setShowGifPicker(!showGifPicker);
-                setShowMoreOptions(false);
-              }}
-              className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded transition-colors text-sm flex items-center gap-2"
-            >
-              <i className="fa-solid fa-gif text-purple-500"></i>
-              Add GIF
-            </button>
-            <button 
-              onClick={() => {
-                setShowPollCreator(!showPollCreator);
-                setShowMoreOptions(false);
-              }}
-              className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded transition-colors text-sm flex items-center gap-2"
-            >
-              <i className="fa-solid fa-poll text-green-500"></i>
-              Add Poll
-            </button>
-            <button 
-              onClick={() => {
-                setShowSchedulePicker(!showSchedulePicker);
-                setShowMoreOptions(false);
-              }}
-              className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded transition-colors text-sm flex items-center gap-2"
-            >
-              <i className="fa-solid fa-calendar text-orange-500"></i>
-              Schedule Post
-            </button>
-          </div>
-        )}
-
-        {/* Submit */}
-        <div className="p-3 sm:p-4 shrink-0">
-          <button 
+          {/* Submit */}
+          <button
             onClick={handleSubmit}
             disabled={!content.trim() || uploading}
-            className="w-full bg-[#1877F2] disabled:bg-gray-300 hover:bg-blue-600 text-white font-bold py-2.5 sm:py-2 rounded-lg transition-colors text-sm sm:text-base"
+            className="w-full bg-[#1877F2] disabled:bg-gray-300 hover:bg-blue-600 text-white font-bold py-4 rounded-lg transition-colors text-lg"
           >
             {uploading ? 'Uploading...' : 'Post'}
           </button>
         </div>
       </div>
-    </div>
+
+      {/* Desktop Composer Modal */}
+      <div className="hidden md:flex fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] items-center justify-center p-3 sm:p-4">
+        <div className="bg-white w-full max-w-[500px] mx-2 sm:mx-3 rounded-xl sm:rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+          {/* Header */}
+          <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center justify-between shrink-0">
+            <div className="w-8"></div>
+            <h2 className="text-lg sm:text-xl font-bold">Create Post</h2>
+            <button
+              onClick={onClose}
+              className="w-9 h-9 sm:w-8 sm:h-8 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-600 transition-colors"
+            >
+              <i className="fa-solid fa-xmark text-base sm:text-sm"></i>
+            </button>
+          </div>
+
+          {/* User Info */}
+          <div className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3 shrink-0">
+            <img src={user.avatar} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full" alt="Avatar" />
+            <div className="space-y-1 flex-1">
+              <h4 className="font-semibold text-xs sm:text-sm truncate">{user.name}</h4>
+              <div className="flex gap-1.5 sm:gap-2">
+                <select
+                  value={privacy}
+                  onChange={(e) => setPrivacy(e.target.value as any)}
+                  className="bg-gray-200 px-1.5 sm:px-2 py-0.5 rounded flex items-center gap-1 text-[10px] sm:text-[11px] font-bold cursor-pointer outline-none"
+                >
+                  <option value="public">🌐 Public</option>
+                  <option value="friends">👥 Friends</option>
+                  <option value="private">🔒 Private</option>
+                </select>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="bg-gray-200 px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold cursor-pointer outline-none"
+                >
+                  {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Text Area */}
+          <div className="p-3 sm:p-4 flex-1 overflow-y-auto space-y-2 sm:space-y-3">
+            <input
+              type="text"
+              placeholder="Title (optional)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full text-base sm:text-lg font-semibold focus:outline-none placeholder-gray-400"
+            />
+            <textarea
+              placeholder={`What's on your mind?`}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="w-full min-h-[120px] sm:min-h-[150px] text-base sm:text-xl focus:outline-none resize-none placeholder-gray-400"
+            ></textarea>
+
+            {/* Image Preview */}
+            {imageUrl && (
+              <div className="relative">
+                <img src={imageUrl} alt="Preview" className="w-full max-h-[300px] object-cover rounded-lg" />
+                <button
+                  onClick={() => setImageUrl('')}
+                  className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Video Preview */}
+            {videoUrl && (
+              <div className="relative">
+                <video src={videoUrl} controls className="w-full max-h-[300px] rounded-lg" />
+                <button
+                  onClick={() => setVideoUrl('')}
+                  className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* GIF Preview */}
+            {gifUrl && (
+              <div className="relative">
+                <img src={gifUrl} alt="GIF" className="w-full max-h-[300px] object-cover rounded-lg" />
+                <button
+                  onClick={() => setGifUrl('')}
+                  className="absolute top-2 right-2 w-8 h-8 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Emoji Display */}
+            {emoji && (
+              <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg w-fit">
+                <span className="text-2xl">{emoji}</span>
+                <button
+                  onClick={() => setEmoji('')}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Location Display */}
+            {location && (
+              <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg w-fit">
+                <i className="fa-solid fa-location-dot text-[#F3425E]"></i>
+                <span className="text-sm">{location}</span>
+                <button
+                  onClick={() => setLocation('')}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            )}
+
+            {/* Tagged Users Display */}
+            {taggedUsers.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {taggedUsers.map((tag, index) => (
+                  <div key={index} className="flex items-center gap-1 bg-blue-100 px-2 py-1 rounded-full">
+                    <span className="text-sm text-blue-700">@{tag}</span>
+                    <button
+                      onClick={() => setTaggedUsers(taggedUsers.filter((_, i) => i !== index))}
+                      className="text-blue-500 hover:text-blue-700 text-xs"
+                    >
+                      <i className="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Poll Preview */}
+            {showPollCreator && (
+              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                <input
+                  type="text"
+                  placeholder="Ask a question..."
+                  value={pollQuestion}
+                  onChange={(e) => setPollQuestion(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                />
+                {pollOptions.map((option, index) => (
+                  <div key={index} className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder={`Option ${index + 1}`}
+                      value={option}
+                      onChange={(e) => handleUpdatePollOption(index, e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    />
+                    {pollOptions.length > 2 && (
+                      <button
+                        onClick={() => handleRemovePollOption(index)}
+                        className="px-2 text-red-500 hover:text-red-700"
+                      >
+                        <i className="fa-solid fa-xmark"></i>
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {pollOptions.length < 10 && (
+                  <button
+                    onClick={handleAddPollOption}
+                    className="text-blue-500 hover:text-blue-700 text-sm font-medium"
+                  >
+                    + Add Option
+                  </button>
+                )}
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600">Poll expires in:</label>
+                  <select
+                    value={pollExpiry}
+                    onChange={(e) => setPollExpiry(Number(e.target.value))}
+                    className="px-2 py-1 border border-gray-300 rounded-lg text-sm"
+                  >
+                    <option value={1}>1 hour</option>
+                    <option value={6}>6 hours</option>
+                    <option value={24}>1 day</option>
+                    <option value={72}>3 days</option>
+                    <option value={168}>1 week</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Schedule Preview */}
+            {showSchedulePicker && (
+              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="text-sm text-gray-600 block mb-1">Date</label>
+                    <input
+                      type="date"
+                      value={scheduledDate}
+                      onChange={(e) => setScheduledDate(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-sm text-gray-600 block mb-1">Time</label>
+                    <input
+                      type="time"
+                      value={scheduledTime}
+                      onChange={(e) => setScheduledTime(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Add to Post */}
+          <div className="mx-3 sm:mx-4 mb-3 sm:mb-4 p-2.5 sm:p-3 border border-gray-300 rounded-lg flex items-center justify-between shrink-0">
+            <span className="font-semibold text-xs sm:text-sm">Add to post</span>
+            <div className="flex gap-2 sm:gap-3 text-xl sm:text-2xl">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <input
+                type="file"
+                ref={videoInputRef}
+                onChange={handleVideoUpload}
+                accept="video/*"
+                className="hidden"
+              />
+              <i
+                className="fa-solid fa-images text-[#45BD62] cursor-pointer hover:opacity-80"
+                onClick={() => fileInputRef.current?.click()}
+                title="Add Photo/Video"
+              ></i>
+              <i
+                className="fa-solid fa-video text-[#1877F2] cursor-pointer hover:opacity-80"
+                onClick={() => videoInputRef.current?.click()}
+                title="Add Video"
+              ></i>
+              <i
+                className="fa-solid fa-user-tag text-[#1877F2] cursor-pointer hover:opacity-80"
+                onClick={() => setShowTagPicker(!showTagPicker)}
+                title="Tag People"
+              ></i>
+              <i
+                className="fa-regular fa-face-smile text-[#F7B928] cursor-pointer hover:opacity-80"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                title="Add Emoji"
+              ></i>
+              <i
+                className="fa-solid fa-location-dot text-[#F3425E] cursor-pointer hover:opacity-80"
+                onClick={() => setShowLocationPicker(!showLocationPicker)}
+                title="Add Location"
+              ></i>
+              <i
+                className="fa-solid fa-ellipsis text-gray-400 cursor-pointer hover:opacity-80"
+                onClick={() => setShowMoreOptions(!showMoreOptions)}
+                title="More Options"
+              ></i>
+            </div>
+          </div>
+
+          {/* Emoji Picker */}
+          {showEmojiPicker && (
+            <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
+              <input
+                type="text"
+                placeholder="Search emojis..."
+                value={emojiSearch}
+                onChange={(e) => setEmojiSearch(e.target.value)}
+                className="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              />
+              {!emojiSearch && (
+                <div className="flex gap-2 mb-2 overflow-x-auto pb-2">
+                  {Object.keys(emojiCategories).map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedEmojiCategory(cat)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                        selectedEmojiCategory === cat ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="grid grid-cols-8 gap-1 max-h-[200px] overflow-y-auto">
+                {filteredEmojis.map((e) => (
+                  <button
+                    key={e}
+                    onClick={() => {
+                      setEmoji(e);
+                      setShowEmojiPicker(false);
+                      setEmojiSearch('');
+                    }}
+                    className="text-2xl hover:bg-gray-100 rounded p-1 transition-colors"
+                  >
+                    {e}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Location Picker */}
+          {showLocationPicker && (
+            <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
+              <button
+                onClick={handleGetCurrentLocation}
+                disabled={gettingLocation}
+                className="w-full mb-3 px-4 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+              >
+                {gettingLocation ? (
+                  <>
+                    <i className="fa-solid fa-spinner fa-spin"></i>
+                    Getting location...
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-crosshairs"></i>
+                    Use my current location
+                  </>
+                )}
+              </button>
+              <div className="relative mb-2">
+                <i className="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input
+                  type="text"
+                  placeholder="Search location..."
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div className="max-h-[150px] overflow-y-auto space-y-1">
+                {['New York, USA', 'London, UK', 'Tokyo, Japan', 'Paris, France', 'Berlin, Germany', 'Sydney, Australia', 'Toronto, Canada', 'Dubai, UAE', 'Singapore', 'Mumbai, India'].map((loc) => (
+                  <button
+                    key={loc}
+                    onClick={() => {
+                      setLocation(loc);
+                      setShowLocationPicker(false);
+                    }}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded transition-colors text-sm"
+                  >
+                    <i className="fa-solid fa-location-dot text-[#F3425E] mr-2"></i>
+                    {loc}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tag Picker */}
+          {showTagPicker && (
+            <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
+              <div className="flex gap-2 mb-2">
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">@</span>
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    value={tagSearch}
+                    onChange={(e) => setTagSearch(e.target.value)}
+                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                        setTaggedUsers([...taggedUsers, e.currentTarget.value.trim().replace('@', '')]);
+                        setTagSearch('');
+                        e.currentTarget.value = '';
+                      }
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={() => setShowTagPicker(false)}
+                  className="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">Type a username and press Enter to tag</p>
+            </div>
+          )}
+
+          {/* GIF Picker */}
+          {showGifPicker && (
+            <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
+              <input
+                type="text"
+                placeholder="Search GIFs..."
+                value={gifSearch}
+                onChange={(e) => setGifSearch(e.target.value)}
+                className="w-full mb-3 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              />
+              <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto">
+                {sampleGifs.map((gif) => (
+                  <button
+                    key={gif}
+                    onClick={() => {
+                      setGifUrl(gif);
+                      setShowGifPicker(false);
+                    }}
+                    className="rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
+                  >
+                    <img src={gif} alt="GIF" className="w-full h-24 object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* More Options */}
+          {showMoreOptions && (
+            <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg bg-white shrink-0">
+              <button
+                onClick={() => {
+                  setShowGifPicker(!showGifPicker);
+                  setShowMoreOptions(false);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded transition-colors text-sm flex items-center gap-2"
+              >
+                <i className="fa-solid fa-gif text-purple-500"></i>
+                Add GIF
+              </button>
+              <button
+                onClick={() => {
+                  setShowPollCreator(!showPollCreator);
+                  setShowMoreOptions(false);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded transition-colors text-sm flex items-center gap-2"
+              >
+                <i className="fa-solid fa-poll text-green-500"></i>
+                Add Poll
+              </button>
+              <button
+                onClick={() => {
+                  setShowSchedulePicker(!showSchedulePicker);
+                  setShowMoreOptions(false);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded transition-colors text-sm flex items-center gap-2"
+              >
+                <i className="fa-solid fa-calendar text-orange-500"></i>
+                Schedule Post
+              </button>
+            </div>
+          )}
+
+          {/* Submit */}
+          <div className="p-3 sm:p-4 shrink-0">
+            <button
+              onClick={handleSubmit}
+              disabled={!content.trim() || uploading}
+              className="w-full bg-[#1877F2] disabled:bg-gray-300 hover:bg-blue-600 text-white font-bold py-2.5 sm:py-2 rounded-lg transition-colors text-sm sm:text-base"
+            >
+              {uploading ? 'Uploading...' : 'Post'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -19,6 +19,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [avatarError, setAvatarError] = useState(false);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -50,6 +51,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
   // Log avatar URL for debugging
   useEffect(() => {
     console.log('Navbar - Current user avatar URL:', user.avatar);
+    setAvatarError(false); // Reset error state when avatar changes
   }, [user.avatar]);
 
 
@@ -194,11 +196,24 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
         </Link>
         {/* Profile */}
         <div className="relative dropdown-container">
-          <button 
+          <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="relative w-9 h-9 sm:w-10 sm:w-12 sm:h-10 sm:h-12 rounded-full flex items-center justify-center"
           >
-            <img src={user.avatar} className="w-full h-full rounded-full object-cover" alt="Avatar" />
+            <img
+              src={user.avatar}
+              className="w-full h-full rounded-full object-cover"
+              alt="Avatar"
+              onError={() => {
+                console.error('Avatar failed to load in Navbar:', user.avatar);
+                setAvatarError(true);
+              }}
+            />
+            {avatarError && (
+              <div className="absolute inset-0 bg-gray-300 rounded-full flex items-center justify-center">
+                <i className="fa-solid fa-user text-gray-500 text-lg"></i>
+              </div>
+            )}
             <div className="absolute bottom-0 right-0 bg-gray-600 rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
               <i className="fa-solid fa-caret-down text-white text-[10px] sm:text-sm"></i>
             </div>
@@ -207,7 +222,15 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
             <div className="fixed left-2 right-2 top-[60px] max-h-[calc(100vh-76px)] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96" onClick={(e) => e.stopPropagation()}>
               <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                 <div className="flex items-center gap-4">
-                  <img src={user.avatar} className="w-16 h-16 rounded-full object-cover border-3 border-blue-500" alt="Avatar" />
+                  <img
+                    src={user.avatar}
+                    className="w-16 h-16 rounded-full object-cover border-3 border-blue-500"
+                    alt="Avatar"
+                    onError={(e) => {
+                      console.error('Dropdown avatar failed to load:', user.avatar);
+                      (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/default/100/100';
+                    }}
+                  />
                   <div>
                     <p className="font-bold text-lg">{user.name}</p>
                     <p className="text-base text-gray-600">@{user.username}</p>
@@ -437,7 +460,15 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
                 </button>
               </div>
               <div className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer">
-                <img src={user.avatar} className="w-12 h-12 rounded-full object-cover" alt="Avatar" />
+                <img
+                  src={user.avatar}
+                  className="w-12 h-12 rounded-full object-cover"
+                  alt="Avatar"
+                  onError={(e) => {
+                    console.error('Mobile menu avatar failed to load:', user.avatar);
+                    (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/default/100/100';
+                  }}
+                />
                 <div>
                   <p className="font-semibold">{user.name}</p>
                   <p className="text-sm text-gray-500">@{user.username}</p>

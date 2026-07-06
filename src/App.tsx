@@ -130,6 +130,13 @@ const AppContent: React.FC = () => {
               reputation: storedUser?.reputation || currentUser?.reputation || 0,
             };
 
+            console.log('App.tsx - Avatar sources:', {
+              storedUserAvatar: storedUser?.avatar ? storedUser.avatar.substring(0, 50) + '...' : 'none',
+              currentUserAvatar: currentUser?.avatar ? currentUser.avatar.substring(0, 50) + '...' : 'none',
+              firebasePhotoURL: firebaseUser.photoURL ? firebaseUser.photoURL.substring(0, 50) + '...' : 'none',
+              finalAvatar: appUser.avatar.substring(0, 50) + '...'
+            });
+
             // Sync profile from backend when available
             try {
               const backendUser = await userApi.getUser(firebaseUser.uid);
