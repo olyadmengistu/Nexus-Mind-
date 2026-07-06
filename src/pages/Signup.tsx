@@ -88,30 +88,21 @@ const Signup: React.FC = () => {
       };
 
       console.log('Saving user to localStorage with avatar (base64):', photoURL.substring(0, 50) + '...');
-
-      // First, save current user directly for immediate access (highest priority)
-      localStorage.setItem('nexus_current_user', JSON.stringify(newUser));
-      console.log('Saved to nexus_current_user');
-
-      // Then save to nexus_users for searchability
-      try {
-        const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
-        // Remove any existing entry for this user to avoid duplicates
-        const filteredUsers = existingUsers.filter((u: User) => u.id !== user.uid);
-        filteredUsers.push(newUser);
-        localStorage.setItem('nexus_users', JSON.stringify(filteredUsers));
-        console.log('Saved to nexus_users');
-      } catch (storageError) {
-        console.error('Error saving to nexus_users:', storageError);
-      }
-
+      
       // Persist profile to backend
       try {
         await userApi.createProfile(user.uid, newUser);
-        console.log('Saved to backend');
       } catch (apiError) {
         console.warn('Backend profile sync failed, using local storage:', apiError);
       }
+
+      // Get existing users from localStorage
+      const existingUsers = JSON.parse(localStorage.getItem('nexus_users') || '[]');
+      existingUsers.push(newUser);
+      localStorage.setItem('nexus_users', JSON.stringify(existingUsers));
+
+      // Also save current user directly for immediate access
+      localStorage.setItem('nexus_current_user', JSON.stringify(newUser));
 
       console.log('Signup complete, user data saved');
       console.log('Avatar length:', newUser.avatar.length, 'characters');

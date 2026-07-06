@@ -121,21 +121,19 @@ const AppContent: React.FC = () => {
               localStorage.setItem('nexus_current_user', JSON.stringify(storedUser));
             }
 
+            // Prioritize localStorage avatar over Firebase photoURL to ensure custom profile images persist
+            const localStorageAvatar = storedUser?.avatar || currentUser?.avatar;
             const appUser: User = {
               id: firebaseUser.uid,
               name: storedUser?.name || currentUser?.name || firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
               username: storedUser?.username || currentUser?.username || firebaseUser.displayName?.toLowerCase().replace(/\s+/g, '') || firebaseUser.email?.split('@')[0] || 'user',
               email: firebaseUser.email || '',
-              avatar: storedUser?.avatar || currentUser?.avatar || firebaseUser.photoURL || 'https://picsum.photos/seed/default/100/100',
+              avatar: localStorageAvatar || firebaseUser.photoURL || 'https://picsum.photos/seed/default/100/100',
               reputation: storedUser?.reputation || currentUser?.reputation || 0,
             };
 
-            console.log('App.tsx - Avatar sources:', {
-              storedUserAvatar: storedUser?.avatar ? storedUser.avatar.substring(0, 50) + '...' : 'none',
-              currentUserAvatar: currentUser?.avatar ? currentUser.avatar.substring(0, 50) + '...' : 'none',
-              firebasePhotoURL: firebaseUser.photoURL ? firebaseUser.photoURL.substring(0, 50) + '...' : 'none',
-              finalAvatar: appUser.avatar.substring(0, 50) + '...'
-            });
+            console.log('App user avatar source:', localStorageAvatar ? 'localStorage' : (firebaseUser.photoURL ? 'Firebase' : 'default'));
+            console.log('App user avatar preview:', localStorageAvatar?.substring(0, 50) || firebaseUser.photoURL?.substring(0, 50) || 'default');
 
             // Sync profile from backend when available
             try {

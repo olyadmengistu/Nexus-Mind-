@@ -427,115 +427,19 @@ const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
 
       {/* Create Stream Modal */}
       {showCreateModal && (
-        <div className="md:hidden fixed inset-0 bg-white z-50 overflow-y-auto">
-          {/* Mobile Full-Screen Close Button */}
-          <button
-            onClick={() => setShowCreateModal(false)}
-            className="fixed top-4 right-4 w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 transition-colors z-10 shadow-lg"
-          >
-            <i className="fa-solid fa-xmark text-2xl"></i>
-          </button>
-          <div className="p-6 pt-20">
-            <h2 className="text-2xl font-bold mb-6">Go Live</h2>
-            <form onSubmit={handleCreateStream} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Title *</label>
-                <input
-                  type="text"
-                  value={createForm.title}
-                  onChange={(e) => setCreateForm({...createForm, title: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                  placeholder="Stream title"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea
-                  value={createForm.description}
-                  onChange={(e) => setCreateForm({...createForm, description: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                  rows={4}
-                  placeholder="Stream description"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Category</label>
-                <select
-                  value={createForm.category}
-                  onChange={(e) => setCreateForm({...createForm, category: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                >
-                  {categories.slice(1).map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
-                <input
-                  type="text"
-                  value={createForm.tags}
-                  onChange={(e) => setCreateForm({...createForm, tags: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                  placeholder="gaming, live, entertainment"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Thumbnail</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setCreateForm({...createForm, thumbnailFile: e.target.files?.[0] || null})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Max Viewers (optional)</label>
-                <input
-                  type="number"
-                  value={createForm.maxViewers}
-                  onChange={(e) => setCreateForm({...createForm, maxViewers: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                  placeholder="Leave empty for unlimited"
-                />
-              </div>
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={createForm.isPrivate}
-                    onChange={(e) => setCreateForm({...createForm, isPrivate: e.target.checked})}
-                    className="rounded w-5 h-5"
-                  />
-                  <span className="text-base">Private Stream</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={createForm.allowChat}
-                    onChange={(e) => setCreateForm({...createForm, allowChat: e.target.checked})}
-                    className="rounded w-5 h-5"
-                  />
-                  <span className="text-base">Allow Chat</span>
-                </label>
-              </div>
-              <button
-                type="submit"
-                disabled={isCreating}
-                className="w-full px-6 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 text-lg font-bold"
-              >
-                {isCreating ? 'Creating...' : 'Go Live'}
-              </button>
-            </form>
+        <div className="fixed inset-0 bg-white z-50 flex flex-col sm:bg-black sm:bg-opacity-50 sm:items-center sm:justify-center">
+          {/* Mobile Full-Screen Header */}
+          <div className="sm:hidden flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-xl font-bold">Go Live</h2>
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
+            >
+              <i className="fa-solid fa-xmark text-xl text-gray-700"></i>
+            </button>
           </div>
-        </div>
-      )}
-      {/* Desktop Create Stream Modal */}
-      {showCreateModal && (
-        <div className="hidden md:flex fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto mx-3 sm:mx-0 md:rounded-xl lg:max-w-lg">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto mx-3 sm:mx-0 flex-1 sm:flex-none">
+            <div className="hidden sm:flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Go Live</h2>
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -641,125 +545,19 @@ const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
 
       {/* Schedule Stream Modal */}
       {showScheduleModal && (
-        <div className="md:hidden fixed inset-0 bg-white z-50 overflow-y-auto">
-          {/* Mobile Full-Screen Close Button */}
-          <button
-            onClick={() => setShowScheduleModal(false)}
-            className="fixed top-4 right-4 w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 transition-colors z-10 shadow-lg"
-          >
-            <i className="fa-solid fa-xmark text-2xl"></i>
-          </button>
-          <div className="p-6 pt-20">
-            <h2 className="text-2xl font-bold mb-6">Schedule Stream</h2>
-            <form onSubmit={handleScheduleStream} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Title *</label>
-                <input
-                  type="text"
-                  value={scheduleForm.title}
-                  onChange={(e) => setScheduleForm({...scheduleForm, title: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                  placeholder="Stream title"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea
-                  value={scheduleForm.description}
-                  onChange={(e) => setScheduleForm({...scheduleForm, description: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                  rows={4}
-                  placeholder="Stream description"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Category</label>
-                <select
-                  value={scheduleForm.category}
-                  onChange={(e) => setScheduleForm({...scheduleForm, category: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                >
-                  {categories.slice(1).map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Tags (comma-separated)</label>
-                <input
-                  type="text"
-                  value={scheduleForm.tags}
-                  onChange={(e) => setScheduleForm({...scheduleForm, tags: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                  placeholder="gaming, live, entertainment"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Scheduled Time *</label>
-                <input
-                  type="datetime-local"
-                  value={scheduleForm.scheduledTime}
-                  onChange={(e) => setScheduleForm({...scheduleForm, scheduledTime: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Thumbnail</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setScheduleForm({...scheduleForm, thumbnailFile: e.target.files?.[0] || null})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Max Viewers (optional)</label>
-                <input
-                  type="number"
-                  value={scheduleForm.maxViewers}
-                  onChange={(e) => setScheduleForm({...scheduleForm, maxViewers: e.target.value})}
-                  className="w-full px-4 py-3 border rounded-lg text-lg"
-                  placeholder="Leave empty for unlimited"
-                />
-              </div>
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={scheduleForm.isPrivate}
-                    onChange={(e) => setScheduleForm({...scheduleForm, isPrivate: e.target.checked})}
-                    className="rounded w-5 h-5"
-                  />
-                  <span className="text-base">Private Stream</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={scheduleForm.allowChat}
-                    onChange={(e) => setScheduleForm({...scheduleForm, allowChat: e.target.checked})}
-                    className="rounded w-5 h-5"
-                  />
-                  <span className="text-base">Allow Chat</span>
-                </label>
-              </div>
-              <button
-                type="submit"
-                disabled={isScheduling}
-                className="w-full px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-lg font-bold"
-              >
-                {isScheduling ? 'Scheduling...' : 'Schedule Stream'}
-              </button>
-            </form>
+        <div className="fixed inset-0 bg-white z-50 flex flex-col sm:bg-black sm:bg-opacity-50 sm:items-center sm:justify-center">
+          {/* Mobile Full-Screen Header */}
+          <div className="sm:hidden flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-xl font-bold">Schedule Stream</h2>
+            <button
+              onClick={() => setShowScheduleModal(false)}
+              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
+            >
+              <i className="fa-solid fa-xmark text-xl text-gray-700"></i>
+            </button>
           </div>
-        </div>
-      )}
-      {/* Desktop Schedule Stream Modal */}
-      {showScheduleModal && (
-        <div className="hidden md:flex fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto mx-3 sm:mx-0">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto mx-3 sm:mx-0 flex-1 sm:flex-none">
+            <div className="hidden sm:flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Schedule Stream</h2>
               <button
                 onClick={() => setShowScheduleModal(false)}

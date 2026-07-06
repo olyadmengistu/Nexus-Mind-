@@ -27,7 +27,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
   const [editContent, setEditContent] = useState(post.content || '');
   const [isFollowing, setIsFollowing] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [showFullContent, setShowFullContent] = useState(false);
+  const [isContentLong, setIsContentLong] = useState(false);
 
   // Load comments when solutions section is shown
   useEffect(() => {
@@ -35,6 +36,12 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
       loadComments();
     }
   }, [showSolutions]);
+
+  // Check if content is long enough to need truncation
+  useEffect(() => {
+    const contentLength = post.content?.length || 0;
+    setIsContentLong(contentLength > 300);
+  }, [post.content]);
 
   const loadComments = async () => {
     setLoadingComments(true);
@@ -191,14 +198,23 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
     setIsFollowing(!isFollowing);
     setShowMenu(false);
     // TODO: Backend integration for follow functionality
-    console.log(`${isFollowing ? 'Unfollowed' : 'Followed'} ${post.userName}`);
+    console.log('Follow user:', post.userId, isFollowing ? 'unfollowed' : 'followed');
   };
 
   const handleSave = () => {
     setIsSaved(!isSaved);
     setShowMenu(false);
     // TODO: Backend integration for save functionality
-    console.log(`${isSaved ? 'Removed from saved' : 'Saved'} post ${post.id}`);
+    // Save to localStorage for now
+    const savedPosts = JSON.parse(localStorage.getItem('nexus_saved_posts') || '[]');
+    if (isSaved) {
+      const updated = savedPosts.filter((id: string) => id !== post.id);
+      localStorage.setItem('nexus_saved_posts', JSON.stringify(updated));
+    } else {
+      savedPosts.push(post.id);
+      localStorage.setItem('nexus_saved_posts', JSON.stringify(savedPosts));
+    }
+    console.log('Save post:', post.id, isSaved ? 'removed from saved' : 'saved');
   };
 
   const handleAddSolution = async () => {
@@ -322,12 +338,14 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
               >
                 Copy Link
               </button>
-              <button
-                onClick={handleFollow}
-                className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
-              >
-                {isFollowing ? 'Unfollow' : 'Follow'} {post.userName}
-              </button>
+              {post.userId !== currentUser.id && (
+                <button
+                  onClick={handleFollow}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
+                >
+                  {isFollowing ? 'Unfollow' : 'Follow'} {post.userName}
+                </button>
+              )}
               <button
                 onClick={handleSave}
                 className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
@@ -422,20 +440,19 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
         ) : (
           <>
             {localPost.title && <h3 className="font-bold text-xs sm:text-sm sm:text-base sm:text-lg">{localPost.title}</h3>}
-            <p className="text-xs sm:text-sm sm:text-base whitespace-pre-wrap break-words leading-relaxed">
-              {localPost.content && localPost.content.length > 300 && !isExpanded
-                ? `${localPost.content.substring(0, 300)}...`
-                : localPost.content
-              }
-            </p>
-            {localPost.content && localPost.content.length > 300 && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="text-blue-500 hover:text-blue-700 text-xs sm:text-sm font-medium mt-1"
-              >
-                {isExpanded ? 'Read Less' : 'Read More'}
-              </button>
-            )}
+            <div>
+              <p className="text-xs sm:text-sm sm:text-base whitespace-pre-wrap break-words leading-relaxed">
+                {isContentLong && !showFullContent ? localPost.content?.substring(0, 300) + '...' : localPost.content}
+              </p>
+              {isContentLong && (
+                <button
+                  onClick={() => setShowFullContent(!showFullContent)}
+                  className="text-blue-500 text-sm font-medium mt-1 hover:underline"
+                >
+                  {showFullContent ? 'Read Less' : 'Read More'}
+                </button>
+              )}
+            </div>
           </>
         )}
         

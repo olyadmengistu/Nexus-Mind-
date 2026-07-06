@@ -28,25 +28,6 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ user }) => {
 
   return (
     <>
-      {/* Mobile Horizontal Scroll Sidebar */}
-      <aside className="lg:hidden fixed left-0 right-0 top-[52px] sm:top-[56px] z-40 bg-white border-b border-gray-200 overflow-x-auto">
-        <div className="flex items-center gap-2 px-2 py-2 sm:px-4 sm:py-3 min-w-max">
-          <Link to="/profile" className="flex items-center gap-2 sm:gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors flex-shrink-0">
-            <img src={user.avatar} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover" alt="User" />
-            <span className="font-semibold text-xs sm:text-sm">{user.name}</span>
-          </Link>
-
-          {items.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2 sm:gap-3 p-2 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors flex-shrink-0">
-              <div className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-lg sm:text-xl ${item.color}`}>
-                <i className={`fa-solid ${item.icon}`}></i>
-              </div>
-              <span className="text-xs sm:text-sm font-semibold">{item.label}</span>
-            </div>
-          ))}
-        </div>
-      </aside>
-
       {/* Desktop Sidebar */}
       <aside className="fixed left-0 top-[56px] bottom-0 w-[280px] overflow-y-auto hidden lg:block p-2">
         <Link to="/profile" className="flex items-center gap-4 p-3 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors mb-2">
@@ -65,6 +46,25 @@ const LeftSidebar: React.FC<LeftSidebarProps> = ({ user }) => {
 
         <div className="mt-4 pt-4 border-t border-gray-300 px-2 text-xs text-gray-500 space-y-2">
           <p>Privacy · Terms · Advertising · Cookies · Connect.Solve.Grow © 2024</p>
+        </div>
+      </aside>
+
+      {/* Mobile Horizontal Scroll Sidebar */}
+      <aside className="lg:hidden fixed left-0 right-0 top-[52px] sm:top-[56px] z-40 bg-white border-b border-gray-200">
+        <div className="flex overflow-x-auto no-scrollbar gap-2 px-2 py-3">
+          <Link to="/profile" className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors flex-shrink-0">
+            <img src={user.avatar} className="w-9 h-9 rounded-full object-cover" alt="User" />
+            <span className="font-semibold text-sm">{user.name}</span>
+          </Link>
+
+          {items.map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2 p-2 hover:bg-gray-200 rounded-lg cursor-pointer transition-colors flex-shrink-0">
+              <div className={`w-9 h-9 flex items-center justify-center text-xl ${item.color}`}>
+                <i className={`fa-solid ${item.icon}`}></i>
+              </div>
+              <span className="text-sm font-semibold">{item.label}</span>
+            </div>
+          ))}
         </div>
       </aside>
     </>
