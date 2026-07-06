@@ -88,11 +88,11 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-2 sm:px-4 flex items-center justify-between transition-transform duration-300 md:translate-y-0 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+    <header className={`fixed top-0 left-0 right-0 h-[52px] sm:h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-2 sm:px-4 flex items-center justify-between transition-transform duration-300 md:translate-y-0 ${isVisible ? 'translate-y-0' : '-translate-y-full'`}>
       {/* Left */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        <Link to="/" className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-[#1877F2] rounded-xl">
-            <i className="fa-solid fa-brain text-white text-xl sm:text-2xl"></i>
+      <div className="flex items-center gap-1.5 sm:gap-2 sm:gap-3">
+        <Link to="/" className="flex items-center justify-center w-9 h-9 sm:w-10 sm:w-12 sm:h-10 sm:h-12 bg-[#1877F2] rounded-xl">
+            <i className="fa-solid fa-brain text-white text-lg sm:text-xl sm:text-2xl"></i>
         </Link>
         {/* Search bar - desktop only */}
         <div className="relative group hidden sm:block">
@@ -164,43 +164,43 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
         {/* Search icon - mobile only */}
         <Link 
           to="/search" 
-          className="flex sm:hidden w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full items-center justify-center"
+          className="flex sm:hidden w-9 h-9 bg-gray-200 hover:bg-gray-300 rounded-full items-center justify-center"
         >
-          <i className="fa-solid fa-magnifying-glass text-xl"></i>
+          <i className="fa-solid fa-magnifying-glass text-lg"></i>
         </Link>
         {/* Menu button - mobile only */}
         <button 
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="flex sm:hidden w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full items-center justify-center"
+          className="flex sm:hidden w-9 h-9 bg-gray-200 hover:bg-gray-300 rounded-full items-center justify-center"
         >
-          <i className="fa-solid fa-bars text-xl"></i>
+          <i className="fa-solid fa-bars text-lg"></i>
         </button>
         {/* Messages */}
-        <Link to="/messages" className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
-          <i className="fa-brands fa-facebook-messenger text-xl"></i>
+        <Link to="/messages" className="w-9 h-9 sm:w-10 sm:w-12 sm:h-10 sm:h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
+          <i className="fa-brands fa-facebook-messenger text-lg sm:text-xl"></i>
         </Link>
         {/* Notifications */}
-        <Link to="/notifications" className="relative w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
-          <i className="fa-solid fa-bell text-xl"></i>
+        <Link to="/notifications" className="relative w-9 h-9 sm:w-10 sm:w-12 sm:h-10 sm:h-12 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center">
+          <i className="fa-solid fa-bell text-lg sm:text-xl"></i>
           {unreadCount > 0 && (
-            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+            <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
         </Link>
         {/* Feedback - desktop only */}
-        <Link to="/feedback" className="hidden sm:flex w-12 h-12 bg-gray-200 hover:bg-gray-300 rounded-full items-center justify-center">
-          <i className="fa-solid fa-comment-dots text-xl"></i>
+        <Link to="/feedback" className="hidden sm:flex w-10 sm:w-12 h-10 sm:h-12 bg-gray-200 hover:bg-gray-300 rounded-full items-center justify-center">
+          <i className="fa-solid fa-comment-dots text-lg sm:text-xl"></i>
         </Link>
         {/* Profile */}
         <div className="relative dropdown-container">
           <button 
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center"
+            className="relative w-9 h-9 sm:w-10 sm:w-12 sm:h-10 sm:h-12 rounded-full flex items-center justify-center"
           >
             <img src={user.avatar} className="w-full h-full rounded-full object-cover" alt="Avatar" />
-            <div className="absolute bottom-0 right-0 bg-gray-600 rounded-full w-5 h-5 flex items-center justify-center">
-              <i className="fa-solid fa-caret-down text-white text-sm"></i>
+            <div className="absolute bottom-0 right-0 bg-gray-600 rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center">
+              <i className="fa-solid fa-caret-down text-white text-[10px] sm:text-sm"></i>
             </div>
           </button>
           {dropdownOpen && (

@@ -300,7 +300,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
         <div className="max-w-[1100px] mx-auto">
           {/* Cover */}
           <div
-            className="h-[350px] rounded-b-xl relative group"
+            className="h-[200px] sm:h-[250px] md:h-[350px] rounded-b-xl relative group"
             style={{
               backgroundImage: profileUser.coverPhoto
                 ? `url(${profileUser.coverPhoto})`
@@ -309,36 +309,36 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
               backgroundPosition: 'center'
             }}
           >
-             <button onClick={handleEditCover} className="absolute bottom-4 right-4 bg-white px-3 py-2 rounded-lg font-bold text-sm shadow flex items-center gap-2">
-                <i className="fa-solid fa-camera"></i> Edit cover photo
+             <button onClick={handleEditCover} className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg font-bold text-[10px] sm:text-sm shadow flex items-center gap-1.5 sm:gap-2">
+                <i className="fa-solid fa-camera text-xs sm:text-sm"></i> <span className="hidden sm:inline">Edit cover</span>
              </button>
           </div>
           
           {/* Profile Info Row */}
-          <div className="px-10 pb-4 relative">
-             <div className="flex flex-col md:flex-row items-center md:items-end gap-4 -mt-10 md:-mt-20">
+          <div className="px-4 sm:px-6 md:px-10 pb-3 sm:pb-4 relative">
+             <div className="flex flex-col md:flex-row items-center md:items-end gap-3 sm:gap-4 -mt-8 sm:-mt-10 md:-mt-20">
                 <div className="relative group">
-                  <img src={profileUser.avatar} className="w-28 h-28 sm:w-[168px] sm:h-[168px] rounded-full border-4 border-white shadow" alt="Avatar" />
-                  <button className="absolute bottom-4 right-2 bg-gray-200 hover:bg-gray-300 w-9 h-9 rounded-full border-4 border-white flex items-center justify-center">
-                    <i className="fa-solid fa-camera"></i>
+                  <img src={profileUser.avatar} className="w-20 h-20 sm:w-28 sm:h-28 sm:w-[168px] sm:h-[168px] rounded-full border-3 sm:border-4 border-white shadow" alt="Avatar" />
+                  <button className="absolute bottom-2 sm:bottom-4 right-1 sm:right-2 bg-gray-200 hover:bg-gray-300 w-7 h-7 sm:w-9 sm:h-9 rounded-full border-3 sm:border-4 border-white flex items-center justify-center">
+                    <i className="fa-solid fa-camera text-xs sm:text-sm"></i>
                   </button>
                 </div>
-                <div className="flex-1 mb-4 text-center md:text-left">
-                  <h1 className="text-4xl font-bold">{profileUser.name}</h1>
-                  <div className="flex items-center gap-3 mt-2">
-                    <p className="text-gray-500 font-semibold">{profileUser.reputation} Reputation Points</p>
+                <div className="flex-1 mb-3 sm:mb-4 text-center md:text-left">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">{profileUser.name}</h1>
+                  <div className="flex items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2 justify-center md:justify-start">
+                    <p className="text-gray-500 font-semibold text-xs sm:text-sm">{profileUser.reputation} Rep</p>
                     {streakData.streak > 0 && (
                       <StreakBadge streak={streakData.streak} size="small" />
                     )}
                   </div>
-                  <p className="text-gray-600 mt-2">{profileUser.bio}</p>
+                  <p className="text-gray-600 text-xs sm:text-sm mt-1.5 sm:mt-2 line-clamp-2">{profileUser.bio}</p>
                 </div>
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-1.5 sm:gap-2 mb-3 sm:mb-4 flex-wrap justify-center">
                   {userId && userId !== user.id && (
                     <button
                       onClick={handleFollow}
                       className={`
-                        px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors
+                        px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg font-bold flex items-center gap-1.5 sm:gap-2 transition-colors text-xs sm:text-sm
                         ${isFollowing 
                           ? 'bg-black text-white hover:bg-gray-800' 
                           : 'bg-[#42B72A] text-white hover:bg-[#36a420]'
@@ -347,37 +347,37 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
                     >
                       {isFollowing ? (
                         <>
-                          <i className="fa-solid fa-check"></i> Following
+                          <i className="fa-solid fa-check text-xs sm:text-sm"></i> <span className="hidden sm:inline">Following</span><span className="sm:hidden">Follow</span>
                         </>
                       ) : (
                         <>
-                          <i className="fa-solid fa-user-plus"></i> Follow
+                          <i className="fa-solid fa-user-plus text-xs sm:text-sm"></i> <span className="hidden sm:inline">Follow</span><span className="sm:hidden">Follow</span>
                         </>
                       )}
                     </button>
                   )}
-                  <button className="bg-[#1877F2] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2">
-                    <i className="fa-solid fa-bookmark"></i> Saved
+                  <button className="bg-[#1877F2] text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                    <i className="fa-solid fa-bookmark text-xs sm:text-sm"></i> <span className="hidden sm:inline">Saved</span>
                   </button>
                   {!userId || userId === user.id ? (
-                    <button onClick={handleEditProfile} className="bg-gray-200 px-4 py-2 rounded-lg font-bold flex items-center gap-2">
-                      <i className="fa-solid fa-pen"></i> Edit profile
+                    <button onClick={handleEditProfile} className="bg-gray-200 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <i className="fa-solid fa-pen text-xs sm:text-sm"></i> <span className="hidden sm:inline">Edit</span>
                     </button>
                   ) : (
-                    <button className="bg-gray-200 px-4 py-2 rounded-lg font-bold flex items-center gap-2">
-                      <i className="fa-solid fa-message"></i> Message
+                    <button className="bg-gray-200 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-bold flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                      <i className="fa-solid fa-message text-xs sm:text-sm"></i> <span className="hidden sm:inline">Message</span>
                     </button>
                   )}
                 </div>
              </div>
              
              {/* Tabs */}
-             <div className="mt-8 flex border-t border-gray-200 pt-1">
+             <div className="mt-4 sm:mt-6 md:mt-8 flex border-t border-gray-200 pt-1 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                 {['Challenges', 'Badges', 'About', 'Expertise', 'Solutions', 'Saved', 'More'].map((tab, idx) => (
                    <button
                      key={tab}
                      onClick={() => setActiveTab(tab)}
-                     className={`px-4 py-4 font-bold text-gray-600 border-b-4 ${activeTab === tab ? 'border-blue-500 text-blue-500' : 'border-transparent hover:bg-gray-100'}`}
+                     className={`px-3 sm:px-4 py-2.5 sm:py-4 font-bold text-gray-600 border-b-4 text-xs sm:text-sm whitespace-nowrap ${activeTab === tab ? 'border-blue-500 text-blue-500' : 'border-transparent hover:bg-gray-100'}`}
                    >
                      {tab}
                    </button>
@@ -388,29 +388,29 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
       </div>
 
       {/* Main Grid */}
-      <div className="max-w-[1100px] mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col lg:flex-row gap-4">
+      <div className="max-w-[1100px] mx-auto px-2.5 sm:px-4 py-2.5 sm:py-4 flex flex-col lg:flex-row gap-3 sm:gap-4">
         {/* Left Side (Intro/Photos) */}
-        <div className="w-full lg:w-[400px] space-y-4">
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-             <h2 className="text-xl font-bold mb-4">Intro</h2>
-             <div className="space-y-4 text-sm text-gray-700">
+        <div className="w-full lg:w-[400px] space-y-3 sm:space-y-4">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+             <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Intro</h2>
+             <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-gray-700">
                 <p className="text-center italic">{profileUser.bio || 'No bio added yet'}</p>
                 
                 {/* Streak Section */}
                 {streakData.streak > 0 && (
-                  <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-3 rounded-lg border border-orange-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-orange-800">Current Streak</span>
+                  <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-2.5 sm:p-3 rounded-lg border border-orange-200">
+                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                      <span className="font-bold text-orange-800 text-xs sm:text-sm">Current Streak</span>
                       <StreakBadge streak={streakData.streak} size="small" showLabel={false} />
                     </div>
-                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
+                    <div className="flex items-center justify-between text-[10px] sm:text-xs text-gray-600 mb-1.5 sm:mb-2">
                       <span>Longest: {streakData.longestStreak} days</span>
                       <span>Freezes: {streakData.streakFreezes}/3</span>
                     </div>
                     {streakData.streakFreezes < 3 && userId === user.id && (
                       <button 
                         onClick={handleAddStreakFreeze}
-                        className="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 py-1.5 rounded text-xs font-semibold transition-colors"
+                        className="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-semibold transition-colors"
                       >
                         + Add Streak Freeze
                       </button>
@@ -419,44 +419,44 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
                 )}
                 
                 {profileUser.work && (
-                  <div className="flex items-center gap-3">
-                     <i className="fa-solid fa-briefcase text-gray-500 text-lg"></i>
-                     <span>Works at <b>{profileUser.work}</b></span>
+                  <div className="flex items-center gap-2 sm:gap-3">
+                     <i className="fa-solid fa-briefcase text-gray-500 text-sm sm:text-lg"></i>
+                     <span className="text-xs sm:text-sm">Works at <b>{profileUser.work}</b></span>
                   </div>
                 )}
                 {profileUser.education && (
-                  <div className="flex items-center gap-3">
-                     <i className="fa-solid fa-graduation-cap text-gray-500 text-lg"></i>
-                     <span>Went to <b>{profileUser.education}</b></span>
+                  <div className="flex items-center gap-2 sm:gap-3">
+                     <i className="fa-solid fa-graduation-cap text-gray-500 text-sm sm:text-lg"></i>
+                     <span className="text-xs sm:text-sm">Went to <b>{profileUser.education}</b></span>
                   </div>
                 )}
                 {profileUser.location && (
-                  <div className="flex items-center gap-3">
-                     <i className="fa-solid fa-location-dot text-gray-500 text-lg"></i>
-                     <span>From <b>{profileUser.location}</b></span>
+                  <div className="flex items-center gap-2 sm:gap-3">
+                     <i className="fa-solid fa-location-dot text-gray-500 text-sm sm:text-lg"></i>
+                     <span className="text-xs sm:text-sm">From <b>{profileUser.location}</b></span>
                   </div>
                 )}
                 {profileUser.expertise && profileUser.expertise.length > 0 && (
-                  <div className="flex items-start gap-3">
-                     <i className="fa-solid fa-star text-gray-500 text-lg mt-0.5"></i>
+                  <div className="flex items-start gap-2 sm:gap-3">
+                     <i className="fa-solid fa-star text-gray-500 text-sm sm:text-lg mt-0.5"></i>
                      <div>
-                       <span className="font-bold">Expertise:</span>
+                       <span className="font-bold text-xs sm:text-sm">Expertise:</span>
                        <div className="flex flex-wrap gap-1 mt-1">
                          {profileUser.expertise.map((skill, idx) => (
-                           <span key={idx} className="bg-gray-100 px-2 py-1 rounded text-xs">{skill}</span>
+                           <span key={idx} className="bg-gray-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs">{skill}</span>
                          ))}
                        </div>
                      </div>
                   </div>
                 )}
-                <button onClick={() => setShowEditDetails(true)} className="w-full bg-gray-200 hover:bg-gray-300 font-bold py-2 rounded-lg transition-colors">Edit Details</button>
+                <button onClick={() => setShowEditDetails(true)} className="w-full bg-gray-200 hover:bg-gray-300 font-bold py-1.5 sm:py-2 rounded-lg transition-colors text-xs sm:text-sm">Edit Details</button>
              </div>
           </div>
           
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-             <div className="flex items-center justify-between mb-4">
-               <h2 className="text-xl font-bold">Saved</h2>
-               <button className="text-blue-500 hover:bg-blue-50 p-2 rounded text-sm font-semibold">See all saved</button>
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm">
+             <div className="flex items-center justify-between mb-3 sm:mb-4">
+               <h2 className="text-lg sm:text-xl font-bold">Saved</h2>
+               <button className="text-blue-500 hover:bg-blue-50 p-1.5 sm:p-2 rounded text-[10px] sm:text-sm font-semibold">See all</button>
              </div>
              {savedItems.length > 0 ? (
                <div className="grid grid-cols-3 gap-2">
@@ -486,17 +486,17 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
         </div>
 
         {/* Right Side (Posts) */}
-        <div className="flex-1 space-y-4">
+        <div className="flex-1 space-y-3 sm:space-y-4">
           {activeTab === 'Challenges' && (
             <>
-              <div className="bg-white p-3 rounded-lg shadow-sm flex items-center justify-between">
-                <h2 className="font-bold text-xl">Challenges Posted</h2>
-                <div className="flex gap-2">
-                  <button onClick={() => setShowFilters(true)} className="bg-gray-200 px-3 py-1.5 rounded font-bold text-sm flex items-center gap-2">
-                     <i className="fa-solid fa-sliders"></i> Filters
+              <div className="bg-white p-2.5 sm:p-3 rounded-lg shadow-sm flex items-center justify-between">
+                <h2 className="font-bold text-lg sm:text-xl">Challenges</h2>
+                <div className="flex gap-1.5 sm:gap-2">
+                  <button onClick={() => setShowFilters(true)} className="bg-gray-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded font-bold text-[10px] sm:text-sm flex items-center gap-1.5 sm:gap-2">
+                     <i className="fa-solid fa-sliders text-xs sm:text-sm"></i> <span className="hidden sm:inline">Filters</span>
                   </button>
-                  <button onClick={() => setShowManagePosts(true)} className="bg-gray-200 px-3 py-1.5 rounded font-bold text-sm flex items-center gap-2">
-                     <i className="fa-solid fa-gear"></i> Manage Posts
+                  <button onClick={() => setShowManagePosts(true)} className="bg-gray-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded font-bold text-[10px] sm:text-sm flex items-center gap-1.5 sm:gap-2">
+                     <i className="fa-solid fa-gear text-xs sm:text-sm"></i> <span className="hidden sm:inline">Manage</span>
                   </button>
                 </div>
               </div>
@@ -506,7 +506,7 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
                   <PostCard key={post.id} post={post} currentUser={profileUser} onVote={() => {}} />
                 ))
               ) : (
-                <div className="bg-white p-10 text-center rounded-lg shadow-sm text-gray-500 italic">
+                <div className="bg-white p-6 sm:p-10 text-center rounded-lg shadow-sm text-gray-500 italic text-xs sm:text-sm">
                   No problems posted yet.
                 </div>
               )}
@@ -514,42 +514,42 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
           )}
 
           {activeTab === 'About' && (
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
-              <h2 className="font-bold text-xl mb-4">About</h2>
-              <div className="space-y-4 text-gray-700">
-                <p className="text-lg">{profileUser.bio || 'No bio added yet.'}</p>
-                <div className="border-t pt-4">
-                  <h3 className="font-bold mb-2">Contact Information</h3>
-                  <p><strong>Email:</strong> {profileUser.email}</p>
-                  <p><strong>Username:</strong> @{profileUser.username}</p>
+            <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm">
+              <h2 className="font-bold text-lg sm:text-xl mb-3 sm:mb-4">About</h2>
+              <div className="space-y-3 sm:space-y-4 text-gray-700 text-sm sm:text-base">
+                <p className="text-base sm:text-lg">{profileUser.bio || 'No bio added yet.'}</p>
+                <div className="border-t pt-3 sm:pt-4">
+                  <h3 className="font-bold mb-2 text-sm sm:text-base">Contact Information</h3>
+                  <p className="text-xs sm:text-sm"><strong>Email:</strong> {profileUser.email}</p>
+                  <p className="text-xs sm:text-sm"><strong>Username:</strong> @{profileUser.username}</p>
                 </div>
-                <div className="border-t pt-4">
-                  <h3 className="font-bold mb-2">Statistics</h3>
-                  <p><strong>Reputation Points:</strong> {profileUser.reputation}</p>
-                  <p><strong>Posts:</strong> {myPosts.length}</p>
-                  <p><strong>Saved Items:</strong> {savedItems.length}</p>
+                <div className="border-t pt-3 sm:pt-4">
+                  <h3 className="font-bold mb-2 text-sm sm:text-base">Statistics</h3>
+                  <p className="text-xs sm:text-sm"><strong>Reputation Points:</strong> {profileUser.reputation}</p>
+                  <p className="text-xs sm:text-sm"><strong>Posts:</strong> {myPosts.length}</p>
+                  <p className="text-xs sm:text-sm"><strong>Saved Items:</strong> {savedItems.length}</p>
                 </div>
               </div>
             </div>
           )}
 
           {activeTab === 'Badges' && (
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
-              <h2 className="font-bold text-xl mb-4">Achievement Badges</h2>
+            <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm">
+              <h2 className="font-bold text-lg sm:text-xl mb-3 sm:mb-4">Achievement Badges</h2>
               <BadgeGrid userId={profileUser.id} showProgress={true} />
             </div>
           )}
 
           {activeTab === 'Expertise' && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <ExpertiseGraph userId={profileUser.id} showUpdateButton={userId === user.id} />
               
               {profileUser.expertise && profileUser.expertise.length > 0 && (
-                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
-                  <h2 className="font-bold text-xl mb-4">Skills & Interests</h2>
-                  <div className="flex flex-wrap gap-2">
+                <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm">
+                  <h2 className="font-bold text-lg sm:text-xl mb-3 sm:mb-4">Skills & Interests</h2>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {profileUser.expertise.map((skill, idx) => (
-                      <span key={idx} className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full font-semibold">
+                      <span key={idx} className="bg-blue-100 text-blue-800 px-2 sm:px-4 py-1 sm:py-2 rounded-full font-semibold text-xs sm:text-sm">
                         {skill}
                       </span>
                     ))}
@@ -558,75 +558,75 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
               )}
               
               {(!profileUser.expertise || profileUser.expertise.length === 0) && (
-                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
-                  <h2 className="font-bold text-xl mb-4">Skills & Interests</h2>
-                  <p className="text-gray-500 italic">No expertise added yet. Click "Edit Details" to add your skills.</p>
+                <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm">
+                  <h2 className="font-bold text-lg sm:text-xl mb-3 sm:mb-4">Skills & Interests</h2>
+                  <p className="text-gray-500 italic text-xs sm:text-sm">No expertise added yet. Click "Edit Details" to add your skills.</p>
                 </div>
               )}
             </div>
           )}
 
           {activeTab === 'Solutions' && (
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
-              <h2 className="font-bold text-xl mb-4">Solutions</h2>
-              <div className="text-gray-500 italic">
+            <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm">
+              <h2 className="font-bold text-lg sm:text-xl mb-3 sm:mb-4">Solutions</h2>
+              <div className="text-gray-500 italic text-xs sm:text-sm">
                 Solutions posted by {profileUser.name} will appear here.
               </div>
             </div>
           )}
 
           {activeTab === 'Saved' && (
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
-              <h2 className="font-bold text-xl mb-4">Saved Items</h2>
+            <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm">
+              <h2 className="font-bold text-lg sm:text-xl mb-3 sm:mb-4">Saved Items</h2>
               {savedItems.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {savedItems.map((item) => (
-                    <div key={item.id} className="border rounded-lg p-4 flex items-center gap-4">
+                    <div key={item.id} className="border rounded-lg p-2.5 sm:p-4 flex items-center gap-2 sm:gap-4">
                       {item.thumbnail && (
-                        <img src={item.thumbnail} className="w-16 h-16 rounded object-cover" alt={item.title} />
+                        <img src={item.thumbnail} className="w-12 h-12 sm:w-16 sm:h-16 rounded object-cover" alt={item.title} />
                       )}
                       <div className="flex-1">
-                        <h3 className="font-bold">{item.title}</h3>
-                        <p className="text-sm text-gray-500">{item.itemType}</p>
-                        {item.description && <p className="text-sm text-gray-600">{item.description}</p>}
+                        <h3 className="font-bold text-xs sm:text-sm sm:text-base">{item.title}</h3>
+                        <p className="text-[10px] sm:text-sm text-gray-500">{item.itemType}</p>
+                        {item.description && <p className="text-[10px] sm:text-sm text-gray-600 line-clamp-2">{item.description}</p>}
                       </div>
                       <button
                         onClick={() => handleRemoveSavedItem(item.id)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:text-red-700 p-1.5 sm:p-2"
                       >
-                        <i className="fa-solid fa-trash"></i>
+                        <i className="fa-solid fa-trash text-sm sm:text-base"></i>
                       </button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 italic">No saved items yet.</p>
+                <p className="text-gray-500 italic text-xs sm:text-sm">No saved items yet.</p>
               )}
             </div>
           )}
 
           {activeTab === 'More' && (
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
-              <h2 className="font-bold text-xl mb-4">More</h2>
-              <div className="space-y-2">
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-lg flex items-center gap-3">
-                  <i className="fa-solid fa-users text-gray-500"></i>
+            <div className="bg-white p-3 sm:p-6 rounded-lg shadow-sm">
+              <h2 className="font-bold text-lg sm:text-xl mb-3 sm:mb-4">More</h2>
+              <div className="space-y-1 sm:space-y-2">
+                <button className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-100 rounded-lg flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
+                  <i className="fa-solid fa-users text-gray-500 text-sm sm:text-base"></i>
                   <span>Friends</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-lg flex items-center gap-3">
-                  <i className="fa-solid fa-images text-gray-500"></i>
+                <button className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-100 rounded-lg flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
+                  <i className="fa-solid fa-images text-gray-500 text-sm sm:text-base"></i>
                   <span>Photos</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-lg flex items-center gap-3">
-                  <i className="fa-solid fa-video text-gray-500"></i>
+                <button className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-100 rounded-lg flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
+                  <i className="fa-solid fa-video text-gray-500 text-sm sm:text-base"></i>
                   <span>Videos</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-lg flex items-center gap-3">
-                  <i className="fa-solid fa-heart text-gray-500"></i>
+                <button className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-100 rounded-lg flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
+                  <i className="fa-solid fa-heart text-gray-500 text-sm sm:text-base"></i>
                   <span>Liked Posts</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 hover:bg-gray-100 rounded-lg flex items-center gap-3">
-                  <i className="fa-solid fa-clock-rotate-left text-gray-500"></i>
+                <button className="w-full text-left px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-100 rounded-lg flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
+                  <i className="fa-solid fa-clock-rotate-left text-gray-500 text-sm sm:text-base"></i>
                   <span>Activity Log</span>
                 </button>
               </div>

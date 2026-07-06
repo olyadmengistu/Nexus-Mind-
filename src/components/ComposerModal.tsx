@@ -221,30 +221,30 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
   };
 
   return (
-    <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-[500px] mx-3 sm:mx-0 rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white w-full max-w-[500px] mx-2 sm:mx-3 rounded-xl sm:rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between shrink-0">
+        <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center justify-between shrink-0">
           <div className="w-8"></div>
-          <h2 className="text-xl font-bold">Create Problem Post</h2>
+          <h2 className="text-lg sm:text-xl font-bold">Create Post</h2>
           <button 
             onClick={onClose}
-            className="w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-600 transition-colors"
+            className="w-9 h-9 sm:w-8 sm:h-8 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-600 transition-colors"
           >
-            <i className="fa-solid fa-xmark"></i>
+            <i className="fa-solid fa-xmark text-base sm:text-sm"></i>
           </button>
         </div>
 
         {/* User Info */}
-        <div className="p-4 flex items-center gap-3 shrink-0">
-          <img src={user.avatar} className="w-10 h-10 rounded-full" alt="Avatar" />
-          <div className="space-y-1">
-            <h4 className="font-semibold text-sm">{user.name}</h4>
-            <div className="flex gap-2">
+        <div className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3 shrink-0">
+          <img src={user.avatar} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full" alt="Avatar" />
+          <div className="space-y-1 flex-1">
+            <h4 className="font-semibold text-xs sm:text-sm truncate">{user.name}</h4>
+            <div className="flex gap-1.5 sm:gap-2">
               <select 
                 value={privacy}
                 onChange={(e) => setPrivacy(e.target.value as any)}
-                className="bg-gray-200 px-2 py-0.5 rounded flex items-center gap-1 text-[11px] font-bold cursor-pointer outline-none"
+                className="bg-gray-200 px-1.5 sm:px-2 py-0.5 rounded flex items-center gap-1 text-[10px] sm:text-[11px] font-bold cursor-pointer outline-none"
               >
                 <option value="public">🌐 Public</option>
                 <option value="friends">👥 Friends</option>
@@ -253,7 +253,7 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
               <select 
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="bg-gray-200 px-2 py-0.5 rounded text-[11px] font-bold cursor-pointer outline-none"
+                className="bg-gray-200 px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold cursor-pointer outline-none"
               >
                 {categories.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -262,19 +262,19 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
         </div>
 
         {/* Text Area */}
-        <div className="p-4 flex-1 overflow-y-auto space-y-3">
+        <div className="p-3 sm:p-4 flex-1 overflow-y-auto space-y-2 sm:space-y-3">
           <input 
             type="text" 
-            placeholder="Problem Title (optional)" 
+            placeholder="Title (optional)" 
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full text-lg font-semibold focus:outline-none placeholder-gray-400"
+            className="w-full text-base sm:text-lg font-semibold focus:outline-none placeholder-gray-400"
           />
           <textarea 
-            placeholder={`What problem are you facing, ${user.name.split(' ')[0]}?`}
+            placeholder={`What's on your mind?`}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full min-h-[150px] text-xl focus:outline-none resize-none placeholder-gray-400"
+            className="w-full min-h-[120px] sm:min-h-[150px] text-base sm:text-xl focus:outline-none resize-none placeholder-gray-400"
           ></textarea>
           
           {/* Image Preview */}
@@ -442,9 +442,9 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
         </div>
 
         {/* Add to Post */}
-        <div className="mx-4 mb-4 p-3 border border-gray-300 rounded-lg flex items-center justify-between shrink-0">
-          <span className="font-semibold text-sm">Add to your post</span>
-          <div className="flex gap-3 text-2xl">
+        <div className="mx-3 sm:mx-4 mb-3 sm:mb-4 p-2.5 sm:p-3 border border-gray-300 rounded-lg flex items-center justify-between shrink-0">
+          <span className="font-semibold text-xs sm:text-sm">Add to post</span>
+          <div className="flex gap-2 sm:gap-3 text-xl sm:text-2xl">
             <input 
               type="file" 
               ref={fileInputRef}
@@ -677,13 +677,13 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
         )}
 
         {/* Submit */}
-        <div className="p-4 shrink-0">
+        <div className="p-3 sm:p-4 shrink-0">
           <button 
             onClick={handleSubmit}
             disabled={!content.trim() || uploading}
-            className="w-full bg-[#1877F2] disabled:bg-gray-300 hover:bg-blue-600 text-white font-bold py-2 rounded-lg transition-colors"
+            className="w-full bg-[#1877F2] disabled:bg-gray-300 hover:bg-blue-600 text-white font-bold py-2.5 sm:py-2 rounded-lg transition-colors text-sm sm:text-base"
           >
-            {uploading ? 'Uploading...' : 'Post Challenge'}
+            {uploading ? 'Uploading...' : 'Post'}
           </button>
         </div>
       </div>

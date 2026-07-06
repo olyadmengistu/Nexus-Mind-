@@ -298,36 +298,36 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-136px)] bg-white md:h-[calc(100vh-56px)]">
+    <div className="flex h-[calc(100vh-116px)] sm:h-[calc(100vh-136px)] bg-white md:h-[calc(100vh-56px)]">
       {/* Sidebar */}
       <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} w-full md:w-[360px] border-r border-gray-200 flex-col`}>
-        <div className="p-3 sm:p-4 flex items-center justify-between">
-           <h1 className="text-xl sm:text-2xl font-bold">Chats</h1>
-           <div className="flex gap-2">
-             <button className="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center" title="More options">
-               <i className="fa-solid fa-ellipsis"></i>
+        <div className="p-2.5 sm:p-4 flex items-center justify-between">
+           <h1 className="text-lg sm:text-xl sm:text-2xl font-bold">Chats</h1>
+           <div className="flex gap-1.5 sm:gap-2">
+             <button className="w-8 h-8 sm:w-9 sm:h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center" title="More options">
+               <i className="fa-solid fa-ellipsis text-sm sm:text-base"></i>
              </button>
              <button 
                onClick={() => setShowNewChatModal(true)}
-               className="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
+               className="w-8 h-8 sm:w-9 sm:h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
                title="New message"
              >
-               <i className="fa-solid fa-pen-to-square"></i>
+               <i className="fa-solid fa-pen-to-square text-sm sm:text-base"></i>
              </button>
            </div>
         </div>
-        <div className="px-3 sm:px-4 mb-3 sm:mb-4">
+        <div className="px-2.5 sm:px-4 mb-2.5 sm:mb-4">
            <div className="relative">
-             <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+             <i className="fa-solid fa-magnifying-glass absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm sm:text-base"></i>
              <input 
                type="text" 
-               placeholder="Search Messenger" 
+               placeholder="Search" 
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
-               className="w-full bg-gray-100 pl-10 pr-4 py-2 rounded-full outline-none text-sm"
+               className="w-full bg-gray-100 pl-8 sm:pl-10 pr-3 sm:pr-4 py-1.5 sm:py-2 rounded-full outline-none text-xs sm:text-sm"
              />
              {isSearching && (
-               <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+               <i className="fa-solid fa-spinner fa-spin absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm sm:text-base"></i>
              )}
            </div>
         </div>
@@ -343,12 +343,12 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
                 <div 
                   key={conv.id}
                   onClick={() => setSelectedChat(conv.id)}
-                  className={`flex items-center gap-3 p-2.5 sm:p-3 mx-2 rounded-lg cursor-pointer transition-colors ${selectedChat === conv.id ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
+                  className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 sm:p-3 mx-1.5 sm:mx-2 rounded-lg cursor-pointer transition-colors ${selectedChat === conv.id ? 'bg-blue-50' : 'hover:bg-gray-100'}`}
                 >
-                  <img src={otherUser.avatar} className="w-12 h-12 sm:w-14 sm:h-14 rounded-full" alt="Chat" />
+                  <img src={otherUser.avatar} className="w-10 h-10 sm:w-12 sm:w-14 sm:h-12 sm:h-14 rounded-full" alt="Chat" />
                   <div className="flex-1 min-w-0">
-                     <p className="font-semibold text-sm sm:text-base truncate">{otherUser.name}</p>
-                     <p className="text-xs sm:text-sm text-gray-500 truncate">{conv.lastMessage} · {conv.time}</p>
+                     <p className="font-semibold text-xs sm:text-sm sm:text-base truncate">{otherUser.name}</p>
+                     <p className="text-[10px] sm:text-xs sm:text-sm text-gray-500 truncate">{conv.lastMessage} · {conv.time}</p>
                   </div>
                 </div>
               );
@@ -362,22 +362,22 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
         {selectedConversation && otherUser ? (
           <>
             {/* Chat Header */}
-            <div className="p-2.5 sm:p-3 border-b border-gray-200 flex items-center justify-between shadow-sm">
-               <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-2 sm:p-2.5 sm:p-3 border-b border-gray-200 flex items-center justify-between shadow-sm">
+               <div className="flex items-center gap-1.5 sm:gap-2 sm:gap-3">
                  <button
                    onClick={() => setSelectedChat(null)}
-                   className="md:hidden w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                   className="md:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-full hover:bg-gray-100 flex items-center justify-center"
                    aria-label="Back to conversations"
                  >
-                   <i className="fa-solid fa-arrow-left text-gray-700"></i>
+                   <i className="fa-solid fa-arrow-left text-gray-700 text-sm sm:text-base"></i>
                  </button>
-                 <img src={otherUser.avatar} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full" alt="Avatar" />
+                 <img src={otherUser.avatar} className="w-8 h-8 sm:w-9 sm:w-10 sm:h-9 sm:h-10 rounded-full" alt="Avatar" />
                  <div className="min-w-0">
-                   <p className="font-bold text-sm sm:text-base truncate">{otherUser.name}</p>
-                   <p className="text-xs text-gray-500">Active {selectedConversation.time}</p>
+                   <p className="font-bold text-xs sm:text-sm sm:text-base truncate">{otherUser.name}</p>
+                   <p className="text-[10px] sm:text-xs text-gray-500">Active {selectedConversation.time}</p>
                  </div>
                </div>
-               <div className="flex gap-2 sm:gap-3 md:gap-5 text-[#1877F2] text-lg sm:text-xl">
+               <div className="flex gap-1.5 sm:gap-2 sm:gap-3 md:gap-5 text-[#1877F2] text-base sm:text-lg sm:text-xl">
                  <i 
                    onClick={() => handleStartCall('audio')}
                    className="fa-solid fa-phone cursor-pointer hover:text-blue-600"
@@ -419,7 +419,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
             )}
 
             {/* Messages */}
-            <div className="flex-1 bg-white p-3 sm:p-4 overflow-y-auto flex flex-col gap-2">
+            <div className="flex-1 bg-white p-2 sm:p-3 sm:p-4 overflow-y-auto flex flex-col gap-1.5 sm:gap-2">
               {loadingMessages ? (
                 <div className="flex-1 flex items-center justify-center text-gray-500">
                   <p>Loading messages...</p>
@@ -434,9 +434,9 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
                   const sender = isOwn ? user : otherUser;
                   return (
                     <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[82%] sm:max-w-[70%] md:max-w-[60%] ${isOwn ? 'bg-[#1877F2] text-white' : 'bg-gray-200'} p-3 rounded-2xl`}>
-                        <p>{msg.text}</p>
-                        <p className={`text-xs mt-1 ${isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
+                      <div className={`max-w-[85%] sm:max-w-[82%] sm:max-w-[70%] md:max-w-[60%] ${isOwn ? 'bg-[#1877F2] text-white' : 'bg-gray-200'} p-2 sm:p-3 rounded-2xl`}>
+                        <p className="text-xs sm:text-sm">{msg.text}</p>
+                        <p className={`text-[10px] sm:text-xs mt-1 ${isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
                           {formatMessageTime(msg.timestamp)}
                         </p>
                       </div>
@@ -465,8 +465,8 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
             )}
 
             {/* Footer */}
-            <div className="p-3 sm:p-4 border-t border-gray-200 flex items-center gap-2 sm:gap-3 relative">
-              <div className="flex gap-3 sm:gap-4 text-[#1877F2] text-xl">
+            <div className="p-2 sm:p-3 sm:p-4 border-t border-gray-200 flex items-center gap-1.5 sm:gap-2 sm:gap-3 relative">
+              <div className="flex gap-2 sm:gap-3 sm:gap-4 text-[#1877F2] text-lg sm:text-xl">
                 <i 
                   onClick={() => handleAttachment('image')}
                   className="fa-solid fa-circle-plus cursor-pointer hover:text-blue-600"
@@ -495,16 +495,16 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
                     onChange={(e) => setMessageText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Aa" 
-                    className="w-full bg-gray-100 px-4 py-2 rounded-full outline-none"
+                    className="w-full bg-gray-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full outline-none text-sm sm:text-base"
                  />
                  <i 
                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                   className="fa-regular fa-face-smile absolute right-3 top-1/2 -translate-y-1/2 text-[#1877F2] cursor-pointer hover:text-blue-600"
+                   className="fa-regular fa-face-smile absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-[#1877F2] cursor-pointer hover:text-blue-600 text-base sm:text-lg"
                  ></i>
               </div>
               <i 
                 onClick={handleSend}
-                className={`fa-solid fa-paper-plane text-xl cursor-pointer ${messageText.trim() ? 'text-[#1877F2]' : 'text-gray-400'}`}
+                className={`fa-solid fa-paper-plane text-lg sm:text-xl cursor-pointer ${messageText.trim() ? 'text-[#1877F2]' : 'text-gray-400'}`}
               ></i>
             </div>
           </>

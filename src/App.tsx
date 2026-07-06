@@ -223,7 +223,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen">
       {user && !isOnboardingPage && <Navbar user={user} onLogout={handleLogout} isVisible={isNavVisible} />}
-      <main className={user && !isOnboardingPage ? `pt-[56px] pb-[72px] md:pb-0 md:pt-[56px] transition-all duration-300 ${isNavVisible ? '' : 'md:pt-[56px] pt-0 pb-0'}` : ""}>
+      <main className={user && !isOnboardingPage ? `pt-[52px] pb-[64px] sm:pb-[72px] md:pb-0 md:pt-[56px] transition-all duration-300 ${isNavVisible ? '' : 'md:pt-[56px] pt-0 pb-0'}` : ""}>
         <Routes>
             <Route 
               path="/welcome" 

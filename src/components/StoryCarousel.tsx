@@ -64,31 +64,31 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
         {/* Create Reflection */}
         <div 
           onClick={() => setIsComposerOpen(true)}
-          className="min-w-[100px] sm:min-w-[112px] h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow bg-white flex flex-col cursor-pointer hover:bg-gray-50 group snap-start"
+          className="min-w-[88px] sm:min-w-[100px] sm:min-w-[112px] h-[150px] sm:h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow bg-white flex flex-col cursor-pointer hover:bg-gray-50 group snap-start"
         >
            <div className="flex-1 overflow-hidden">
              <img src="https://picsum.photos/seed/me/200/300" className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Create" />
            </div>
-           <div className="h-[44px] sm:h-[48px] relative flex items-end justify-center pb-2">
-             <div className="absolute -top-4 w-7 h-7 sm:w-8 sm:h-8 bg-blue-500 rounded-full border-4 border-white flex items-center justify-center text-white">
-               <i className="fa-solid fa-plus text-xs"></i>
+           <div className="h-[40px] sm:h-[44px] sm:h-[48px] relative flex items-end justify-center pb-2">
+             <div className="absolute -top-3 sm:-top-4 w-6 h-6 sm:w-7 sm:w-8 sm:h-8 bg-blue-500 rounded-full border-3 sm:border-4 border-white flex items-center justify-center text-white">
+               <i className="fa-solid fa-plus text-[10px] sm:text-xs"></i>
              </div>
-             <span className="text-[10px] sm:text-xs font-semibold">Inspire Hub</span>
+             <span className="text-[9px] sm:text-[10px] sm:text-xs font-semibold">Add</span>
            </div>
         </div>
 
         {/* Stories List */}
         {STORIES.map(story => (
-          <div key={story.id} className="min-w-[100px] sm:min-w-[112px] h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow relative cursor-pointer group snap-start">
+          <div key={story.id} className="min-w-[88px] sm:min-w-[100px] sm:min-w-[112px] h-[150px] sm:h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow relative cursor-pointer group snap-start">
              <img src={story.thumbnail} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt={story.userName} />
              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
              
              {/* Avatar Ring */}
-             <div className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 w-9 h-9 sm:w-10 sm:h-10 rounded-full border-4 border-[#1877F2] overflow-hidden">
+             <div className="absolute top-2 sm:top-2.5 sm:top-3 left-2 sm:left-2.5 sm:left-3 w-8 h-8 sm:w-9 sm:w-10 sm:h-10 rounded-full border-3 sm:border-4 border-[#1877F2] overflow-hidden">
                 <img src={story.userAvatar} className="w-full h-full object-cover" alt="Avatar" />
              </div>
              
-             <span className="absolute bottom-2 left-2.5 sm:left-3 text-white text-[10px] sm:text-xs font-semibold drop-shadow-md">
+             <span className="absolute bottom-1.5 sm:bottom-2 left-2 sm:left-2.5 sm:left-3 text-white text-[9px] sm:text-[10px] sm:text-xs font-semibold drop-shadow-md">
                {story.userName}
              </span>
           </div>
@@ -99,29 +99,29 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
           <div 
             key={inspiration.id} 
             onClick={() => setSelectedInspirationIndex(index)}
-            className="min-w-[100px] sm:min-w-[112px] h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow relative cursor-pointer group snap-start"
+            className="min-w-[88px] sm:min-w-[100px] sm:min-w-[112px] h-[150px] sm:h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow relative cursor-pointer group snap-start"
           >
             {inspiration.imageUrl ? (
               <img src={inspiration.imageUrl} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Inspiration" />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-                <i className="fa-solid fa-lightbulb text-white text-2xl sm:text-3xl"></i>
+                <i className="fa-solid fa-lightbulb text-white text-xl sm:text-2xl sm:text-3xl"></i>
               </div>
             )}
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
             
             {/* Avatar Ring */}
-            <div className="absolute top-2.5 sm:top-3 left-2.5 sm:left-3 w-9 h-9 sm:w-10 sm:h-10 rounded-full border-4 border-purple-500 overflow-hidden">
+            <div className="absolute top-2 sm:top-2.5 sm:top-3 left-2 sm:left-2.5 sm:left-3 w-8 h-8 sm:w-9 sm:w-10 sm:h-10 rounded-full border-3 sm:border-4 border-purple-500 overflow-hidden">
                <img src={inspiration.userAvatar} className="w-full h-full object-cover" alt="Avatar" />
             </div>
             
-            <span className="absolute bottom-2 left-2.5 sm:left-3 text-white text-[10px] sm:text-xs font-semibold drop-shadow-md">
+            <span className="absolute bottom-1.5 sm:bottom-2 left-2 sm:left-2.5 sm:left-3 text-white text-[9px] sm:text-[10px] sm:text-xs font-semibold drop-shadow-md">
               {inspiration.userName}
             </span>
 
             {/* Challenge Badge */}
-            <div className="absolute top-2.5 sm:top-3 right-2">
-              <span className="bg-white/90 backdrop-blur-sm text-blue-800 text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full font-medium shadow-sm">
+            <div className="absolute top-2 sm:top-2.5 sm:top-3 right-1.5 sm:right-2">
+              <span className="bg-white/90 backdrop-blur-sm text-blue-800 text-[8px] sm:text-[9px] sm:text-[10px] px-1 sm:px-1.5 sm:px-2 py-0.5 rounded-full font-medium shadow-sm">
                 {inspiration.challengeOvercome}
               </span>
             </div>
