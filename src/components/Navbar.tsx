@@ -88,7 +88,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
   ];
 
   return (
-    <header className={`fixed top-0 left-0 right-0 h-[52px] sm:h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-2 sm:px-4 flex items-center justify-between transition-transform duration-300 md:translate-y-0 ${isVisible ? 'translate-y-0' : '-translate-y-full'`}>
+    <header className={`fixed top-0 left-0 right-0 h-[52px] sm:h-[56px] bg-white border-b border-gray-300 shadow-sm z-50 px-2 sm:px-4 flex items-center justify-between transition-transform duration-300 md:translate-y-0 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       {/* Left */}
       <div className="flex items-center gap-1.5 sm:gap-2 sm:gap-3">
         <Link to="/" className="flex items-center justify-center w-9 h-9 sm:w-10 sm:w-12 sm:h-10 sm:h-12 bg-[#1877F2] rounded-xl">
