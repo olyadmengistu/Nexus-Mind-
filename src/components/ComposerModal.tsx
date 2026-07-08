@@ -221,20 +221,10 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
   };
 
   return (
-    <div className="fixed inset-0 bg-white z-[100] flex flex-col sm:bg-white/80 sm:backdrop-blur-sm sm:items-center sm:justify-center p-3 sm:p-4">
-      {/* Mobile Full-Screen Header */}
-      <div className="sm:hidden flex items-center justify-between p-4 border-b border-gray-200 shrink-0">
-        <h2 className="text-lg font-bold">Create Post</h2>
-        <button 
-          onClick={onClose}
-          className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 transition-colors"
-        >
-          <i className="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
-      <div className="bg-white w-full max-w-[500px] mx-2 sm:mx-3 rounded-xl sm:rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] flex-1 sm:flex-none">
-        {/* Desktop Header */}
-        <div className="hidden sm:flex p-3 sm:p-4 border-b border-gray-200 items-center justify-between shrink-0">
+    <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white w-full max-w-[500px] mx-2 sm:mx-3 rounded-xl sm:rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+        {/* Header */}
+        <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center justify-between shrink-0">
           <div className="w-8"></div>
           <h2 className="text-lg sm:text-xl font-bold">Create Post</h2>
           <button 

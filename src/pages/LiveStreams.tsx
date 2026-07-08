@@ -427,19 +427,9 @@ const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
 
       {/* Create Stream Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-white z-50 flex flex-col sm:bg-black sm:bg-opacity-50 sm:items-center sm:justify-center">
-          {/* Mobile Full-Screen Header */}
-          <div className="sm:hidden flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold">Go Live</h2>
-            <button
-              onClick={() => setShowCreateModal(false)}
-              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
-            >
-              <i className="fa-solid fa-xmark text-xl text-gray-700"></i>
-            </button>
-          </div>
-          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto mx-3 sm:mx-0 flex-1 sm:flex-none">
-            <div className="hidden sm:flex items-center justify-between mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto mx-3 sm:mx-0">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Go Live</h2>
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -545,19 +535,9 @@ const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
 
       {/* Schedule Stream Modal */}
       {showScheduleModal && (
-        <div className="fixed inset-0 bg-white z-50 flex flex-col sm:bg-black sm:bg-opacity-50 sm:items-center sm:justify-center">
-          {/* Mobile Full-Screen Header */}
-          <div className="sm:hidden flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-xl font-bold">Schedule Stream</h2>
-            <button
-              onClick={() => setShowScheduleModal(false)}
-              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center"
-            >
-              <i className="fa-solid fa-xmark text-xl text-gray-700"></i>
-            </button>
-          </div>
-          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto mx-3 sm:mx-0 flex-1 sm:flex-none">
-            <div className="hidden sm:flex items-center justify-between mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto mx-3 sm:mx-0">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Schedule Stream</h2>
               <button
                 onClick={() => setShowScheduleModal(false)}
