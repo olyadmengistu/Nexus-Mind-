@@ -45,12 +45,12 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
 
     // Listen for typing indicators
     socketClient.on('user_typing', ({ userId, isTyping }: { userId: string; isTyping: boolean }) => {
-      console.log(`User ${userId} is typing: ${isTyping}`);
+      // Handle typing indicator
     });
 
     // Listen for real-time notifications
     socketClient.on('notification', (notification: any) => {
-      console.log('New notification received:', notification);
+      // Handle notification
     });
 
     return () => {
@@ -292,8 +292,6 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   };
 
   const handleAttachment = (type: 'image' | 'note' | 'gift') => {
-    // Placeholder for attachment handling - ready for backend integration
-    console.log(`Attachment type: ${type} - Ready for backend integration`);
     alert(`${type.charAt(0).toUpperCase() + type.slice(1)} attachment feature ready for backend integration`);
   };
 

@@ -58,7 +58,9 @@ const BadgeGrid: React.FC<BadgeGridProps> = ({
         title: `I earned the ${badge.name} badge!`,
         text: shareText,
         url: shareUrl
-      }).catch((error) => console.log('Error sharing:', error));
+      }).catch((error) => {
+        // Share error handling
+      });
     } else {
       // Fallback: copy to clipboard
       navigator.clipboard.writeText(`${shareText} ${shareUrl}`).then(() => {

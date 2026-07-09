@@ -83,8 +83,6 @@ export const searchUsers = async (params: UserSearchParams): Promise<ApiResponse
 
 // Video Search API
 export const searchVideos = async (params: VideoSearchParams): Promise<ApiResponse<Video[]>> => {
-  console.log('Backend: Search videos payload', params);
-  
   // TODO: Replace with actual API call
   // const queryParams = new URLSearchParams({
   //   query: params.query,
@@ -126,8 +124,6 @@ export const searchVideos = async (params: VideoSearchParams): Promise<ApiRespon
 
 // Collaboration Search API
 export const searchCollaborations = async (params: CollaborationSearchParams): Promise<ApiResponse<Collaboration[]>> => {
-  console.log('Backend: Search collaborations payload', params);
-  
   // TODO: Replace with actual API call
   // const queryParams = new URLSearchParams({
   //   query: params.query,
@@ -190,8 +186,6 @@ export const searchGroups = async (params: GroupSearchParams): Promise<ApiRespon
 
 // Product Search API
 export const searchProducts = async (params: ProductSearchParams): Promise<ApiResponse<Product[]>> => {
-  console.log('Backend: Search products payload', params);
-  
   // TODO: Replace with actual API call
   // const queryParams = new URLSearchParams({
   //   query: params.query,
@@ -237,8 +231,6 @@ export const searchProducts = async (params: ProductSearchParams): Promise<ApiRe
 
 // Conversation Search API
 export const searchConversations = async (params: ConversationSearchParams): Promise<ApiResponse<Conversation[]>> => {
-  console.log('Backend: Search conversations payload', params);
-  
   // TODO: Replace with actual API call
   // const queryParams = new URLSearchParams({
   //   query: params.query,

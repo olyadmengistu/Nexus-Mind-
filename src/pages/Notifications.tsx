@@ -260,7 +260,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
                     onClick={() => {
                       markAsRead(notif.id);
                       if (notif.actionUrl) {
-                        console.log('Navigate to:', notif.actionUrl);
+                        // Navigate to action URL
                       }
                     }}
                   >
@@ -325,7 +325,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
                     className={`flex items-center gap-2 sm:gap-3 sm:gap-4 p-2 sm:p-2.5 sm:p-3 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors ${!notif.read ? 'bg-blue-50' : ''}`}
                     onClick={() => {
                       if (notif.actionUrl) {
-                        console.log('Navigate to:', notif.actionUrl);
+                        // Navigate to action URL
                       }
                     }}
                   >

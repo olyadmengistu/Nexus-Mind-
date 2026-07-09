@@ -95,17 +95,11 @@ const RightSidebar: React.FC = () => {
 
   // Handle video call initiation
   const handleVideoCall = (contact: Contact) => {
-    console.log('Initiating video call with:', contact.name);
-    // TODO: Backend integration - initiate video call
-    // This will be connected to backend when ready
     alert(`Video call with ${contact.name} - Backend integration ready`);
   };
 
   // Handle contact click - open conversation
   const handleContactClick = (contact: Contact) => {
-    console.log('Opening conversation with:', contact.name);
-    // TODO: Backend integration - open conversation
-    // This will be connected to backend when ready
     alert(`Opening conversation with ${contact.name} - Backend integration ready`);
   };
 
@@ -122,25 +116,20 @@ const RightSidebar: React.FC = () => {
 
   // Menu options for contacts
   const menuOptions = [
-    { label: 'View Profile', action: () => console.log('View profile') },
-    { label: 'Send Message', action: () => console.log('Send message') },
-    { label: 'Block Contact', action: () => console.log('Block contact') },
-    { label: 'Remove Contact', action: () => console.log('Remove contact') }
+    { label: 'View Profile', action: () => {} },
+    { label: 'Send Message', action: () => {} },
+    { label: 'Block Contact', action: () => {} },
+    { label: 'Remove Contact', action: () => {} }
   ];
 
   // Handle menu option click
   const handleMenuOption = (option: string) => {
-    console.log('Menu option selected:', option);
-    // TODO: Backend integration - handle menu options
     alert(`${option} - Backend integration ready`);
     setShowMenu(false);
   };
 
   // Handle sponsored item click - track click and open details
   const handleSponsoredClick = (item: SponsoredContent) => {
-    console.log('Sponsored item clicked:', item.title);
-    // TODO: Backend integration - track click analytics
-    // Increment click count in backend
     setSponsoredItems(prev => prev.map(sponsored => 
       sponsored.id === item.id 
         ? { ...sponsored, clicks: sponsored.clicks + 1 }
@@ -152,8 +141,6 @@ const RightSidebar: React.FC = () => {
 
   // Handle sponsored CTA click
   const handleSponsoredCTA = (item: SponsoredContent) => {
-    console.log('Sponsored CTA clicked:', item.title, item.ctaUrl);
-    // TODO: Backend integration - track CTA click and redirect
     if (item.ctaUrl) {
       window.open(item.ctaUrl, '_blank');
     }
@@ -161,8 +148,6 @@ const RightSidebar: React.FC = () => {
 
   // Handle save sponsored item
   const handleSaveSponsored = (item: SponsoredContent) => {
-    console.log('Saving sponsored item:', item.title);
-    // TODO: Backend integration - save to user's saved items
     setSponsoredItems(prev => prev.map(sponsored => 
       sponsored.id === item.id 
         ? { ...sponsored, isSaved: !sponsored.isSaved }
@@ -173,8 +158,6 @@ const RightSidebar: React.FC = () => {
 
   // Handle share sponsored item
   const handleShareSponsored = (item: SponsoredContent) => {
-    console.log('Sharing sponsored item:', item.title);
-    // TODO: Backend integration - share functionality
     if (navigator.share) {
       navigator.share({
         title: item.title,
@@ -190,8 +173,6 @@ const RightSidebar: React.FC = () => {
 
   // Handle report sponsored item
   const handleReportSponsored = (item: SponsoredContent) => {
-    console.log('Reporting sponsored item:', item.title);
-    // TODO: Backend integration - report inappropriate content
     const reason = prompt('Please provide a reason for reporting this sponsored content:');
     if (reason) {
       alert(`Report submitted for "${item.title}" - Backend integration ready`);
@@ -200,8 +181,6 @@ const RightSidebar: React.FC = () => {
 
   // Handle view sponsor profile
   const handleViewSponsor = (item: SponsoredContent) => {
-    console.log('Viewing sponsor:', item.sponsorName);
-    // TODO: Backend integration - navigate to sponsor profile
     window.open(item.sponsorUrl, '_blank');
   };
 

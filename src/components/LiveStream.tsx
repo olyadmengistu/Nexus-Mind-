@@ -81,13 +81,6 @@ const LiveStream: React.FC<LiveStreamProps> = ({
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
-      
-      // Prepare for backend: send stream initialization
-      console.log('Backend: Initialize stream payload', {
-        streamId: stream.id,
-        streamerId: user.id,
-        timestamp: Date.now()
-      });
     } catch (error) {
       console.error('Error accessing media devices:', error);
       alert('Could not access camera or microphone. Please check permissions.');
@@ -100,13 +93,6 @@ const LiveStream: React.FC<LiveStreamProps> = ({
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
         setIsMuted(!audioTrack.enabled);
-        
-        // Prepare for backend: send mute state
-        console.log('Backend: Toggle mute payload', {
-          streamId: stream.id,
-          isMuted: !audioTrack.enabled,
-          timestamp: Date.now()
-        });
       }
     }
   }, [localStream, stream.id]);
@@ -117,13 +103,6 @@ const LiveStream: React.FC<LiveStreamProps> = ({
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
         setIsVideoOff(!videoTrack.enabled);
-        
-        // Prepare for backend: send video state
-        console.log('Backend: Toggle video payload', {
-          streamId: stream.id,
-          isVideoOff: !videoTrack.enabled,
-          timestamp: Date.now()
-        });
       }
     }
   }, [localStream, stream.id]);
@@ -151,12 +130,6 @@ const LiveStream: React.FC<LiveStreamProps> = ({
         }
         
         setIsScreenSharing(true);
-        
-        // Prepare for backend: send screen share state
-        console.log('Backend: Start screen share payload', {
-          streamId: stream.id,
-          timestamp: Date.now()
-        });
       } catch (error) {
         console.error('Error sharing screen:', error);
       }
@@ -164,12 +137,6 @@ const LiveStream: React.FC<LiveStreamProps> = ({
       // Revert to camera
       await initializeLocalStream();
       setIsScreenSharing(false);
-      
-      // Prepare for backend: send screen share end
-      console.log('Backend: End screen share payload', {
-        streamId: stream.id,
-        timestamp: Date.now()
-      });
     }
   }, [isScreenSharing, localStream]);
 
@@ -188,13 +155,6 @@ const LiveStream: React.FC<LiveStreamProps> = ({
         const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
         
-        // Prepare for backend: send recording data
-        console.log('Backend: Recording completed payload', {
-          streamId: stream.id,
-          recordingUrl: url,
-          timestamp: Date.now()
-        });
-        
         // Trigger download
         const a = document.createElement('a');
         a.href = url;
@@ -205,22 +165,10 @@ const LiveStream: React.FC<LiveStreamProps> = ({
       mediaRecorder.start();
       mediaRecorderRef.current = mediaRecorder;
       setIsRecording(true);
-      
-      // Prepare for backend: send recording start
-      console.log('Backend: Start recording payload', {
-        streamId: stream.id,
-        timestamp: Date.now()
-      });
     } else if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current = null;
       setIsRecording(false);
-      
-      // Prepare for backend: send recording stop
-      console.log('Backend: Stop recording payload', {
-        streamId: stream.id,
-        timestamp: Date.now()
-      });
     }
   }, [isRecording, localStream, stream.id]);
 
@@ -241,13 +189,6 @@ const LiveStream: React.FC<LiveStreamProps> = ({
     
     setChatMessages(prev => [...prev, message]);
     setNewMessage('');
-    
-    // Prepare for backend: send chat message
-    console.log('Backend: Send chat message payload', {
-      streamId: stream.id,
-      message,
-      timestamp: Date.now()
-    });
   }, [newMessage, user, stream.id, isStreamer]);
 
   const handleLike = useCallback(() => {
@@ -255,13 +196,6 @@ const LiveStream: React.FC<LiveStreamProps> = ({
     if (onLikeStream) {
       onLikeStream();
     }
-    
-    // Prepare for backend: send like
-    console.log('Backend: Like stream payload', {
-      streamId: stream.id,
-      userId: user.id,
-      timestamp: Date.now()
-    });
   }, [stream.id, user.id, onLikeStream]);
 
   const handleEndStream = useCallback(() => {
@@ -272,16 +206,6 @@ const LiveStream: React.FC<LiveStreamProps> = ({
       if (mediaRecorderRef.current && isRecording) {
         mediaRecorderRef.current.stop();
       }
-      
-      // Prepare for backend: send end stream
-      console.log('Backend: End stream payload', {
-        streamId: stream.id,
-        streamerId: user.id,
-        duration,
-        viewerCount,
-        likeCount,
-        timestamp: Date.now()
-      });
       
       if (onEndStream) {
         onEndStream();

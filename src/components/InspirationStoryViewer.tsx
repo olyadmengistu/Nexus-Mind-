@@ -169,7 +169,7 @@ const InspirationStoryViewer: React.FC<InspirationStoryViewerProps> = ({
           url: window.location.href
         });
       } catch (error) {
-        console.log('Share cancelled or failed');
+        // Share cancelled or failed
       }
     } else {
       // Fallback: copy to clipboard

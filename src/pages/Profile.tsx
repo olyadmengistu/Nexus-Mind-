@@ -229,15 +229,11 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
   };
 
   const handleApplyFilters = () => {
-    // Apply filters to posts - backend ready
-    console.log('Applying filters:', filters);
     setShowFilters(false);
   };
 
   const handleDeletePost = (postId: string) => {
     // Delete post - backend ready
-    console.log('Deleting post:', postId);
-    // In a real backend, this would make an API call
   };
 
   const handleAddStreakFreeze = async () => {

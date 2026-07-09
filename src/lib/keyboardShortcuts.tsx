@@ -57,7 +57,6 @@ export const createCommonShortcuts = (actions: {
   navigateProfile: () => void;
   navigateSettings: () => void;
   createPost: () => void;
-  toggleTheme?: () => void;
   openHelp: () => void;
 }): KeyboardShortcut[] => {
   return [
@@ -102,11 +101,6 @@ export const createCommonShortcuts = (actions: {
       description: 'Help',
       action: actions.openHelp,
     },
-    ...(actions.toggleTheme ? [{
-      key: 'd',
-      description: 'Toggle dark mode',
-      action: actions.toggleTheme,
-    }] : []),
   ];
 };
 
@@ -128,15 +122,15 @@ export const KeyboardShortcutsHelp = () => {
   ];
 
   return (
-    <div className="fixed bottom-4 right-4 bg-gray-900 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm">
+    <div className="fixed bottom-4 right-4 bg-white text-gray-900 p-4 rounded-lg shadow-lg z-50 max-w-sm border border-gray-200">
       <h3 className="font-bold mb-3 text-sm">Keyboard Shortcuts</h3>
       <div className="space-y-2 text-xs">
         {shortcuts.map((shortcut, index) => (
           <div key={index} className="flex justify-between items-center">
-            <kbd className="bg-gray-700 px-2 py-1 rounded text-xs font-mono">
+            <kbd className="bg-gray-100 px-2 py-1 rounded text-xs font-mono border border-gray-300">
               {shortcut.key}
             </kbd>
-            <span className="text-gray-300">{shortcut.description}</span>
+            <span className="text-gray-600">{shortcut.description}</span>
           </div>
         ))}
       </div>

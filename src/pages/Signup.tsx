@@ -53,9 +53,6 @@ const Signup: React.FC = () => {
       let photoURL = 'https://picsum.photos/seed/default/100/100';
       if (photoPreview) {
         photoURL = photoPreview;
-        console.log('Using base64 profile photo');
-      } else {
-        console.log('No profile photo provided, using default avatar');
       }
 
       // Update user profile
@@ -65,7 +62,6 @@ const Signup: React.FC = () => {
           displayName,
           photoURL
         });
-        console.log('Firebase profile updated with photoURL');
       } catch (profileError) {
         console.error('Error updating Firebase profile (base64 might be too large):', profileError);
         // Continue anyway since we'll use localStorage
@@ -86,8 +82,6 @@ const Signup: React.FC = () => {
         avatar: photoURL,
         reputation: 0,
       };
-
-      console.log('Saving user to localStorage with avatar (base64):', photoURL.substring(0, 50) + '...');
       
       // Persist profile to backend
       try {
@@ -103,9 +97,6 @@ const Signup: React.FC = () => {
 
       // Also save current user directly for immediate access
       localStorage.setItem('nexus_current_user', JSON.stringify(newUser));
-
-      console.log('Signup complete, user data saved');
-      console.log('Avatar length:', newUser.avatar.length, 'characters');
 
       // Navigate to onboarding
       navigate('/onboarding');

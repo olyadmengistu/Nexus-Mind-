@@ -320,11 +320,7 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
       [videoId]: [...(prev[videoId] || []), comment]
     }));
     
-    // Prepare for backend: send comment to API
-    console.log('Backend: Add comment payload', {
-      videoId,
-      ...comment
-    });
+    // Comment added - backend ready
     
     setNewComment('');
   };
@@ -335,12 +331,7 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
       [videoId]: prev[videoId]?.filter(c => c.id !== commentId) || []
     }));
     
-    // Prepare for backend: send delete comment to API
-    console.log('Backend: Delete comment payload', {
-      videoId,
-      commentId,
-      userId: user.id
-    });
+    // Comment deleted - backend ready
   };
   
   // Get unique categories
@@ -492,7 +483,7 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
               >
                 <i className="fa-solid fa-arrow-left mr-2"></i>Back to Videos
               </button>
-              <div className="aspect-video bg-gray-900 rounded-lg mb-4 flex items-center justify-center relative">
+              <div className="aspect-video bg-black rounded-lg mb-4 flex items-center justify-center relative">
                 {selectedVideo.videoUrl ? (
                   <video
                     src={selectedVideo.videoUrl}

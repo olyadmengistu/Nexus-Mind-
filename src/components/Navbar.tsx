@@ -47,12 +47,6 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
     debouncedSearch(searchQuery);
   }, [searchQuery, debouncedSearch]);
 
-  // Log avatar URL for debugging
-  useEffect(() => {
-    console.log('Navbar - Current user avatar URL:', user.avatar);
-  }, [user.avatar]);
-
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownOpen) {

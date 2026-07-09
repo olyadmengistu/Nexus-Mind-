@@ -147,7 +147,6 @@ const AppContent: React.FC = () => {
               // Profile may not exist yet for new users
             }
 
-            console.log('App user created:', appUser);
             setUser(appUser);
           } else {
             setUser(null);
@@ -188,17 +187,12 @@ const AppContent: React.FC = () => {
   };
 
   const handleAddPost = async (newPost: Post) => {
-    console.log('handleAddPost called with:', newPost);
     try {
       const { id: _localId, ...postData } = newPost;
-      console.log('Sending to API:', postData);
       const created = await postsApi.createPost(postData);
-      console.log('Created post from API:', created);
       const updatedPosts = [created as Post, ...posts];
-      console.log('Updated posts array:', updatedPosts);
       setPosts(updatedPosts);
       localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
-      console.log('Post saved to localStorage');
     } catch (error) {
       console.error('Error saving post to backend:', error);
     }

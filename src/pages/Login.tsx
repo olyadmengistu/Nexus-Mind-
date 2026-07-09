@@ -24,7 +24,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       try {
         const result = await getRedirectResult(auth);
         if (result) {
-          console.log('Redirect sign-in successful, user:', result.user.uid);
           const firebaseUser = result.user;
 
           // First check if user already exists in localStorage (from signup)
@@ -118,8 +117,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       provider.addScope('profile');
       provider.addScope('email');
 
-      console.log('Initiating Google sign-in...');
-      
       const userCredential = await signInWithPopup(auth, provider);
       const firebaseUser = userCredential.user;
       const idToken = await firebaseUser.getIdToken();
