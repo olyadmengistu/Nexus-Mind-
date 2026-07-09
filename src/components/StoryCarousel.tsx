@@ -73,7 +73,7 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
              <div className="absolute -top-3 sm:-top-4 w-6 h-6 sm:w-7 sm:w-8 sm:h-8 bg-blue-500 rounded-full border-3 sm:border-4 border-white flex items-center justify-center text-white">
                <i className="fa-solid fa-plus text-[10px] sm:text-xs"></i>
              </div>
-             <span className="text-[9px] sm:text-[10px] sm:text-xs font-semibold">Add</span>
+             <span className="text-[9px] sm:text-[10px] sm:text-xs font-semibold">Inspire Hub</span>
            </div>
         </div>
 
