@@ -119,12 +119,12 @@ const Signup: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-[500px] bg-white p-8 shadow-xl rounded-xl">
+      <div className="w-full max-w-[500px] bg-white p-6 sm:p-8 shadow-xl rounded-xl">
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-[#1877F2] text-4xl font-bold mb-2 tracking-tighter">NexusMind</h1>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-1">Create a new account</h2>
-          <p className="text-sm text-gray-600">It's free and always will be.</p>
+          <h1 className="text-[#1877F2] text-3xl sm:text-4xl font-bold mb-2 tracking-tighter">NexusMind</h1>
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-1">Create a new account</h2>
+          <p className="text-sm sm:text-base text-gray-600">It's free and always will be.</p>
         </div>
 
 
@@ -139,17 +139,17 @@ const Signup: React.FC = () => {
           />
           <div
             onClick={handlePhotoClick}
-            className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors border-2 border-dashed border-gray-400 overflow-hidden"
+            className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors border-2 border-dashed border-gray-400 overflow-hidden"
           >
             {photoPreview ? (
               <img src={photoPreview} alt="Profile preview" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-4xl text-gray-500">+</span>
+              <span className="text-4xl sm:text-5xl text-gray-500">+</span>
             )}
           </div>
           <p
             onClick={handlePhotoClick}
-            className="text-[#1877F2] text-sm font-medium mt-2 cursor-pointer hover:underline"
+            className="text-[#1877F2] text-sm sm:text-base font-medium mt-2 cursor-pointer hover:underline"
           >
             {photoPreview ? 'Change Profile Photo' : 'Add Profile Photo'}
           </p>
@@ -164,14 +164,14 @@ const Signup: React.FC = () => {
               placeholder="First name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px]"
+              className="flex-1 border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] sm:text-[19px]"
             />
             <input
               type="text"
               placeholder="Last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px]"
+              className="flex-1 border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] sm:text-[19px]"
             />
           </div>
 
@@ -181,7 +181,7 @@ const Signup: React.FC = () => {
             placeholder="Username (optional)"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px]"
+            className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] sm:text-[19px]"
           />
 
           {/* Email Field */}
@@ -190,7 +190,7 @@ const Signup: React.FC = () => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px]"
+            className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] sm:text-[19px]"
           />
 
           {/* Password Field */}
@@ -199,17 +199,17 @@ const Signup: React.FC = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px]"
+            className="w-full border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] sm:text-[19px]"
           />
 
           {/* Birthday Section */}
           <div>
-            <label className="text-sm text-gray-600 font-medium mb-2 block">Birthday</label>
+            <label className="text-sm sm:text-base text-gray-600 font-medium mb-2 block">Birthday</label>
             <div className="flex gap-2">
               <select
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
-                className="flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] bg-white"
+                className="flex-1 border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] sm:text-[19px] bg-white"
               >
                 <option value="">Month</option>
                 <option value="January">January</option>
@@ -228,7 +228,7 @@ const Signup: React.FC = () => {
               <select
                 value={day}
                 onChange={(e) => setDay(e.target.value)}
-                className="flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] bg-white"
+                className="flex-1 border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] sm:text-[19px] bg-white"
               >
                 <option value="">Day</option>
                 {Array.from({ length: 31 }, (_, i) => (
@@ -238,7 +238,7 @@ const Signup: React.FC = () => {
               <select
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
-                className="flex-1 border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] bg-white"
+                className="flex-1 border border-gray-300 p-3 sm:p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-[17px] sm:text-[19px] bg-white"
               >
                 <option value="">Year</option>
                 {Array.from({ length: 100 }, (_, i) => (
@@ -252,19 +252,19 @@ const Signup: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#42B72A] hover:bg-[#36a420] text-white font-bold py-3 rounded-lg text-[17px] transition-colors mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#42B72A] hover:bg-[#36a420] text-white font-bold py-3 sm:py-4 rounded-lg text-[17px] sm:text-[19px] transition-colors mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Creating account...' : 'Sign Up'}
           </button>
           
-          {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
+          {error && <p className="text-red-500 text-sm sm:text-base text-center mt-2">{error}</p>}
         </form>
 
         {/* Back to Login */}
         <div className="text-center mt-6">
           <button
             onClick={() => navigate('/login')}
-            className="text-[#1877F2] text-sm hover:underline"
+            className="text-[#1877F2] text-sm sm:text-base hover:underline"
           >
             Already have an account?
           </button>
