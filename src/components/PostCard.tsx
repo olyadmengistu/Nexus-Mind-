@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Post, User, Solution } from '../types';
-import { solutionsApi, commentsApi, postsApi } from '../lib/firebaseApi';
+import { solutionsApi, commentsApi, postsApi, userApi } from '../lib/firebaseApi';
 
 interface PostCardProps {
   post: Post;
@@ -25,6 +25,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(post.title || '');
   const [editContent, setEditContent] = useState(post.content || '');
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   // Load comments when solutions section is shown
   useEffect(() => {
@@ -32,6 +34,20 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
       loadComments();
     }
   }, [showSolutions]);
+
+  // Check if user is following the post author
+  useEffect(() => {
+    if (currentUser.following && post.userId !== currentUser.id) {
+      setIsFollowing(currentUser.following.includes(post.userId));
+    }
+  }, [currentUser.following, post.userId, currentUser.id]);
+
+  // Check if user has saved the post
+  useEffect(() => {
+    if (currentUser.savedItems) {
+      setIsSaved(currentUser.savedItems.some((item: any) => item.itemId === post.id));
+    }
+  }, [currentUser.savedItems, post.id]);
 
   const loadComments = async () => {
     setLoadingComments(true);
@@ -227,6 +243,52 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
     }
   };
 
+  const handleFollow = async () => {
+    if (post.userId === currentUser.id) return;
+    
+    try {
+      if (isFollowing) {
+        await userApi.unfollowUser(currentUser.id, post.userId);
+        setIsFollowing(false);
+      } else {
+        await userApi.followUser(currentUser.id, post.userId);
+        setIsFollowing(true);
+      }
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Failed to follow/unfollow user:', error);
+      alert('Failed to follow user. Please try again.');
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const savedItem = {
+        id: post.id,
+        userId: currentUser.id,
+        itemType: 'post' as const,
+        itemId: post.id,
+        title: post.title || post.content.substring(0, 50),
+        description: post.content.substring(0, 100),
+        thumbnail: post.imageUrl,
+        url: `/post/${post.id}`,
+        timestamp: Date.now()
+      };
+      
+      if (isSaved) {
+        await userApi.removeSavedItem(currentUser.id, post.id);
+        setIsSaved(false);
+      } else {
+        await userApi.saveItem(currentUser.id, savedItem);
+        setIsSaved(true);
+      }
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Failed to save/unsave post:', error);
+      alert('Failed to save post. Please try again.');
+    }
+  };
+
 
   const formatDate = (ts: number) => {
     const diff = Date.now() - ts;
@@ -304,6 +366,26 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
                 className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
               >
                 Copy Link
+              </button>
+              {post.userId !== currentUser.id && (
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    handleFollow();
+                  }}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
+                >
+                  {isFollowing ? 'Unfollow' : 'Follow'}
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  handleSave();
+                }}
+                className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm font-medium"
+              >
+                {isSaved ? 'Unsave' : 'Save'}
               </button>
               <button
                 onClick={() => {
