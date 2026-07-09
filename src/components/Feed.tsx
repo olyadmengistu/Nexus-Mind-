@@ -50,77 +50,77 @@ const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote }) => {
         <StoryCarousel user={user} />
 
         {/* Mobile Horizontal Scroll - Trending & Contacts */}
-        <div className="xl:hidden bg-white rounded-xl shadow-sm p-3 sm:p-4">
-          <h3 className="text-gray-500 font-bold text-xs sm:text-sm mb-2 sm:mb-3">Trending</h3>
-          <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 -mx-3 sm:-mx-4 px-3 sm:px-4 scrollbar-hide">
-            <div className="flex-shrink-0 w-40 sm:w-48 bg-gray-50 rounded-xl p-2.5 sm:p-3">
-              <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-500 flex items-center justify-center">
-                  <i className="fa-solid fa-lightbulb text-white text-[10px] sm:text-xs"></i>
+        <div className="xl:hidden bg-white rounded-xl shadow-sm p-4 sm:p-6">
+          <h3 className="text-gray-500 font-bold text-sm sm:text-base mb-3 sm:mb-4">Trending Solutions</h3>
+          <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 -mx-4 sm:-mx-6 px-4 sm:px-6 scrollbar-hide">
+            <div className="flex-shrink-0 w-56 sm:w-64 bg-gray-50 rounded-xl p-4 sm:p-5">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                  <i className="fa-solid fa-lightbulb text-white text-sm sm:text-base"></i>
                 </div>
-                <span className="text-[10px] sm:text-xs font-bold text-gray-700">Top</span>
+                <span className="text-sm sm:text-base font-bold text-gray-700">Top</span>
               </div>
-              <p className="text-[10px] sm:text-xs text-gray-600 line-clamp-2">Sustainable energy solution...</p>
-              <p className="text-[10px] sm:text-xs text-blue-600 mt-1.5 sm:mt-2">125</p>
+              <p className="text-sm sm:text-base text-gray-600 line-clamp-2">Sustainable energy solution...</p>
+              <p className="text-sm sm:text-base text-blue-600 mt-2 sm:mt-3">125</p>
             </div>
-            <div className="flex-shrink-0 w-40 sm:w-48 bg-gray-50 rounded-xl p-2.5 sm:p-3">
-              <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-green-500 flex items-center justify-center">
-                  <i className="fa-solid fa-lightbulb text-white text-[10px] sm:text-xs"></i>
+            <div className="flex-shrink-0 w-56 sm:w-64 bg-gray-50 rounded-xl p-4 sm:p-5">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-500 flex items-center justify-center">
+                  <i className="fa-solid fa-lightbulb text-white text-sm sm:text-base"></i>
                 </div>
-                <span className="text-[10px] sm:text-xs font-bold text-gray-700">Rising</span>
+                <span className="text-sm sm:text-base font-bold text-gray-700">Rising</span>
               </div>
-              <p className="text-[10px] sm:text-xs text-gray-600 line-clamp-2">AI problem solving...</p>
-              <p className="text-[10px] sm:text-xs text-blue-600 mt-1.5 sm:mt-2">98</p>
+              <p className="text-sm sm:text-base text-gray-600 line-clamp-2">AI problem solving...</p>
+              <p className="text-sm sm:text-base text-blue-600 mt-2 sm:mt-3">98</p>
             </div>
-            <div className="flex-shrink-0 w-40 sm:w-48 bg-gray-50 rounded-xl p-2.5 sm:p-3">
-              <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-purple-500 flex items-center justify-center">
-                  <i className="fa-solid fa-lightbulb text-white text-[10px] sm:text-xs"></i>
+            <div className="flex-shrink-0 w-56 sm:w-64 bg-gray-50 rounded-xl p-4 sm:p-5">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-500 flex items-center justify-center">
+                  <i className="fa-solid fa-lightbulb text-white text-sm sm:text-base"></i>
                 </div>
-                <span className="text-[10px] sm:text-xs font-bold text-gray-700">Pick</span>
+                <span className="text-sm sm:text-base font-bold text-gray-700">Pick</span>
               </div>
-              <p className="text-[10px] sm:text-xs text-gray-600 line-clamp-2">Workspace optimization...</p>
-              <p className="text-[10px] sm:text-xs text-blue-600 mt-1.5 sm:mt-2">87</p>
+              <p className="text-sm sm:text-base text-gray-600 line-clamp-2">Workspace optimization...</p>
+              <p className="text-sm sm:text-base text-blue-600 mt-2 sm:mt-3">87</p>
             </div>
           </div>
           
-          <h3 className="text-gray-500 font-bold text-xs sm:text-sm mb-2 sm:mb-3 mt-3 sm:mt-4">Online</h3>
-          <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 -mx-3 sm:-mx-4 px-3 sm:px-4 scrollbar-hide">
+          <h3 className="text-gray-500 font-bold text-sm sm:text-base mb-3 sm:mb-4 mt-4 sm:mt-6">Online Contacts</h3>
+          <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 -mx-4 sm:-mx-6 px-4 sm:px-6 scrollbar-hide">
             <div className="flex-shrink-0 flex flex-col items-center">
               <div className="relative">
-                <img src="https://picsum.photos/seed/sarah/50/50" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover" alt="Sarah" />
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                <img src="https://picsum.photos/seed/sarah/50/50" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover" alt="Sarah" />
+                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full"></div>
               </div>
-              <span className="text-[10px] sm:text-xs mt-1 text-gray-700">Sarah</span>
+              <span className="text-sm sm:text-base mt-2 text-gray-700 font-medium">Sarah</span>
             </div>
             <div className="flex-shrink-0 flex flex-col items-center">
               <div className="relative">
-                <img src="https://picsum.photos/seed/alex/50/50" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover" alt="Alex" />
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                <img src="https://picsum.photos/seed/alex/50/50" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover" alt="Alex" />
+                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full"></div>
               </div>
-              <span className="text-[10px] sm:text-xs mt-1 text-gray-700">Alex</span>
+              <span className="text-sm sm:text-base mt-2 text-gray-700 font-medium">Alex</span>
             </div>
             <div className="flex-shrink-0 flex flex-col items-center">
               <div className="relative">
-                <img src="https://picsum.photos/seed/maria/50/50" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover" alt="Maria" />
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                <img src="https://picsum.photos/seed/maria/50/50" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover" alt="Maria" />
+                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-green-500 border-2 border-white rounded-full"></div>
               </div>
-              <span className="text-[10px] sm:text-xs mt-1 text-gray-700">Maria</span>
+              <span className="text-sm sm:text-base mt-2 text-gray-700 font-medium">Maria</span>
             </div>
             <div className="flex-shrink-0 flex flex-col items-center">
               <div className="relative">
-                <img src="https://picsum.photos/seed/john/50/50" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover" alt="John" />
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-gray-400 border-2 border-white rounded-full"></div>
+                <img src="https://picsum.photos/seed/john/50/50" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover" alt="John" />
+                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-gray-400 border-2 border-white rounded-full"></div>
               </div>
-              <span className="text-[10px] sm:text-xs mt-1 text-gray-700">John</span>
+              <span className="text-sm sm:text-base mt-2 text-gray-700 font-medium">John</span>
             </div>
             <div className="flex-shrink-0 flex flex-col items-center">
               <div className="relative">
-                <img src="https://picsum.photos/seed/tom/50/50" className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover" alt="Tom" />
-                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-gray-400 border-2 border-white rounded-full"></div>
+                <img src="https://picsum.photos/seed/tom/50/50" className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover" alt="Tom" />
+                <div className="absolute bottom-0 right-0 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-gray-400 border-2 border-white rounded-full"></div>
               </div>
-              <span className="text-[10px] sm:text-xs mt-1 text-gray-700">Tom</span>
+              <span className="text-sm sm:text-base mt-2 text-gray-700 font-medium">Tom</span>
             </div>
           </div>
         </div>
