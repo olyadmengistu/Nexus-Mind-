@@ -117,6 +117,17 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
 
   return (
     <div className="max-w-7xl mx-auto p-3 sm:p-4">
+      {/* Mobile Back Header */}
+      <div className="md:hidden flex items-center mb-4">
+        <button
+          onClick={() => window.history.back()}
+          className="flex items-center gap-2 text-[#1877F2] font-semibold"
+        >
+          <i className="fa-solid fa-arrow-left text-xl"></i>
+          <span>Back</span>
+        </button>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold">Marketplace</h1>

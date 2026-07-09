@@ -40,8 +40,9 @@ const AppContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { isNavVisible } = useScrollDirection();
 
-  // Hide navbar and bottom nav on onboarding page
+  // Hide navbar and bottom nav on onboarding page and mobile full-screen pages
   const isOnboardingPage = location.pathname === '/onboarding';
+  const isMobileFullScreenPage = ['/videos', '/marketplace', '/groups', '/collaborate', '/search', '/messages', '/notifications', '/feedback', '/profile', '/saved-posts', '/activity-log', '/settings', '/help', '/admin/dashboard'].includes(location.pathname);
 
   useEffect(() => {
     let isMounted = true;
@@ -222,8 +223,8 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      {user && !isOnboardingPage && <Navbar user={user} onLogout={handleLogout} isVisible={isNavVisible} />}
-      <main className={user && !isOnboardingPage ? `pt-[52px] pb-[64px] sm:pb-[72px] md:pb-0 md:pt-[56px] transition-all duration-300 ${isNavVisible ? '' : 'md:pt-[56px] pt-0 pb-0'}` : ""}>
+      {user && !isOnboardingPage && !isMobileFullScreenPage && <Navbar user={user} onLogout={handleLogout} isVisible={isNavVisible} />}
+      <main className={user && !isOnboardingPage && !isMobileFullScreenPage ? `pt-[52px] pb-[64px] sm:pb-[72px] md:pb-0 md:pt-[56px] transition-all duration-300 ${isNavVisible ? '' : 'md:pt-[56px] pt-0 pb-0'}` : ""}>
         <Routes>
             <Route 
               path="/welcome" 
@@ -335,7 +336,7 @@ const AppContent: React.FC = () => {
             />
           </Routes>
         </main>
-        {user && !isOnboardingPage && <BottomNav isVisible={isNavVisible} />}
+        {user && !isOnboardingPage && !isMobileFullScreenPage && <BottomNav isVisible={isNavVisible} />}
       </div>
   );
 };

@@ -169,6 +169,17 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
 
   return (
     <div className="max-w-[800px] mx-auto p-2.5 sm:p-4 bg-white min-h-screen sm:shadow">
+      {/* Mobile Back Header */}
+      <div className="md:hidden flex items-center mb-2.5 sm:mb-4">
+        <button
+          onClick={() => window.history.back()}
+          className="flex items-center gap-2 text-[#1877F2] font-semibold"
+        >
+          <i className="fa-solid fa-arrow-left text-xl"></i>
+          <span>Back</span>
+        </button>
+      </div>
+
       <div className="flex items-center justify-between mb-2.5 sm:mb-4">
         <h1 className="text-lg sm:text-xl sm:text-2xl font-bold">Notifications</h1>
         <div className="flex items-center gap-1 sm:gap-2">

@@ -238,6 +238,17 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Mobile Back Header */}
+        <div className="md:hidden flex items-center mb-4">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-blue-400 font-semibold"
+          >
+            <i className="fa-solid fa-arrow-left text-xl"></i>
+            <span>Back</span>
+          </button>
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">NexusMind Analytics Dashboard</h1>

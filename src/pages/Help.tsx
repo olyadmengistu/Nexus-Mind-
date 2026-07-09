@@ -4,6 +4,17 @@ const Help: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
     <div className="max-w-4xl mx-auto p-3 sm:p-6">
+        {/* Mobile Back Header */}
+        <div className="md:hidden flex items-center mb-4">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-[#1877F2] font-semibold"
+          >
+            <i className="fa-solid fa-arrow-left text-xl"></i>
+            <span>Back</span>
+          </button>
+        </div>
+
         <h1 className="text-3xl font-bold mb-8">Help & Support</h1>
         
       <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">

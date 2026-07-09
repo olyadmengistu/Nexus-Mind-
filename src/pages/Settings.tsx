@@ -92,6 +92,17 @@ const Settings: React.FC<SettingsProps> = ({ user }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto p-2.5 sm:p-6">
+        {/* Mobile Back Header */}
+        <div className="md:hidden flex items-center mb-4">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-[#1877F2] font-semibold"
+          >
+            <i className="fa-solid fa-arrow-left text-xl"></i>
+            <span>Back</span>
+          </button>
+        </div>
+
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-8">Settings</h1>
 
         {/* Profile Settings */}

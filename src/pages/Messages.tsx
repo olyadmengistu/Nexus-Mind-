@@ -299,9 +299,22 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
 
   return (
     <div className="flex h-[calc(100vh-116px)] sm:h-[calc(100vh-136px)] bg-white md:h-[calc(100vh-56px)]">
+      {/* Mobile Back Header */}
+      <div className="md:hidden absolute top-0 left-0 right-0 z-10 bg-white border-b border-gray-200">
+        <div className="p-2.5 sm:p-4 flex items-center gap-2">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-[#1877F2] font-semibold"
+          >
+            <i className="fa-solid fa-arrow-left text-xl"></i>
+            <span>Back</span>
+          </button>
+        </div>
+      </div>
+
       {/* Sidebar */}
       <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} w-full md:w-[360px] border-r border-gray-200 flex-col`}>
-        <div className="p-2.5 sm:p-4 flex items-center justify-between">
+        <div className="p-2.5 sm:p-4 pt-10 md:pt-2.5 flex items-center justify-between">
            <h1 className="text-lg sm:text-xl sm:text-2xl font-bold">Chats</h1>
            <div className="flex gap-1.5 sm:gap-2">
              <button className="w-8 h-8 sm:w-9 sm:h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center" title="More options">

@@ -295,6 +295,19 @@ const Profile: React.FC<ProfileProps> = ({ user, posts }) => {
 
   return (
     <div className="bg-[#F0F2F5] min-h-screen">
+      {/* Mobile Back Header */}
+      <div className="md:hidden bg-white border-b border-gray-300">
+        <div className="max-w-[1100px] mx-auto px-4 py-2">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-[#1877F2] font-semibold"
+          >
+            <i className="fa-solid fa-arrow-left text-xl"></i>
+            <span>Back</span>
+          </button>
+        </div>
+      </div>
+
       {/* Header Area */}
       <div className="bg-white border-b border-gray-300">
         <div className="max-w-[1100px] mx-auto">

@@ -103,6 +103,17 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ user }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto p-3 sm:p-6">
+        {/* Mobile Back Header */}
+        <div className="md:hidden flex items-center mb-4">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-[#1877F2] font-semibold"
+          >
+            <i className="fa-solid fa-arrow-left text-xl"></i>
+            <span>Back</span>
+          </button>
+        </div>
+
         <h1 className="text-3xl font-bold mb-8">Activity Log</h1>
         
         {/* Analytics Cards */}

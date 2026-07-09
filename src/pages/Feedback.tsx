@@ -89,6 +89,17 @@ const Feedback: React.FC<FeedbackProps> = ({ user }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="max-w-5xl mx-auto p-3 sm:p-6">
+        {/* Mobile Back Header */}
+        <div className="md:hidden flex items-center mb-4">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-[#1877F2] font-semibold"
+          >
+            <i className="fa-solid fa-arrow-left text-xl"></i>
+            <span>Back</span>
+          </button>
+        </div>
+
         {/* Header Section */}
         <div className="text-center mb-6 sm:mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">

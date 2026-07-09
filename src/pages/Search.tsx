@@ -102,6 +102,17 @@ const Search: React.FC<SearchProps> = ({ user }) => {
   return (
     <div className="min-h-screen bg-[#F0F2F5]">
       <div className="max-w-[800px] mx-auto p-2.5 sm:p-4">
+        {/* Mobile Back Header */}
+        <div className="md:hidden flex items-center mb-3 sm:mb-4">
+          <button
+            onClick={() => window.history.back()}
+            className="flex items-center gap-2 text-[#1877F2] font-semibold"
+          >
+            <i className="fa-solid fa-arrow-left text-xl"></i>
+            <span>Back</span>
+          </button>
+        </div>
+
         {/* Search Header */}
         <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-3 sm:mb-4">
           <div className="relative">
