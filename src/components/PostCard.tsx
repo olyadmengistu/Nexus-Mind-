@@ -237,27 +237,27 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
   };
 
   return (
-    <div className="bg-white sm:rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white sm:rounded-xl shadow-sm overflow-hidden mb-4 sm:mb-0">
       {/* Header */}
-      <div className="p-2.5 sm:p-4 flex items-start justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+      <div className="p-4 sm:p-4 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-3">
           <div className="relative">
-             <img src={post.userAvatar} className="w-9 h-9 sm:w-12 sm:h-12 rounded-full object-cover" alt={post.userName} />
+             <img src={post.userAvatar} className="w-12 h-12 sm:w-12 sm:h-12 rounded-full object-cover" alt={post.userName} />
              {post.isSolved && (
-               <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 sm:p-1 rounded-full border-2 border-white text-[10px] sm:text-xs">
-                 <i className="fa-solid fa-check text-[8px] sm:text-xs"></i>
+               <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-1 sm:p-1 rounded-full border-2 border-white text-xs sm:text-xs">
+                 <i className="fa-solid fa-check text-xs sm:text-xs"></i>
                </div>
              )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1 sm:gap-1.5 sm:gap-2">
-              <h4 className="font-bold text-xs sm:text-sm sm:text-base leading-tight cursor-pointer hover:underline truncate max-w-[120px] sm:max-w-[150px] sm:max-w-none">{post.userName}</h4>
-              <span className="text-gray-500 text-[10px] sm:text-sm">•</span>
-              <span className="bg-blue-100 text-blue-600 px-1.5 sm:px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] sm:text-xs font-bold uppercase">{post.category}</span>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-1.5 sm:gap-2">
+              <h4 className="font-bold text-sm sm:text-sm sm:text-base leading-tight cursor-pointer hover:underline truncate max-w-[150px] sm:max-w-[150px] sm:max-w-none">{post.userName}</h4>
+              <span className="text-gray-500 text-xs sm:text-sm">•</span>
+              <span className="bg-blue-100 text-blue-600 px-2 sm:px-2 sm:px-3 py-1 sm:py-1 rounded-full text-xs sm:text-[10px] sm:text-xs font-bold uppercase">{post.category}</span>
               {post.privacy && (
                 <>
-                  <span className="text-gray-500 text-[10px] sm:text-sm">•</span>
-                  <span className="text-gray-500 text-[10px] sm:text-xs">
+                  <span className="text-gray-500 text-xs sm:text-sm">•</span>
+                  <span className="text-gray-500 text-xs sm:text-xs">
                     {post.privacy === 'private' && <i className="fa-solid fa-lock"></i>}
                     {post.privacy === 'friends' && <i className="fa-solid fa-user-group"></i>}
                     {post.privacy === 'public' && <i className="fa-solid fa-globe"></i>}
@@ -265,10 +265,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
                 </>
               )}
             </div>
-            <p className="text-gray-500 text-[10px] sm:text-xs sm:text-sm">
+            <p className="text-gray-500 text-xs sm:text-xs sm:text-sm">
               {post.scheduledTime && post.scheduledTime > Date.now() ? (
                 <>
-                  <i className="fa-solid fa-clock text-[10px] sm:text-xs"></i> {formatDate(post.scheduledTime)}
+                  <i className="fa-solid fa-clock text-xs sm:text-xs"></i> {formatDate(post.scheduledTime)}
                 </>
               ) : (
                 <>
@@ -281,7 +281,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
         <div className="relative">
           <button 
             onClick={() => setShowMenu(!showMenu)}
-            className="text-gray-500 hover:bg-gray-100 w-9 h-9 sm:w-10 sm:h-10 rounded-full transition-colors"
+            className="text-gray-500 hover:bg-gray-100 w-10 h-10 sm:w-10 sm:h-10 rounded-full transition-colors"
           >
             <i className="fa-solid fa-ellipsis text-base sm:text-lg"></i>
           </button>
@@ -354,7 +354,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
       </div>
 
       {/* Content */}
-      <div className="px-2.5 sm:px-4 pb-2 sm:pb-3 space-y-2 sm:space-y-3">
+      <div className="px-4 sm:px-4 pb-4 sm:pb-3 space-y-3 sm:space-y-3">
         {isEditing ? (
           <div className="space-y-2 sm:space-y-3">
             <input
@@ -392,24 +392,24 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
           </div>
         ) : (
           <>
-            {localPost.title && <h3 className="font-bold text-xs sm:text-sm sm:text-base sm:text-lg">{localPost.title}</h3>}
-            <p className="text-xs sm:text-sm sm:text-base whitespace-pre-wrap break-words leading-relaxed">{localPost.content}</p>
+            {localPost.title && <h3 className="font-bold text-sm sm:text-sm sm:text-base sm:text-lg">{localPost.title}</h3>}
+            <p className="text-sm sm:text-sm sm:text-base whitespace-pre-wrap break-words leading-relaxed">{localPost.content}</p>
           </>
         )}
         
         {/* Emoji Display */}
         {post.emoji && (
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm sm:text-base text-gray-600">
-            <span className="text-2xl">{post.emoji}</span>
-            <span className="font-medium">feeling</span>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-3 text-base sm:text-base text-gray-600">
+            <span className="text-3xl">{post.emoji}</span>
+            <span className="font-medium text-sm">feeling</span>
           </div>
         )}
 
         {/* Location Display */}
         {post.location && (
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm sm:text-base text-gray-600">
-            <i className="fa-solid fa-location-dot text-[#F3425E] text-xl"></i>
-            <span className="font-medium">{post.location}</span>
+          <div className="flex flex-wrap items-center gap-3 sm:gap-3 text-base sm:text-base text-gray-600">
+            <i className="fa-solid fa-location-dot text-[#F3425E] text-2xl"></i>
+            <span className="font-medium text-sm">{post.location}</span>
             {post.locationCoordinates && (
               <a
                 href={`https://www.google.com/maps?q=${post.locationCoordinates.latitude},${post.locationCoordinates.longitude}`}
@@ -490,19 +490,19 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
       )}
 
       {/* Stats */}
-      <div className="px-2.5 sm:px-4 py-2 sm:py-3 flex flex-col gap-1.5 sm:gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100">
-        <div className="flex items-center gap-1.5 sm:gap-2 cursor-pointer hover:underline group">
+      <div className="px-4 sm:px-4 py-3 sm:py-3 flex flex-col gap-2 sm:gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-gray-100">
+        <div className="flex items-center gap-2 sm:gap-2 cursor-pointer hover:underline group">
           <div className="flex -space-x-1">
-             <div className="bg-blue-500 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[10px] sm:text-xs text-white">
-               <i className="fa-solid fa-thumbs-up text-[8px] sm:text-xs"></i>
+             <div className="bg-blue-500 w-5 h-5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-xs sm:text-xs text-white">
+               <i className="fa-solid fa-thumbs-up text-xs sm:text-xs"></i>
              </div>
-             <div className="bg-yellow-500 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-[10px] sm:text-xs text-white">
-               <i className="fa-solid fa-lightbulb text-[8px] sm:text-xs"></i>
+             <div className="bg-yellow-500 w-5 h-5 sm:w-5 sm:h-5 rounded-full flex items-center justify-center text-xs sm:text-xs text-white">
+               <i className="fa-solid fa-lightbulb text-xs sm:text-xs"></i>
              </div>
           </div>
-          <span className="text-gray-500 text-[10px] sm:text-sm sm:text-base font-medium">{localPost.votes}</span>
+          <span className="text-gray-500 text-sm sm:text-sm sm:text-base font-medium">{localPost.votes}</span>
         </div>
-        <div className="flex gap-3 sm:gap-4 text-[10px] sm:text-sm sm:text-base text-gray-500 font-medium">
+        <div className="flex gap-4 sm:gap-4 text-sm sm:text-sm sm:text-base text-gray-500 font-medium">
            <button 
              onClick={() => setShowSolutions(!showSolutions)}
              className="hover:underline cursor-pointer"
@@ -514,24 +514,24 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
       </div>
 
       {/* Actions */}
-      <div className="px-2 sm:px-4 py-2 flex items-center justify-around">
+      <div className="px-2 sm:px-4 py-3 sm:py-2 flex items-center justify-around">
         <button
           onClick={handleVoteClick}
-          className={`flex items-center gap-1 sm:gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2 sm:py-2.5 sm:py-4 rounded-xl font-bold text-[10px] sm:text-xs sm:text-lg transition-all hover:scale-105 active:scale-95 ${hasVoted ? 'text-blue-500' : 'text-[#65676B]'}`}
+          className={`flex items-center gap-2 sm:gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-3 sm:py-2.5 sm:py-4 rounded-xl font-bold text-sm sm:text-xs sm:text-lg transition-all hover:scale-105 active:scale-95 ${hasVoted ? 'text-blue-500' : 'text-[#65676B]'}`}
         >
-          <i className={`fa-regular fa-thumbs-up text-base sm:text-lg sm:text-xl ${hasVoted ? 'fa-solid' : ''}`}></i> <span className="hidden sm:inline">Helpful</span><span className="sm:hidden">Help</span>
+          <i className={`fa-regular fa-thumbs-up text-lg sm:text-lg sm:text-xl ${hasVoted ? 'fa-solid' : ''}`}></i> <span className="hidden sm:inline">Helpful</span><span className="sm:hidden">Help</span>
         </button>
         <button
           onClick={() => navigate(`/solutions/${post.id}`)}
-          className="flex items-center gap-1 sm:gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2 sm:py-2.5 sm:py-4 rounded-xl text-[#65676B] font-bold text-[10px] sm:text-xs sm:text-lg transition-colors"
+          className="flex items-center gap-2 sm:gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-3 sm:py-2.5 sm:py-4 rounded-xl text-[#65676B] font-bold text-sm sm:text-xs sm:text-lg transition-colors"
         >
-          <i className="fa-regular fa-lightbulb text-base sm:text-lg sm:text-xl"></i> <span className="hidden sm:inline">Solution</span><span className="sm:hidden">Solve</span>
+          <i className="fa-regular fa-lightbulb text-lg sm:text-lg sm:text-xl"></i> <span className="hidden sm:inline">Solution</span><span className="sm:hidden">Solve</span>
         </button>
         <button
           onClick={handleShare}
-          className="flex items-center gap-1 sm:gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2 sm:py-2.5 sm:py-4 rounded-xl text-[#65676B] font-bold text-[10px] sm:text-xs sm:text-lg transition-colors"
+          className="flex items-center gap-2 sm:gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-3 sm:py-2.5 sm:py-4 rounded-xl text-[#65676B] font-bold text-sm sm:text-xs sm:text-lg transition-colors"
         >
-          <i className={`fa-solid text-base sm:text-lg sm:text-xl ${shareSuccess ? 'fa-check' : 'fa-share'}`}></i> {shareSuccess ? 'Copied!' : 'Share'}
+          <i className={`fa-solid text-lg sm:text-lg sm:text-xl ${shareSuccess ? 'fa-check' : 'fa-share'}`}></i> {shareSuccess ? 'Copied!' : 'Share'}
         </button>
       </div>
 
