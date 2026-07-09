@@ -64,7 +64,7 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
         {/* Create Reflection */}
         <div 
           onClick={() => setIsComposerOpen(true)}
-          className="min-w-[88px] sm:min-w-[100px] sm:min-w-[112px] h-[150px] sm:h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow bg-white flex flex-col cursor-pointer hover:bg-gray-50 group snap-start"
+          className="min-w-[140px] sm:min-w-[160px] sm:min-w-[180px] h-[150px] sm:h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow bg-white flex flex-col cursor-pointer hover:bg-gray-50 group snap-start"
         >
            <div className="flex-1 overflow-hidden">
              <img src="https://picsum.photos/seed/me/200/300" className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Create" />
@@ -79,7 +79,7 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
 
         {/* Stories List */}
         {STORIES.map(story => (
-          <div key={story.id} className="min-w-[88px] sm:min-w-[100px] sm:min-w-[112px] h-[150px] sm:h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow relative cursor-pointer group snap-start">
+          <div key={story.id} className="min-w-[140px] sm:min-w-[160px] sm:min-w-[180px] h-[150px] sm:h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow relative cursor-pointer group snap-start">
              <img src={story.thumbnail} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt={story.userName} />
              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
              
@@ -99,7 +99,7 @@ const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
           <div 
             key={inspiration.id} 
             onClick={() => setSelectedInspirationIndex(index)}
-            className="min-w-[88px] sm:min-w-[100px] sm:min-w-[112px] h-[150px] sm:h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow relative cursor-pointer group snap-start"
+            className="min-w-[140px] sm:min-w-[160px] sm:min-w-[180px] h-[150px] sm:h-[170px] sm:h-[190px] rounded-xl overflow-hidden shadow relative cursor-pointer group snap-start"
           >
             {inspiration.imageUrl ? (
               <img src={inspiration.imageUrl} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Inspiration" />
