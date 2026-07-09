@@ -119,10 +119,10 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
     <div className="max-w-7xl mx-auto p-3 sm:p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Marketplace</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Marketplace</h1>
         <button
           onClick={() => setShowProductModal(true)}
-          className="px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
+          className="px-4 py-2 sm:px-6 sm:py-3 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors text-sm sm:text-base"
         >
           <i className="fa-solid fa-plus mr-2"></i>Sell Item
         </button>
@@ -132,7 +132,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
       <div className="flex gap-4 mb-6 border-b border-gray-200 overflow-x-auto scrollbar-hide">
         <button
           onClick={() => setActiveTab('browse')}
-          className={`px-4 py-2 font-medium transition-colors relative whitespace-nowrap ${
+          className={`px-4 py-2 sm:px-6 sm:py-3 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${
             activeTab === 'browse' ? 'text-[#1877F2]' : 'text-gray-600 hover:text-gray-800'
           }`}
         >
@@ -141,7 +141,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
         </button>
         <button
           onClick={() => setActiveTab('cart')}
-          className={`px-4 py-2 font-medium transition-colors relative whitespace-nowrap ${
+          className={`px-4 py-2 sm:px-6 sm:py-3 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${
             activeTab === 'cart' ? 'text-[#1877F2]' : 'text-gray-600 hover:text-gray-800'
           }`}
         >
@@ -155,7 +155,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
         </button>
         <button
           onClick={() => setActiveTab('orders')}
-          className={`px-4 py-2 font-medium transition-colors relative whitespace-nowrap ${
+          className={`px-4 py-2 sm:px-6 sm:py-3 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${
             activeTab === 'orders' ? 'text-[#1877F2]' : 'text-gray-600 hover:text-gray-800'
           }`}
         >
@@ -164,7 +164,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
         </button>
         <button
           onClick={() => setActiveTab('sell')}
-          className={`px-4 py-2 font-medium transition-colors relative whitespace-nowrap ${
+          className={`px-4 py-2 sm:px-6 sm:py-3 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${
             activeTab === 'sell' ? 'text-[#1877F2]' : 'text-gray-600 hover:text-gray-800'
           }`}
         >
@@ -220,28 +220,28 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
                 <div className="aspect-square bg-gray-200">
                   <img src={product.images[0]} className="w-full h-full object-cover" alt={product.title} />
                 </div>
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2 line-clamp-2">{product.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+                <div className="p-4 sm:p-6">
+                  <h3 className="font-semibold text-base sm:text-lg mb-2 line-clamp-2">{product.title}</h3>
+                  <p className="text-sm sm:text-base text-gray-600 mb-3 line-clamp-2">{product.description}</p>
                   <div className="flex items-center gap-2 mb-3">
-                    <img src={product.sellerAvatar} className="w-6 h-6 rounded-full" alt="" />
-                    <span className="text-sm text-gray-500">{product.sellerName}</span>
+                    <img src={product.sellerAvatar} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full" alt="" />
+                    <span className="text-sm sm:text-base text-gray-500">{product.sellerName}</span>
                   </div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-lg font-bold text-[#1877F2]">${product.price}</span>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <span className="text-lg sm:text-xl font-bold text-[#1877F2]">${product.price}</span>
+                    <div className="flex items-center gap-1 text-sm sm:text-base text-gray-500">
                       <i className="fa-solid fa-star text-yellow-500"></i>
                       <span>{product.rating}</span>
                       <span>({product.reviews})</span>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+                  <div className="flex items-center justify-between text-sm sm:text-base text-gray-500 mb-3">
                     <span><i className="fa-solid fa-box mr-1"></i>{product.stock} in stock</span>
                     <span className="capitalize">{product.condition}</span>
                   </div>
                   <button
                     onClick={() => addToCart(product)}
-                    className="w-full px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
+                    className="w-full px-4 py-2 sm:px-6 sm:py-3 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors text-sm sm:text-base"
                   >
                     <i className="fa-solid fa-cart-plus mr-2"></i>Add to Cart
                   </button>

@@ -438,6 +438,15 @@ export const groupsApi = {
     });
     return { success: true };
   },
+
+  leaveGroup: async (groupId: string, userId: string) => {
+    const docRef = doc(db, 'groups', groupId);
+    await updateDoc(docRef, {
+      members: arrayRemove(userId),
+      memberCount: increment(-1)
+    });
+    return { success: true };
+  },
 };
 
 // ==================== SEARCH API ====================

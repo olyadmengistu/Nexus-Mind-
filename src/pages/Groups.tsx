@@ -82,6 +82,19 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
     }
   };
 
+  const handleLeaveGroup = async (groupId: string) => {
+    try {
+      await groupsApi.leaveGroup(groupId, user.id);
+      setGroups(groups.map(g => 
+        g.id === groupId 
+          ? { ...g, members: g.members.filter(m => m.id !== user.id), memberCount: g.memberCount - 1 }
+          : g
+      ));
+    } catch (error) {
+      console.error('Error leaving group:', error);
+    }
+  };
+
   const handleCreatePost = () => {
     if (!selectedGroup || !newPostContent.trim()) return;
 
@@ -143,10 +156,10 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
     <div className="max-w-7xl mx-auto p-3 sm:p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Groups</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Groups</h1>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
+          className="px-4 py-2 sm:px-6 sm:py-3 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors text-sm sm:text-base"
         >
           <i className="fa-solid fa-plus mr-2"></i>Create Group
         </button>
@@ -156,7 +169,7 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
       <div className="flex gap-4 mb-6 border-b border-gray-200">
         <button
           onClick={() => { setActiveTab('discover'); setSelectedGroup(null); }}
-          className={`px-4 py-2 font-medium transition-colors relative ${
+          className={`px-4 py-2 sm:px-6 sm:py-3 font-medium transition-colors relative text-sm sm:text-base ${
             activeTab === 'discover' ? 'text-[#1877F2]' : 'text-gray-600 hover:text-gray-800'
           }`}
         >
@@ -165,7 +178,7 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
         </button>
         <button
           onClick={() => { setActiveTab('my-groups'); setSelectedGroup(null); }}
-          className={`px-4 py-2 font-medium transition-colors relative ${
+          className={`px-4 py-2 sm:px-6 sm:py-3 font-medium transition-colors relative text-sm sm:text-base ${
             activeTab === 'my-groups' ? 'text-[#1877F2]' : 'text-gray-600 hover:text-gray-800'
           }`}
         >
@@ -366,27 +379,27 @@ const Groups: React.FC<GroupsProps> = ({ user }) => {
                 className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => setSelectedGroup(group)}
               >
-                <div className="h-32 bg-gradient-to-r from-blue-500 to-purple-600 relative">
+                <div className="h-32 sm:h-40 bg-gradient-to-r from-blue-500 to-purple-600 relative">
                   <img src={group.coverImage} className="w-full h-full object-cover opacity-50" alt="" />
                   <div className="absolute bottom-4 left-4">
-                    <img src={group.avatar} className="w-16 h-16 rounded-lg border-2 border-white" alt="" />
+                    <img src={group.avatar} className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg border-2 border-white" alt="" />
                   </div>
                 </div>
-                <div className="p-4 pt-8">
-                  <h3 className="font-semibold mb-1">{group.name}</h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{group.description}</p>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="p-4 sm:p-6 pt-8 sm:pt-10">
+                  <h3 className="font-semibold text-base sm:text-lg mb-1">{group.name}</h3>
+                  <p className="text-sm sm:text-base text-gray-600 mb-3 line-clamp-2">{group.description}</p>
+                  <div className="flex items-center justify-between text-sm sm:text-base text-gray-500">
                     <span><i className="fa-solid fa-users mr-1"></i>{group.memberCount}</span>
                     <span><i className="fa-solid fa-tag mr-1"></i>{group.category}</span>
                   </div>
                   {group.isPrivate && (
-                    <span className="inline-block mt-2 px-2 py-1 bg-gray-100 rounded text-xs">
-                      <i className="fa-solid fa-lock mr-1 text-xs"></i>Private
+                    <span className="inline-block mt-2 px-2 py-1 bg-gray-100 rounded text-xs sm:text-sm">
+                      <i className="fa-solid fa-lock mr-1 text-xs sm:text-sm"></i>Private
                     </span>
                   )}
                   {isMember(group) && (
-                    <span className="inline-block mt-2 ml-2 px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-                      <i className="fa-solid fa-check mr-1 text-xs"></i>Joined
+                    <span className="inline-block mt-2 ml-2 px-2 py-1 bg-green-100 text-green-800 rounded text-xs sm:text-sm">
+                      <i className="fa-solid fa-check mr-1 text-xs sm:text-sm"></i>Joined
                     </span>
                   )}
                 </div>
