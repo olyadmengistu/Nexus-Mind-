@@ -604,10 +604,10 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
           <i className={`fa-regular fa-thumbs-up text-lg sm:text-lg sm:text-xl ${hasVoted ? 'fa-solid' : ''}`}></i> <span className="hidden sm:inline">Helpful</span><span className="sm:hidden">Helpful</span>
         </button>
         <button
-          onClick={() => navigate(`/solutions/${post.id}`)}
-          className="flex items-center gap-2 sm:gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-3 sm:py-2.5 sm:py-4 rounded-xl text-[#65676B] font-bold text-sm sm:text-xs sm:text-lg transition-colors"
+          onClick={() => setShowSolutions(!showSolutions)}
+          className={`flex items-center gap-2 sm:gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-3 sm:py-2.5 sm:py-4 rounded-xl font-bold text-sm sm:text-xs sm:text-lg transition-colors ${showSolutions ? 'text-blue-500' : 'text-[#65676B]'}`}
         >
-          <i className="fa-regular fa-lightbulb text-lg sm:text-lg sm:text-xl"></i> <span className="hidden sm:inline">Solution</span><span className="sm:hidden">Solve</span>
+          <i className={`fa-regular fa-lightbulb text-lg sm:text-lg sm:text-xl ${showSolutions ? 'fa-solid' : ''}`}></i> <span className="hidden sm:inline">Solution</span><span className="sm:hidden">Solve</span>
         </button>
         <button
           onClick={handleShare}

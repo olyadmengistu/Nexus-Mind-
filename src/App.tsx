@@ -39,11 +39,13 @@ const AppContent: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isStreamViewerOpen, setIsStreamViewerOpen] = useState(false);
   const { isNavVisible } = useScrollDirection();
 
   // Hide navbar and bottom nav on onboarding page and mobile full-screen pages
   const isOnboardingPage = location.pathname === '/onboarding';
-  const isMobileFullScreenPage = ['/videos', '/marketplace', '/groups', '/collaborate', '/search', '/messages', '/notifications', '/feedback', '/profile', '/saved-posts', '/activity-log', '/settings', '/help', '/admin/dashboard'].includes(location.pathname);
+  const isMobileFullScreenPage = ['/videos', '/marketplace', '/groups', '/collaborate', '/search', '/messages', '/notifications', '/feedback', '/profile', '/saved-posts', '/activity-log', '/settings', '/help', '/admin/dashboard', '/solutions'].includes(location.pathname);
 
   useEffect(() => {
     let isMounted = true;
@@ -189,13 +191,18 @@ const AppContent: React.FC = () => {
 
   const handleAddPost = async (newPost: Post) => {
     try {
+      // Try to save to backend first
       const { id: _localId, ...postData } = newPost;
       const created = await postsApi.createPost(postData);
       const updatedPosts = [created as Post, ...posts];
       setPosts(updatedPosts);
       localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
     } catch (error) {
-      console.error('Error saving post to backend:', error);
+      console.error('Error saving post to backend, using local fallback:', error);
+      // Fallback: add the post locally even if backend fails
+      const updatedPosts = [newPost, ...posts];
+      setPosts(updatedPosts);
+      localStorage.setItem('nexus_posts', JSON.stringify(updatedPosts));
     }
   };
 
@@ -218,8 +225,8 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      {user && !isOnboardingPage && !isMobileFullScreenPage && !isStoryViewerOpen && <Navbar user={user} onLogout={handleLogout} isVisible={isNavVisible} />}
-      <main className={user && !isOnboardingPage && !isMobileFullScreenPage && !isStoryViewerOpen ? `pt-[52px] pb-[64px] sm:pb-[72px] md:pb-0 md:pt-[56px] transition-all duration-300 ${isNavVisible ? '' : 'md:pt-[56px] pt-0 pb-0'}` : ""}>
+      {user && !isOnboardingPage && !isMobileFullScreenPage && !isStoryViewerOpen && !isDropdownOpen && !isStreamViewerOpen && <Navbar user={user} onLogout={handleLogout} isVisible={isNavVisible} onDropdownOpen={setIsDropdownOpen} />}
+      <main className={user && !isOnboardingPage && !isMobileFullScreenPage && !isStoryViewerOpen && !isDropdownOpen && !isStreamViewerOpen ? `pt-[52px] pb-[64px] sm:pb-[72px] md:pb-0 md:pt-[56px] transition-all duration-300 ${isNavVisible ? '' : 'md:pt-[56px] pt-0 pb-0'}` : ""}>
         <Routes>
             <Route 
               path="/welcome" 
@@ -277,7 +284,7 @@ const AppContent: React.FC = () => {
             />
             <Route 
               path="/livestreams" 
-              element={user ? <LiveStreams user={user} /> : <Navigate to="/login" />} 
+              element={user ? <LiveStreams user={user} onStreamViewerOpen={setIsStreamViewerOpen} /> : <Navigate to="/login" />} 
             />
             <Route 
               path="/marketplace" 
@@ -331,7 +338,7 @@ const AppContent: React.FC = () => {
             />
           </Routes>
         </main>
-        {user && !isOnboardingPage && !isMobileFullScreenPage && !isStoryViewerOpen && <BottomNav isVisible={isNavVisible} />}
+        {user && !isOnboardingPage && !isMobileFullScreenPage && !isStoryViewerOpen && !isDropdownOpen && !isStreamViewerOpen && <BottomNav isVisible={isNavVisible} />}
       </div>
   );
 };

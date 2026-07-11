@@ -392,15 +392,19 @@ const Videos: React.FC<VideosProps> = ({ user }) => {
         <div className="flex gap-2">
           <button
             onClick={() => setShowUploadModal(true)}
-            className="px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors"
+            className="px-3 sm:px-4 py-2 bg-[#1877F2] text-white rounded-lg hover:bg-[#166FE5] transition-colors text-sm sm:text-base"
           >
-            <i className="fa-solid fa-upload mr-2"></i>Upload Video
+            <i className="fa-solid fa-upload mr-1 sm:mr-2"></i>
+            <span className="hidden sm:inline">Upload Video</span>
+            <span className="sm:hidden">Upload</span>
           </button>
           <button
             onClick={() => setShowMeetingModal(true)}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base"
           >
-            <i className="fa-solid fa-video mr-2"></i>Schedule Meeting
+            <i className="fa-solid fa-video mr-1 sm:mr-2"></i>
+            <span className="hidden sm:inline">Schedule Meeting</span>
+            <span className="sm:hidden">Schedule</span>
           </button>
         </div>
       </div>

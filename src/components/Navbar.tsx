@@ -8,9 +8,10 @@ interface NavbarProps {
   user: User;
   onLogout: () => void;
   isVisible?: boolean;
+  onDropdownOpen?: (isOpen: boolean) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => {
+const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true, onDropdownOpen }) => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
@@ -46,6 +47,12 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
   useEffect(() => {
     debouncedSearch(searchQuery);
   }, [searchQuery, debouncedSearch]);
+
+  useEffect(() => {
+    if (onDropdownOpen) {
+      onDropdownOpen(dropdownOpen);
+    }
+  }, [dropdownOpen, onDropdownOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -198,7 +205,18 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
             </div>
           </button>
           {dropdownOpen && (
-            <div className="fixed left-2 right-2 top-[60px] max-h-[calc(100vh-76px)] bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96" onClick={(e) => e.stopPropagation()}>
+            <div className="fixed inset-0 top-[52px] sm:top-[56px] bg-white z-50 overflow-hidden sm:fixed sm:inset-auto sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 sm:max-h-[500px] sm:rounded-xl sm:shadow-2xl sm:border sm:border-gray-200" onClick={(e) => e.stopPropagation()}>
+              {/* Mobile Close Button */}
+              <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200">
+                <span className="font-bold text-lg">Menu</span>
+                <button
+                  onClick={() => setDropdownOpen(false)}
+                  className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full"
+                >
+                  <i className="fa-solid fa-xmark text-gray-600 text-xl"></i>
+                </button>
+              </div>
+              
               <div className="p-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
                 <div className="flex items-center gap-4">
                   <img src={user.avatar} className="w-16 h-16 rounded-full object-cover border-3 border-blue-500" alt="Avatar" />
@@ -414,7 +432,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={() => setMobileMenuOpen(false)}
           ></div>
-          <div className="fixed top-0 left-0 h-full w-[86vw] max-w-80 bg-white z-50 shadow-lg transform transition-transform">
+          <div className="fixed top-0 left-0 h-full w-[86vw] max-w-80 bg-white z-50 shadow-lg transform transition-transform" style={{ backgroundColor: 'white' }}>
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -438,179 +456,179 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout, isVisible = true }) => 
                 </div>
               </div>
             </div>
-            <nav className="p-4 overflow-y-auto max-h-[calc(100vh-200px)]">
+            <nav className="p-4 overflow-y-auto max-h-[calc(100vh-200px)] bg-white">
               <div className="space-y-1">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-2">Revenue & Monetization</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-4 py-2 bg-white">Revenue & Monetization</p>
                 
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-rectangle-ad w-8 text-center text-purple-600 text-xl"></i>
                   <span className="font-bold text-lg">Ads</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-hand-holding-dollar w-8 text-center text-green-600 text-xl"></i>
                   <span className="font-bold text-lg">Sponsors</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-sack-dollar w-8 text-center text-yellow-600 text-xl"></i>
                   <span className="font-bold text-lg">Investors</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-coins w-8 text-center text-orange-600 text-xl"></i>
                   <span className="font-bold text-lg">Funding</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-crown w-8 text-center text-amber-600 text-xl"></i>
                   <span className="font-bold text-lg">Premium</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-circle-check w-8 text-center text-blue-600 text-xl"></i>
                   <span className="font-bold text-lg">Verification</span>
                 </button>
                 
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4">Business & Growth</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4 bg-white">Business & Growth</p>
                 
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-building w-8 text-center text-indigo-600 text-xl"></i>
                   <span className="font-bold text-lg">Business Pages</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-briefcase w-8 text-center text-slate-600 text-xl"></i>
                   <span className="font-bold text-lg">Jobs</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-shop w-8 text-center text-pink-600 text-xl"></i>
                   <span className="font-bold text-lg">Marketplace</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-video w-8 text-center text-red-600 text-xl"></i>
                   <span className="font-bold text-lg">Creator Hub</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-handshake-simple w-8 text-center text-teal-600 text-xl"></i>
                   <span className="font-bold text-lg">Brand Deals</span>
                 </button>
                 
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4">Financial & Analytics</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4 bg-white">Financial & Analytics</p>
                 
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-wallet w-8 text-center text-emerald-600 text-xl"></i>
                   <span className="font-bold text-lg">Wallet</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-chart-line w-8 text-center text-cyan-600 text-xl"></i>
                   <span className="font-bold text-lg">Analytics</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-robot w-8 text-center text-violet-600 text-xl"></i>
                   <span className="font-bold text-lg">AI Tools</span>
                 </button>
                 
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4">Community & Engagement</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4 bg-white">Community & Engagement</p>
                 
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-users w-8 text-center text-blue-500 text-xl"></i>
                   <span className="font-bold text-lg">Communities</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-calendar-days w-8 text-center text-rose-600 text-xl"></i>
                   <span className="font-bold text-lg">Events</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-graduation-cap w-8 text-center text-fuchsia-600 text-xl"></i>
                   <span className="font-bold text-lg">Courses</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-rocket w-8 text-center text-lime-600 text-xl"></i>
                   <span className="font-bold text-lg">Boost</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-link w-8 text-center text-sky-600 text-xl"></i>
                   <span className="font-bold text-lg">Affiliate</span>
                 </button>
                 
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4">Platform & Development</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-6 py-4 mt-4 bg-white">Platform & Development</p>
                 
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-code w-8 text-center text-gray-700 text-xl"></i>
                   <span className="font-bold text-lg">Developers</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-mobile-screen w-8 text-center text-stone-600 text-xl"></i>
                   <span className="font-bold text-lg">App Store</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-building-columns w-8 text-center text-neutral-600 text-xl"></i>
                   <span className="font-bold text-lg">Enterprise</span>
                 </button>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700"
+                  className="flex items-center gap-5 px-6 py-5 w-full hover:bg-gray-100 rounded-xl transition-colors text-gray-700 bg-white"
                 >
                   <i className="fa-solid fa-flask w-8 text-center text-zinc-600 text-xl"></i>
                   <span className="font-bold text-lg">Research</span>

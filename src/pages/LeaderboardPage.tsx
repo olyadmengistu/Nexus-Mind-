@@ -60,12 +60,12 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ user }) => {
           {activeTab === 'domain' && (
             <div className="p-4 border-b border-gray-200">
               <p className="text-sm text-gray-600 mb-3">Select a domain:</p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 {EXPERTISE_DOMAINS.map((domain) => (
                   <button
                     key={domain.id}
                     onClick={() => setSelectedDomain(domain.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+                    className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors whitespace-nowrap flex-shrink-0 ${
                       selectedDomain === domain.id
                         ? 'bg-blue-500 text-white'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'

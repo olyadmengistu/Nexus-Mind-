@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { User, Post, Poll, PollOption } from '../types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase';
@@ -43,6 +43,14 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
   const [scheduledTime, setScheduledTime] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   const categories = ['General', 'Technology', 'Business', 'Creative', 'Personal', 'Science', 'Social', 'Health', 'Education', 'Entertainment'];
 
@@ -221,7 +229,7 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
   };
 
   return (
-    <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center p-3 sm:p-4">
+    <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-start justify-center p-3 sm:p-4 pt-8 sm:pt-12">
       <div className="bg-white w-full max-w-[500px] mx-2 sm:mx-3 rounded-xl sm:rounded-lg shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
         {/* Header */}
         <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center justify-between shrink-0">
@@ -263,13 +271,6 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
 
         {/* Text Area */}
         <div className="p-3 sm:p-4 flex-1 overflow-y-auto space-y-2 sm:space-y-3">
-          <input 
-            type="text" 
-            placeholder="Title (optional)" 
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full text-base sm:text-lg font-semibold focus:outline-none placeholder-gray-400"
-          />
           <textarea 
             placeholder={`What problem you are facing?`}
             value={content}

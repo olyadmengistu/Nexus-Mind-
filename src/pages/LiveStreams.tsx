@@ -5,9 +5,10 @@ import { liveStreamsApi } from '../lib/firebaseApi';
 
 interface LiveStreamsProps {
   user: User;
+  onStreamViewerOpen?: (isOpen: boolean) => void;
 }
 
-const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
+const LiveStreams: React.FC<LiveStreamsProps> = ({ user, onStreamViewerOpen }) => {
   const [activeTab, setActiveTab] = useState<'browse' | 'my_streams' | 'schedule'>('browse');
   const [streams, setStreams] = useState<LiveStreamType[]>([]);
   const [selectedStream, setSelectedStream] = useState<LiveStream | null>(null);
@@ -15,6 +16,12 @@ const LiveStreams: React.FC<LiveStreamsProps> = ({ user }) => {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
+  
+  useEffect(() => {
+    if (onStreamViewerOpen) {
+      onStreamViewerOpen(selectedStream !== null);
+    }
+  }, [selectedStream, onStreamViewerOpen]);
   
   // Create stream form state
   const [createForm, setCreateForm] = useState({
