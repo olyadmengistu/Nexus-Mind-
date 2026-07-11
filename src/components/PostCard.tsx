@@ -601,7 +601,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, currentUser, onVote }) => {
           onClick={handleVoteClick}
           className={`flex items-center gap-2 sm:gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-3 sm:py-2.5 sm:py-4 rounded-xl font-bold text-sm sm:text-xs sm:text-lg transition-all hover:scale-105 active:scale-95 ${hasVoted ? 'text-blue-500' : 'text-[#65676B]'}`}
         >
-          <i className={`fa-regular fa-thumbs-up text-lg sm:text-lg sm:text-xl ${hasVoted ? 'fa-solid' : ''}`}></i> <span className="hidden sm:inline">Helpful</span><span className="sm:hidden">Help</span>
+          <i className={`fa-regular fa-thumbs-up text-lg sm:text-lg sm:text-xl ${hasVoted ? 'fa-solid' : ''}`}></i> <span className="hidden sm:inline">Helpful</span><span className="sm:hidden">Helpful</span>
         </button>
         <button
           onClick={() => navigate(`/solutions/${post.id}`)}

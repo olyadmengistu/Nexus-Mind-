@@ -310,12 +310,12 @@ const Collaborate: React.FC<CollaborateProps> = ({ user }) => {
                 <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
               )}
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {categories.map(category => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
+                  className={`px-4 py-2 rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
                     selectedCategory === category
                       ? 'bg-[#1877F2] text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'

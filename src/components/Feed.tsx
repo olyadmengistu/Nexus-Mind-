@@ -15,9 +15,10 @@ interface FeedProps {
   posts: Post[];
   onAddPost: (post: Post) => void;
   onVote: (postId: string, delta: number) => void;
+  onStoryViewerOpen?: (isOpen: boolean) => void;
 }
 
-const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote }) => {
+const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote, onStoryViewerOpen }) => {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [displayedPosts, setDisplayedPosts] = useState<Post[]>(posts);
   const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -47,7 +48,7 @@ const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote }) => {
 
       <div className="w-full max-w-[680px] px-0 py-2 space-y-3 sm:px-4 sm:py-4 sm:space-y-4 lg:ml-[280px] xl:mr-[300px]">
         {/* Stories */}
-        <StoryCarousel user={user} />
+        <StoryCarousel user={user} onStoryViewerOpen={onStoryViewerOpen} />
 
         {/* Mobile Horizontal Scroll - Trending & Contacts */}
         <div className="xl:hidden bg-white rounded-xl shadow-sm p-4 sm:p-6">
@@ -126,23 +127,23 @@ const Feed: React.FC<FeedProps> = ({ user, posts, onAddPost, onVote }) => {
         </div>
 
         {/* Composer Trigger */}
-        <div className="bg-white sm:rounded-xl shadow-sm p-2.5 sm:p-4 space-y-3 sm:space-y-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <img src={user.avatar} className="w-9 h-9 sm:w-12 sm:h-12 rounded-full" alt="User" />
+        <div className="bg-white sm:rounded-xl shadow-sm p-3 sm:p-4 space-y-3 sm:space-y-4">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <img src={user.avatar} className="w-10 h-10 sm:w-12 sm:h-12 rounded-full" alt="User" />
             <button
               onClick={() => setIsComposerOpen(true)}
-              className="flex-1 bg-[#F0F2F5] hover:bg-gray-200 text-left px-3 sm:px-5 py-2.5 sm:py-3.5 rounded-full text-gray-500 text-xs sm:text-sm sm:text-base transition-colors truncate"
+              className="flex-1 bg-[#F0F2F5] hover:bg-gray-200 text-left px-4 sm:px-5 py-3 sm:py-3.5 rounded-full text-gray-500 text-sm sm:text-sm sm:text-base transition-colors truncate"
             >
-              What's on your mind?
+              What problem you are facing?
             </button>
           </div>
-          <div className="border-t border-gray-100 pt-2.5 sm:pt-4 flex items-center justify-around">
-            <Link to="/livestreams" className="flex items-center gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2 sm:py-3 rounded-xl text-[#65676B] font-bold text-[10px] sm:text-xs sm:text-base">
+          <div className="border-t border-gray-100 pt-3 sm:pt-4 flex items-center justify-around">
+            <Link to="/livestreams" className="flex items-center gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2.5 sm:py-3 rounded-xl text-[#65676B] font-bold text-[11px] sm:text-xs sm:text-base">
               <i className="fa-solid fa-video text-[#F3425E] text-base sm:text-lg sm:text-xl"></i> 
               <span className="hidden sm:inline">Live</span>
               <span className="sm:hidden">Live</span>
             </Link>
-            <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2 sm:py-3 rounded-xl text-[#65676B] font-bold text-[10px] sm:text-xs sm:text-base">
+            <button onClick={() => setIsComposerOpen(true)} className="flex items-center gap-1.5 sm:gap-3 hover:bg-gray-100 flex-1 justify-center py-2.5 sm:py-3 rounded-xl text-[#65676B] font-bold text-[11px] sm:text-xs sm:text-base">
               <i className="fa-solid fa-images text-[#45BD62] text-base sm:text-lg sm:text-xl"></i> 
               <span className="hidden sm:inline">Photo</span>
               <span className="sm:hidden">Photo</span>

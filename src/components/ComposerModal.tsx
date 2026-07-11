@@ -271,7 +271,7 @@ const ComposerModal: React.FC<ComposerModalProps> = ({ user, onClose, onSubmit }
             className="w-full text-base sm:text-lg font-semibold focus:outline-none placeholder-gray-400"
           />
           <textarea 
-            placeholder={`What's on your mind?`}
+            placeholder={`What problem you are facing?`}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="w-full min-h-[120px] sm:min-h-[150px] text-base sm:text-xl focus:outline-none resize-none placeholder-gray-400"

@@ -7,13 +7,20 @@ import InspirationStoryViewer from './InspirationStoryViewer';
 
 interface StoryCarouselProps {
   user: User;
+  onStoryViewerOpen?: (isOpen: boolean) => void;
 }
 
-const StoryCarousel: React.FC<StoryCarouselProps> = ({ user }) => {
+const StoryCarousel: React.FC<StoryCarouselProps> = ({ user, onStoryViewerOpen }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [inspirations, setInspirations] = useState<Inspiration[]>([]);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [selectedInspirationIndex, setSelectedInspirationIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (onStoryViewerOpen) {
+      onStoryViewerOpen(selectedInspirationIndex !== null || isComposerOpen);
+    }
+  }, [selectedInspirationIndex, isComposerOpen, onStoryViewerOpen]);
 
   useEffect(() => {
     try {
