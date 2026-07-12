@@ -114,101 +114,101 @@ const Solutions: React.FC<SolutionsProps> = ({ user, posts }) => {
   return (
     <div className="min-h-screen bg-white">
       {/* Mobile Back Header */}
-      <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-2">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-[#1877F2] font-semibold">
-          <i className="fa-solid fa-arrow-left text-xl"></i>
+      <div className="md:hidden bg-white border-b border-gray-200 px-4 py-4 sm:py-5 flex items-center gap-3">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 sm:gap-3 text-[#1877F2] font-semibold text-base sm:text-lg">
+          <i className="fa-solid fa-arrow-left text-xl sm:text-2xl"></i>
           <span>Back</span>
         </button>
       </div>
 
       {/* Header */}
-      <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-4 z-10">
-        <button onClick={() => navigate(-1)} className="hidden md:block p-2 hover:bg-gray-100 rounded-full">
-          <i className="fa-solid fa-arrow-left text-gray-700 text-lg"></i>
+      <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-4 sm:py-5 flex items-center gap-4 z-10">
+        <button onClick={() => navigate(-1)} className="hidden md:block p-2 sm:p-3 hover:bg-gray-100 rounded-full">
+          <i className="fa-solid fa-arrow-left text-gray-700 text-lg sm:text-xl"></i>
         </button>
-        <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Solutions</h1>
-        <span className="text-gray-500 text-sm sm:text-base">{post.solutions.length} solutions</span>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900">Solutions</h1>
+        <span className="text-gray-500 text-sm sm:text-base lg:text-lg">{post.solutions.length} solutions</span>
       </div>
 
       {/* Original Post */}
-      <div className="px-4 sm:px-6 py-4 sm:py-6 border-b border-gray-200">
-        <div className="flex items-start gap-3 sm:gap-4">
+      <div className="px-4 sm:px-6 py-5 sm:py-6 lg:py-8 border-b border-gray-200">
+        <div className="flex items-start gap-3 sm:gap-4 lg:gap-5">
           <img 
             src={post.userAvatar} 
             alt={post.userName} 
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+            className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full object-cover"
           />
           <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-gray-900 text-sm sm:text-base">{post.userName}</span>
-              <span className="text-gray-500 text-xs sm:text-sm">{formatTimeAgo(post.timestamp)}</span>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <span className="font-semibold text-gray-900 text-base sm:text-lg lg:text-xl">{post.userName}</span>
+              <span className="text-gray-500 text-xs sm:text-sm lg:text-base">{formatTimeAgo(post.timestamp)}</span>
             </div>
-            <p className="text-gray-800 mt-1 text-sm sm:text-base font-medium">{post.title}</p>
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">{post.content}</p>
+            <p className="text-gray-800 mt-2 sm:mt-3 text-base sm:text-lg lg:text-xl font-medium">{post.title}</p>
+            <p className="text-gray-600 mt-1 sm:mt-2 text-base sm:text-lg lg:text-xl">{post.content}</p>
           </div>
         </div>
       </div>
 
       {/* All Solutions Section */}
-      <div className="px-4 sm:px-6 py-4 sm:py-6">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">All Solutions</h2>
+      <div className="px-4 sm:px-6 py-5 sm:py-6 lg:py-8 pb-24 sm:pb-28">
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900 mb-4 sm:mb-6 lg:mb-8">All Solutions</h2>
 
         {post.solutions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500">
-            <i className="fa-regular fa-comment text-5xl mb-4 text-gray-300"></i>
-            <p className="text-center">No solutions yet. Be the first to suggest one!</p>
+          <div className="flex flex-col items-center justify-center py-16 sm:py-20 text-gray-500">
+            <i className="fa-regular fa-comment text-6xl sm:text-7xl lg:text-8xl mb-6 text-gray-300"></i>
+            <p className="text-center text-base sm:text-lg lg:text-xl">No solutions yet. Be the first to suggest one!</p>
           </div>
         ) : (
-          <div className="space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6 lg:space-y-8">
             {post.solutions.map((solution) => (
-              <div key={solution.id} className="border border-gray-200 rounded-lg p-4 sm:p-6">
-                <div className="flex items-start gap-3 sm:gap-4">
+              <div key={solution.id} className="border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8">
+                <div className="flex items-start gap-3 sm:gap-4 lg:gap-5">
                   <img 
                     src={solution.userAvatar} 
                     alt={solution.userName} 
-                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+                    className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full object-cover"
                   />
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900 text-sm sm:text-base">{solution.userName}</span>
-                      <span className="text-gray-500 text-xs sm:text-sm">{formatTimeAgo(solution.timestamp)}</span>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className="font-semibold text-gray-900 text-base sm:text-lg lg:text-xl">{solution.userName}</span>
+                      <span className="text-gray-500 text-xs sm:text-sm lg:text-base">{formatTimeAgo(solution.timestamp)}</span>
                     </div>
-                    <p className="text-gray-800 mt-1 text-sm sm:text-base">{solution.text}</p>
+                    <p className="text-gray-800 mt-2 sm:mt-3 text-base sm:text-lg lg:text-xl">{solution.text}</p>
 
                     {/* Interaction Buttons */}
-                    <div className="flex items-center gap-3 sm:gap-4 mt-3 sm:mt-4">
+                    <div className="flex items-center gap-3 sm:gap-4 lg:gap-5 mt-4 sm:mt-5 lg:mt-6">
                       <button 
                         onClick={() => handleHelpful(solution.id)}
-                        className="flex items-center gap-1.5 sm:gap-2 text-gray-500 hover:text-green-600 transition-colors text-sm sm:text-base"
+                        className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 text-gray-500 hover:text-green-600 transition-colors text-sm sm:text-base lg:text-lg"
                       >
-                        <i className="fa-regular fa-thumbs-up text-sm sm:text-base"></i>
-                        <span className="text-sm sm:text-base">Helpful {solution.helpful}</span>
+                        <i className="fa-regular fa-thumbs-up text-base sm:text-lg lg:text-xl"></i>
+                        <span className="text-sm sm:text-base lg:text-lg">Helpful {solution.helpful}</span>
                       </button>
                       <button 
                         onClick={() => setReplyingTo(solution.id)}
-                        className="flex items-center gap-1.5 sm:gap-2 text-gray-500 hover:text-blue-600 transition-colors text-sm sm:text-base"
+                        className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 text-gray-500 hover:text-blue-600 transition-colors text-sm sm:text-base lg:text-lg"
                       >
-                        <i className="fa-regular fa-comment text-sm sm:text-base"></i>
-                        <span className="text-sm sm:text-base">Reply</span>
+                        <i className="fa-regular fa-comment text-base sm:text-lg lg:text-xl"></i>
+                        <span className="text-sm sm:text-base lg:text-lg">Reply</span>
                       </button>
                       {solution.replies.length > 0 && (
                         <button 
                           onClick={() => toggleReplies(solution.id)}
-                          className="flex items-center gap-1.5 sm:gap-2 text-gray-500 hover:text-blue-600 transition-colors text-sm sm:text-base"
+                          className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 text-gray-500 hover:text-blue-600 transition-colors text-sm sm:text-base lg:text-lg"
                         >
-                          <i className="fa-regular fa-comment text-sm sm:text-base"></i>
-                          <span className="text-sm sm:text-base">Replies ({solution.replies.length})</span>
+                          <i className="fa-regular fa-comment text-base sm:text-lg lg:text-xl"></i>
+                          <span className="text-sm sm:text-base lg:text-lg">Replies ({solution.replies.length})</span>
                         </button>
                       )}
                     </div>
 
                     {/* Reply Input */}
                     {replyingTo === solution.id && (
-                      <div className="mt-4 sm:mt-6 flex items-start gap-3 sm:gap-4">
+                      <div className="mt-4 sm:mt-6 lg:mt-8 flex items-start gap-3 sm:gap-4 lg:gap-5">
                         <img 
                           src={user.avatar} 
                           alt={user.name} 
-                          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
+                          className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full object-cover"
                         />
                         <div className="flex-1">
                           <input
@@ -216,22 +216,22 @@ const Solutions: React.FC<SolutionsProps> = ({ user, posts }) => {
                             placeholder="Write a reply..."
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
-                            className="w-full px-4 py-2.5 sm:py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
+                            className="w-full px-4 sm:px-5 py-3 sm:py-3.5 lg:py-4 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base lg:text-lg"
                             autoFocus
                           />
-                          <div className="flex justify-end gap-2 mt-2 sm:mt-3">
+                          <div className="flex justify-end gap-2 sm:gap-3 mt-3 sm:mt-4">
                             <button
                               onClick={() => {
                                 setReplyingTo(null);
                                 setReplyText('');
                               }}
-                              className="px-4 py-1.5 sm:px-5 sm:py-2 text-gray-600 hover:bg-gray-100 rounded-full text-sm sm:text-base"
+                              className="px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 text-gray-600 hover:bg-gray-100 rounded-full text-sm sm:text-base lg:text-lg"
                             >
                               Cancel
                             </button>
                             <button
                               onClick={() => handleReply(solution.id)}
-                              className="px-4 py-1.5 sm:px-5 sm:py-2 bg-blue-500 text-white rounded-full text-sm sm:text-base hover:bg-blue-600"
+                              className="px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-blue-500 text-white rounded-full text-sm sm:text-base lg:text-lg hover:bg-blue-600"
                             >
                               Reply
                             </button>
@@ -242,20 +242,20 @@ const Solutions: React.FC<SolutionsProps> = ({ user, posts }) => {
 
                     {/* Nested Replies */}
                     {showReplies.has(solution.id) && solution.replies.length > 0 && (
-                      <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4 pl-4 sm:pl-6 border-l-2 border-gray-200">
+                      <div className="mt-4 sm:mt-6 lg:mt-8 space-y-3 sm:space-y-4 lg:space-y-5 pl-4 sm:pl-6 lg:pl-8 border-l-2 border-gray-200">
                         {solution.replies.map((reply) => (
-                          <div key={reply.id} className="flex items-start gap-3 sm:gap-4">
+                          <div key={reply.id} className="flex items-start gap-3 sm:gap-4 lg:gap-5">
                             <img 
                               src={reply.userAvatar} 
                               alt={reply.userName} 
-                              className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
+                              className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full object-cover"
                             />
                             <div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-gray-900 text-xs sm:text-sm">{reply.userName}</span>
-                                <span className="text-gray-500 text-[10px] sm:text-xs">{formatTimeAgo(reply.timestamp)}</span>
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <span className="font-semibold text-gray-900 text-xs sm:text-sm lg:text-base">{reply.userName}</span>
+                                <span className="text-gray-500 text-[10px] sm:text-xs lg:text-sm">{formatTimeAgo(reply.timestamp)}</span>
                               </div>
-                              <p className="text-gray-700 text-xs sm:text-sm mt-1">{reply.text}</p>
+                              <p className="text-gray-700 text-xs sm:text-sm lg:text-base mt-1">{reply.text}</p>
                             </div>
                           </div>
                         ))}
@@ -270,32 +270,32 @@ const Solutions: React.FC<SolutionsProps> = ({ user, posts }) => {
       </div>
 
       {/* Post Solution Input */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 sm:py-4">
-        <div className="flex items-center gap-3 sm:gap-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 sm:px-6 py-4 sm:py-5">
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-5">
           <img 
             src={user.avatar} 
             alt={user.name} 
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+            className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full object-cover"
           />
-          <div className="flex-1 flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2.5 sm:py-3">
+          <div className="flex-1 flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-full px-4 sm:px-5 py-3 sm:py-3.5 lg:py-4">
             <input
               type="text"
               placeholder="Suggest a solution..."
               value={newSolutionText}
               onChange={(e) => setNewSolutionText(e.target.value)}
-              className="flex-1 bg-transparent focus:outline-none text-gray-800 text-sm sm:text-base"
+              className="flex-1 bg-transparent focus:outline-none text-gray-800 text-sm sm:text-base lg:text-lg"
             />
             <button className="text-gray-500 hover:text-gray-700">
-              <i className="fa-regular fa-face-smile text-lg sm:text-xl"></i>
+              <i className="fa-regular fa-face-smile text-lg sm:text-xl lg:text-2xl"></i>
             </button>
             <button className="text-gray-500 hover:text-gray-700">
-              <i className="fa-solid fa-paperclip text-lg sm:text-xl"></i>
+              <i className="fa-solid fa-paperclip text-lg sm:text-xl lg:text-2xl"></i>
             </button>
           </div>
           <button
             onClick={handlePostSolution}
             disabled={!newSolutionText.trim()}
-            className="px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-500 text-white rounded-full text-sm sm:text-base font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-blue-500 text-white rounded-full text-sm sm:text-base lg:text-lg font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Post Solution
           </button>

@@ -45,7 +45,7 @@ const AppContent: React.FC = () => {
 
   // Hide navbar and bottom nav on onboarding page and mobile full-screen pages
   const isOnboardingPage = location.pathname === '/onboarding';
-  const isMobileFullScreenPage = ['/videos', '/marketplace', '/groups', '/collaborate', '/search', '/messages', '/notifications', '/feedback', '/profile', '/saved-posts', '/activity-log', '/settings', '/help', '/admin/dashboard', '/solutions'].includes(location.pathname);
+  const isMobileFullScreenPage = ['/videos', '/marketplace', '/groups', '/collaborate', '/search', '/messages', '/notifications', '/feedback', '/profile', '/saved-posts', '/activity-log', '/settings', '/help', '/admin/dashboard'].includes(location.pathname) || location.pathname.startsWith('/solutions');
 
   useEffect(() => {
     let isMounted = true;
