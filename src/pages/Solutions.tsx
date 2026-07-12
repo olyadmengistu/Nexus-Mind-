@@ -280,7 +280,7 @@ const Solutions: React.FC<SolutionsProps> = ({ user, posts }) => {
           <div className="flex-1 flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-full px-4 sm:px-5 py-3 sm:py-3.5 lg:py-4">
             <input
               type="text"
-              placeholder="Suggest a solution..."
+              placeholder="Suggest..."
               value={newSolutionText}
               onChange={(e) => setNewSolutionText(e.target.value)}
               className="flex-1 bg-transparent focus:outline-none text-gray-800 text-sm sm:text-base lg:text-lg"
@@ -295,9 +295,10 @@ const Solutions: React.FC<SolutionsProps> = ({ user, posts }) => {
           <button
             onClick={handlePostSolution}
             disabled={!newSolutionText.trim()}
-            className="px-4 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-3 bg-blue-500 text-white rounded-full text-sm sm:text-base lg:text-lg font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 bg-blue-500 text-white rounded-full text-sm sm:text-base lg:text-lg font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
-            Post Solution
+            <span className="hidden sm:inline">Post</span>
+            <span className="sm:hidden">Post</span>
           </button>
         </div>
       </div>
