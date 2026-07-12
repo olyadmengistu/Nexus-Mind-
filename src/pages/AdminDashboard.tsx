@@ -65,31 +65,6 @@ const AdminDashboard: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<'overview' | 'users' | 'analytics' | 'events'>('overview');
 
   useEffect(() => {
-    // Connect to socket for real-time updates
-    const socket = socketClient.connect();
-    
-    // Listen for analytics updates
-    socketClient.on('analytics_update', (data) => {
-      if (overview) {
-        setOverview(prev => prev ? { ...prev, ...data } : null);
-      }
-      fetchOverview();
-    });
-
-    socketClient.on('analytics_event', (event: RealtimeEvent) => {
-      setRealtimeEvents(prev => [event, ...prev].slice(0, 50));
-    });
-
-    socketClient.on('user_online', (data) => {
-      fetchActiveUsers();
-      fetchOverview();
-    });
-
-    socketClient.on('user_offline', (data) => {
-      fetchActiveUsers();
-      fetchOverview();
-    });
-
     // Initial data fetch
     fetchAllData();
 
@@ -100,10 +75,6 @@ const AdminDashboard: React.FC = () => {
 
     return () => {
       clearInterval(interval);
-      socketClient.off('analytics_update');
-      socketClient.off('analytics_event');
-      socketClient.off('user_online');
-      socketClient.off('user_offline');
     };
   }, []);
 

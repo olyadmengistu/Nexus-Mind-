@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { NOTIFICATIONS } from '../constants';
 import { Notification, User } from '../types';
 import { notificationsApi } from '../lib/firebaseApi';
-import { socketClient } from '../lib/socketClient';
 
 interface NotificationsProps {
   user: User;
@@ -47,20 +46,6 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
     };
 
     loadNotifications();
-
-    // Initialize WebSocket for real-time notifications
-    socketClient.connect();
-    socketClient.join(userId);
-
-    const handleNotification = (notification: Notification) => {
-      setNotifications(prev => [notification, ...prev]);
-    };
-
-    socketClient.on('notification', handleNotification);
-
-    return () => {
-      socketClient.off('notification', handleNotification);
-    };
   }, [userId]);
 
   function formatTime(timestamp: number): string {

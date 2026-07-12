@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { User, Message, Conversation } from '../types';
 import { searchConversations, debounce } from '../lib/searchApi';
 import { conversationsApi } from '../lib/firebaseApi';
-import { socketClient } from '../lib/socketClient';
 
 interface MessagesProps {
   user: User;
@@ -23,41 +22,6 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   const [newChatUser, setNewChatUser] = useState('');
   const [loadingMessages, setLoadingMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Initialize WebSocket connection
-  useEffect(() => {
-    const socket = socketClient.connect();
-    socketClient.join(user.id);
-
-    // Listen for new messages
-    socketClient.on('new_message', (message: Message) => {
-      setConversations(prev => prev.map(conv => {
-        if (conv.id === selectedChat) {
-          return {
-            ...conv,
-            messages: [...conv.messages, message],
-            lastMessage: message.text,
-            time: formatTime(message.timestamp)
-          };
-        }
-        return conv;
-      }));
-    });
-
-    // Listen for typing indicators
-    socketClient.on('user_typing', ({ userId, isTyping }: { userId: string; isTyping: boolean }) => {
-      // Handle typing indicator
-    });
-
-    // Listen for real-time notifications
-    socketClient.on('notification', (notification: any) => {
-      // Handle notification
-    });
-
-    return () => {
-      socketClient.disconnect();
-    };
-  }, [user.id, selectedChat]);
 
   // Initialize conversations from backend
   useEffect(() => {
@@ -200,13 +164,6 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
     };
 
     try {
-      // Send via WebSocket for real-time delivery
-      socketClient.sendMessage(selectedChat, {
-        ...tempMessage,
-        senderName: user.name,
-        senderAvatar: user.avatar
-      });
-
       // Save to backend
       const savedMessage = await conversationsApi.sendMessage(selectedChat, messageText.trim());
       
