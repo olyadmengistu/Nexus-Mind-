@@ -271,12 +271,7 @@ const Solutions: React.FC<SolutionsProps> = ({ user, posts }) => {
 
       {/* Post Solution Input */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 sm:px-6 py-4 sm:py-5">
-        <div className="flex items-center gap-3 sm:gap-4 lg:gap-5">
-          <img 
-            src={user.avatar} 
-            alt={user.name} 
-            className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full object-cover"
-          />
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
           <div className="flex-1 flex items-center gap-2 sm:gap-3 bg-gray-100 rounded-full px-4 sm:px-5 py-3 sm:py-3.5 lg:py-4">
             <input
               type="text"
@@ -297,8 +292,7 @@ const Solutions: React.FC<SolutionsProps> = ({ user, posts }) => {
             disabled={!newSolutionText.trim()}
             className="px-3 py-2 sm:px-4 sm:py-2.5 lg:px-5 lg:py-3 bg-blue-500 text-white rounded-full text-sm sm:text-base lg:text-lg font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
-            <span className="hidden sm:inline">Post</span>
-            <span className="sm:hidden">Post</span>
+            <i className="fa-solid fa-paper-plane text-sm sm:text-base lg:text-lg"></i>
           </button>
         </div>
       </div>
